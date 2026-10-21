@@ -196,6 +196,7 @@ class TimelineTask(StrictBaseModel):
     priority: TaskPriorityEnum
     related_vendor_category: str | None = None
     description: str
+    is_overdue_standard: bool = False
 
 
 class TimelinePlan(StrictBaseModel):
@@ -248,6 +249,8 @@ class OverviewData(StrictBaseModel):
     health_status: BudgetHealthEnum
     summary: str
     key_warnings: list[str]
+    tier_min_healthy: int = 1800
+    tier_min_tight: int = 1100
 
 
 class PlanResponse(StrictBaseModel):

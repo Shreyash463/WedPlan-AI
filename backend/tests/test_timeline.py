@@ -110,3 +110,50 @@ def test_function_specific_tasks():
     task_ids_full = [t.id for t in plan_full.tasks]
     assert "task_mehendi_artist" in task_ids_full
     assert "task_sangeet_choreographer" in task_ids_full
+
+
+def test_due_dates_strictly_non_decreasing():
+    """Verify that tasks across the final ordered list have non-decreasing due dates for multiple horizons."""
+    from backend.app.engine.timeline import CANONICAL_PHASES
+
+    today = date(2026, 4, 1)
+    horizons = [300, 90, 30, 10]
+
+    for days in horizons:
+        wedding_date = today + timedelta(days=days)
+        plan = generate_timeline_plan(
+            wedding_date=wedding_date,
+            functions=[
+                WeddingFunctionEnum.HALDI,
+                WeddingFunctionEnum.MEHENDI,
+                WeddingFunctionEnum.SANGEET,
+                WeddingFunctionEnum.WEDDING,
+                WeddingFunctionEnum.RECEPTION,
+            ],
+            style=WeddingStyleEnum.TRADITIONAL,
+            current_date=today,
+        )
+
+        # 1. Assert due_dates are non-decreasing
+        due_dates = [t.due_date for t in plan.tasks]
+        for i in range(len(due_dates) - 1):
+            assert due_dates[i] <= due_dates[i + 1], (
+                f"Horizon {days}d: due date {due_dates[i]} at index {i} "
+                f"is greater than {due_dates[i + 1]} at index {i + 1}"
+            )
+
+        # 2. Assert phase headers appear in canonical order
+        for i in range(len(plan.phases) - 1):
+            curr_idx = CANONICAL_PHASES.index(plan.phases[i])
+            next_idx = CANONICAL_PHASES.index(plan.phases[i + 1])
+            assert curr_idx < next_idx, (
+                f"Horizon {days}d: phase {plan.phases[i]} appears before {plan.phases[i + 1]} "
+                f"violating canonical order"
+            )
+
+        # 3. For short-notice (10 days), venue booking must be marked as overdue standard
+        if days == 10:
+            venue_task = next(t for t in plan.tasks if t.id == "task_venue_booking")
+            assert venue_task.is_overdue_standard is True
+            assert venue_task.priority == TaskPriorityEnum.URGENT
+

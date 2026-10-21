@@ -161,32 +161,41 @@ TASK_TEMPLATES = [
 ]
 
 
-def determine_phase_name(days_before: int, is_compressed: bool) -> str:
-    """Map day offset to readable countdown phase names."""
+CANONICAL_PHASES: list[str] = [
+    "6+ Months",
+    "5-6 Months",
+    "3-4 Months",
+    "2 Months",
+    "1 Month",
+    "2 Weeks",
+    "Final Week",
+    "Final 72 Hours",
+    "Wedding Day",
+    "After Wedding",
+]
+
+
+def determine_phase_name(days_before: int) -> str:
+    """Map day offset to canonical countdown phase names."""
     if days_before < 0:
-        return "Post-Wedding (Wrap-up)"
+        return "After Wedding"
     if days_before == 0:
         return "Wedding Day"
     if days_before <= 3:
         return "Final 72 Hours"
     if days_before <= 7:
-        return "Wedding Week"
+        return "Final Week"
     if days_before <= 14:
-        return "2 Weeks Before"
-    if is_compressed:
-        if days_before <= 30:
-            return "1 Month Countdown"
-        return "Immediate Action Plan"
-
+        return "2 Weeks"
     if days_before <= 30:
-        return "1 Month Before"
+        return "1 Month"
     if days_before <= 60:
-        return "2 Months Before"
+        return "2 Months"
     if days_before <= 120:
-        return "3-4 Months Before"
+        return "3-4 Months"
     if days_before <= 180:
-        return "5-6 Months Before"
-    return "6+ Months Before"
+        return "5-6 Months"
+    return "6+ Months"
 
 
 def generate_timeline_plan(
@@ -195,11 +204,10 @@ def generate_timeline_plan(
     style: WeddingStyleEnum,
     current_date: date | None = None,
 ) -> TimelinePlan:
-    """Generate dynamic timeline tasks with short-notice compression."""
+    """Generate dynamic timeline tasks with chronological ordering and overdue tracking."""
     today = current_date or date.today()
     days_remaining = (wedding_date - today).days
     is_tight_timeline = days_remaining <= 14
-    is_compressed = days_remaining < 90
 
     selected_func_names = [f.value for f in functions]
     tasks: list[TimelineTask] = []
@@ -216,37 +224,43 @@ def generate_timeline_plan(
         target_date = wedding_date - timedelta(days=raw_days_before)
 
         # Check if overdue based on standard offset
-        is_overdue = target_date < today
+        is_overdue = target_date < today and raw_days_before >= 0
         priority = tmpl["base_priority"]
 
-        if is_overdue and raw_days_before >= 0:
-            # Short-notice compression: Task was supposed to be done earlier!
-            # Elevate to Urgent and schedule for today or tomorrow
+        if is_overdue:
+            # Overdue by standard lead time: schedule for today, mark overdue and urgent
             priority = TaskPriorityEnum.URGENT
-            scheduled_date = min(wedding_date, today + timedelta(days=1))
-            effective_days_before = (wedding_date - scheduled_date).days
+            scheduled_date = min(wedding_date, today)
         else:
             # Scheduled normally; never schedule before today
             scheduled_date = max(target_date, today)
-            effective_days_before = (wedding_date - scheduled_date).days
 
-        phase = determine_phase_name(effective_days_before, is_compressed)
+        effective_days_before = (wedding_date - scheduled_date).days
+        phase = determine_phase_name(effective_days_before)
+
+        desc = tmpl["description"]
+        title = tmpl["title"]
+        if style == WeddingStyleEnum.BUDGET_SMART and tmpl["id"] == "task_soundcheck":
+            title = "Soundcheck & Power Generator Rehearsal"
+            desc = "Verify on-site silent DG generator backup, audio clarity for ceremonies, and ambient lighting."
 
         tasks.append(
             TimelineTask(
                 id=tmpl["id"],
-                title=tmpl["title"],
+                title=title,
                 phase=phase,
                 due_date=scheduled_date.isoformat(),
                 priority=priority,
                 related_vendor_category=tmpl["vendor"],
-                description=tmpl["description"],
+                description=desc,
+                is_overdue_standard=is_overdue,
             )
         )
 
     # Sort tasks:
-    # 1. Urgent tasks first
-    # 2. Then chronologically by due_date
+    # 1. due_date ascending (chronological order)
+    # 2. priority (Urgent -> High -> Normal)
+    # 3. id as stable tie breaker
     priority_order = {
         TaskPriorityEnum.URGENT: 0,
         TaskPriorityEnum.HIGH: 1,
@@ -255,18 +269,15 @@ def generate_timeline_plan(
 
     tasks.sort(
         key=lambda t: (
-            priority_order.get(t.priority, 2),
             t.due_date,
+            priority_order.get(t.priority, 2),
+            t.id,
         )
     )
 
-    # Unique phases in order of occurrence
-    seen_phases = set()
-    phases_in_order: list[str] = []
-    for t in tasks:
-        if t.phase not in seen_phases:
-            seen_phases.add(t.phase)
-            phases_in_order.append(t.phase)
+    # Phases strictly in CANONICAL_PHASES order, containing only phases that have tasks
+    present_phases = {t.phase for t in tasks}
+    phases_in_order = [p for p in CANONICAL_PHASES if p in present_phases]
 
     return TimelinePlan(
         days_remaining=days_remaining,
