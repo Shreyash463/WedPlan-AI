@@ -10,6 +10,7 @@ from backend.app.constants import (
     PRIORITY_WEIGHT_DELTAS,
     STYLE_WEIGHT_DELTAS,
 )
+from backend.app.engine.formatters import format_inr
 from backend.app.models import (
     BudgetHealthEnum,
     BudgetPlan,
@@ -167,17 +168,17 @@ def evaluate_budget_health(
     if cost_per_guest >= healthy_min:
         status = BudgetHealthEnum.HEALTHY
         desc = (
-            f"Comfortable budget of ₹{cost_per_guest:,} per guest for a {city_tier.value} wedding. "
+            f"Comfortable budget of {format_inr(cost_per_guest)} per guest for a {city_tier.value} wedding. "
             f"Covers standard Indian wedding hospitality, premium catering, and elegant venue decor."
         )
     elif cost_per_guest >= tight_min:
         status = BudgetHealthEnum.TIGHT
         desc = (
-            f"Tight budget of ₹{cost_per_guest:,} per guest for {city_tier.value} tier. "
+            f"Tight budget of {format_inr(cost_per_guest)} per guest for {city_tier.value} tier. "
             f"Achievable with disciplined vendor selection and focused guest list management."
         )
         warnings.append(
-            f"Per-guest spend (₹{cost_per_guest:,}) is near the lower boundary for {city_tier.value}."
+            f"Per-guest spend ({format_inr(cost_per_guest)}) is near the lower boundary for {city_tier.value}."
         )
         if len(functions) >= 5:
             warnings.append(
@@ -186,21 +187,21 @@ def evaluate_budget_health(
         target_guests = total_budget // healthy_min
         if target_guests < guest_count:
             suggestions.append(
-                f"Trimming guest count from {guest_count} to ~{target_guests} would elevate your per-guest spend to a comfortable ₹{healthy_min:,}."
+                f"Trimming guest count from {guest_count} to ~{target_guests} would elevate your per-guest spend to a comfortable {format_inr(healthy_min)}."
             )
         if len(functions) > 3:
             approx_function_cost = int(total_budget * 0.12)
             suggestions.append(
-                f"Clubbing Haldi and Mehendi into a combined daytime carnival can free ~₹{approx_function_cost:,} for premium wedding day catering."
+                f"Clubbing Haldi and Mehendi into a combined daytime carnival can free ~{format_inr(approx_function_cost)} for premium wedding day catering."
             )
     else:
         status = BudgetHealthEnum.UNREALISTIC
         desc = (
-            f"Unrealistic budget of ₹{cost_per_guest:,} per guest for {city_tier.value} tier. "
-            f"Standard banquet venues and traditional catering menus in this tier typically start at ₹{tight_min:,}+ per guest."
+            f"Unrealistic budget of {format_inr(cost_per_guest)} per guest for {city_tier.value} tier. "
+            f"Standard banquet venues and traditional catering menus in this tier typically start at {format_inr(tight_min)}+ per guest."
         )
         warnings.append(
-            f"Severe budget strain: ₹{cost_per_guest:,} per guest is significantly below the minimum viable benchmark (₹{tight_min:,}) for {city_tier.value}."
+            f"Severe budget strain: {format_inr(cost_per_guest)} per guest is significantly below the minimum viable benchmark ({format_inr(tight_min)}) for {city_tier.value}."
         )
         warnings.append(
             "Catering and venue rental alone will likely consume over 70% of this budget unless guest numbers are reduced."
@@ -214,7 +215,7 @@ def evaluate_budget_health(
             "Consider hosting ceremonies at a home courtyard, temple hall, or ancestral community venue to save up to 25% on commercial banquet rental."
         )
         suggestions.append(
-            "Focus on digital video invitations (e-invites) rather than physical boxed invitations to save ₹30,000–₹80,000."
+            f"Focus on digital video invitations (e-invites) rather than physical boxed invitations to save {format_inr(30000)}–{format_inr(80000)}."
         )
 
     return status, desc, warnings, suggestions
