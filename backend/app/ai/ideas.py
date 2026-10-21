@@ -5,6 +5,7 @@ import logging
 
 from backend.app.cache import ideas_cache
 from backend.app.config import settings
+from backend.app.engine.formatters import format_inr
 from backend.app.models import (
     CityTierEnum,
     FunctionActivity,
@@ -17,6 +18,18 @@ from backend.app.security import compute_plan_hash, sanitize_input_text
 
 logger = logging.getLogger("wedplan.ai")
 
+FORBIDDEN_PREMIUM_TERMS = [
+    "pyrotechnic",
+    "cold pyro",
+    "helicopter",
+    "imported flower",
+    "imported bloom",
+    "hydraulic lift",
+    "crystal chandelier",
+    "vintage rolls royce",
+    "champagne",
+]
+
 
 def build_fallback_ideas(
     city: str,
@@ -25,39 +38,46 @@ def build_fallback_ideas(
     functions: list[WeddingFunctionEnum],
     priorities: list[PriorityEnum],
     special_requests: str | None = None,
+    total_budget: int = 1500000,
+    guest_count: int = 200,
 ) -> IdeasPlan:
     """Deterministic rule-based generator for high quality Indian wedding concepts.
 
-    Always available when Gemini API key is unset, rate-limited, or fails.
+    Respects vibe, budget tier, functions, priorities, and special request keywords.
+    For Budget-smart / tight budgets, strictly avoids premium luxury terms.
     """
     style_val = style.value
     func_names = [f.value for f in functions]
     priority_names = [p.value for p in priorities]
     sanitized_special = sanitize_input_text(special_requests, max_length=120)
+    special_lower = (sanitized_special or "").lower()
 
-    # Theme and Decor based on vibe
+    cost_per_guest = total_budget // max(guest_count, 1)
+    is_tight = (style == WeddingStyleEnum.BUDGET_SMART) or (cost_per_guest < 1800)
+
+    # 1. Theme and Decor based on vibe
     themes: list[str] = []
     if style_val == "Royal/Palace":
         themes = [
             f"Regal Rajputana grandeur in {city}: Brass urlis, velvet bolsters, royal shamianas, and candlelit courtyard walkways.",
             "Grand floral mandap using deep maroons, royal golden silks, and traditional carved jharokha backdrops.",
-            "Baraat welcome with rose petal shower from vintage balconies and live nagada trumpets.",
+            "Baraat welcome with fragrant rose petal showers from vintage balconies and live nagada trumpets.",
         ]
     elif style_val == "Eco-friendly":
         themes = [
-            "Zero-waste celebration: Seed-paper invitations, potted plant centerpieces, and reclaimed wood structures.",
+            "Zero-waste celebration: Seed-paper invitations, potted plant centerpieces, and reclaimed wooden structures.",
             "Solar-powered fairy lighting, organic local marigolds (genda phool), and natural terracotta kulhads.",
             "Biodegradable banana-leaf dining arrangements and compostable floral disposal for sacred ceremonies.",
         ]
     elif style_val == "Destination":
         themes = [
             f"Scenic celebration in {city}: Breezy sunset mandap draping with ivory chiffons and pastel floral canopies.",
-            "Boho-chic beach or lakefront lounge seating with macrame hangings and personalized wicker parasols.",
-            "Welcome hospitality desk with customized sun hats, chilled coconut water, and itinerary tags.",
+            "Boho-chic lounge seating with macrame hangings, localized handicrafts, and personalized wicker parasols.",
+            "Welcome hospitality desk with customized sun hats, chilled coconut water, and printed local itinerary maps.",
         ]
     elif style_val == "Modern Minimal":
         themes = [
-            "Contemporary aesthetic: Blush pink, champagne gold, and eucalyptus green palette with geometric acrylic arches.",
+            "Contemporary aesthetic: Blush pink, champagne gold, and eucalyptus green palette with geometric brass arches.",
             "Clean floral clusters (baby's breath and blush carnations) paired with ambient Edison bulb backdrops.",
             "Sleek mirrored aisle runner with subtle warm fairy lights and uncluttered guest seating.",
         ]
@@ -74,10 +94,20 @@ def build_fallback_ideas(
             "Auspicious Shehnai and Nadaswaram melodies creating a devotional, celebratory morning ambience.",
         ]
 
-    # Catering ideas
+    # Keyword modifications for themes
+    if "sunset" in special_lower or "outdoor" in special_lower or "lawn" in special_lower:
+        themes.append(
+            "Golden-hour outdoor phera timing scheduled for sunset photography with natural citronella mosquito-repellent lanterns."
+        )
+    if "eco" in special_lower and style_val != "Eco-friendly":
+        themes.append(
+            "Plastic-free sacred ceremonies using natural clay kulhads and potted plant decor accents."
+        )
+
+    # 2. Catering ideas
     menu_ideas: list[str] = [
         "Interactive live street-food chaat counters: Dahi bhalla, sev puri, and customized flavoured golgappe shots.",
-        "Regional Indian culinary highlights tailored for local tastes, paired with artisanal bread and dal makhani.",
+        "Regional Indian culinary highlights tailored for local tastes, paired with artisanal breads and slow-cooked dal makhani.",
         "Artisanal dessert spread featuring hot rabdi jalebi, kulfi falooda, and miniature gulab jamun cups.",
         "Late-night wedding fuel station: Masala cutting chai, filter coffee, and midnight snacks for baraatis.",
     ]
@@ -86,12 +116,19 @@ def build_fallback_ideas(
             0,
             "Chef-curated live gourmet tawa stations featuring seasonal regional specialties and hand-crafted mocktails.",
         )
-    if sanitized_special and "veg" in sanitized_special.lower():
+
+    # Special request catering keywords
+    if "jain" in special_lower or "pure veg" in special_lower or "vegetarian" in special_lower:
+        menu_ideas.insert(
+            0,
+            "Dedicated 100% pure vegetarian / Jain culinary kitchen protocol with zero root vegetables (no onion/garlic) and separate cookware.",
+        )
+    if "punjabi" in special_lower:
         menu_ideas.append(
-            "Dedicated 100% pure vegetarian / Jain culinary kitchen protocol ensuring uncompromised sanctity."
+            "Live Amritsari kulcha and chole counter with tandoori breads, lassi bar, and makki di roti."
         )
 
-    # Function-specific activities
+    # 3. Function-specific activities
     activities: list[FunctionActivity] = []
     for fn in func_names:
         if fn == "Haldi":
@@ -105,21 +142,25 @@ def build_fallback_ideas(
             activities.append(
                 FunctionActivity(
                     function="Mehendi",
-                    activity="Bangle bazaar and live potli-making counter for female guests while bridal henna is applied.",
+                    activity="Bangle bazaar and live potli-making counter for female guests while bridal henna is applied with lemon-sugar mist.",
                 )
             )
         elif fn == "Sangeet":
             activities.append(
                 FunctionActivity(
                     function="Sangeet",
-                    activity="Family flash-mob dance face-off (Ladkewale vs. Ladkiwale) capped off with a high-energy Punjabi DJ set.",
+                    activity="Family flash-mob dance face-off (Ladkewale vs. Ladkiwale) capped off with a high-energy Bollywood DJ set.",
                 )
             )
         elif fn == "Wedding":
+            if is_tight:
+                wed_activity = "Varmala exchange under a fresh rose and marigold petal shower (Phoolon ki Varmala) accompanied by live shehnai melodies."
+            else:
+                wed_activity = "Varmala countdown with ambient floral petal cannons and personalized audio narration of the couple's journey."
             activities.append(
                 FunctionActivity(
                     function="Wedding",
-                    activity="Varmala countdown with cold pyrotechnics and customized audio narration of the couple's love story.",
+                    activity=wed_activity,
                 )
             )
         elif fn == "Reception":
@@ -133,24 +174,53 @@ def build_fallback_ideas(
             activities.append(
                 FunctionActivity(
                     function="Engagement",
-                    activity="Champagne/sparkling mocktail toast with close friends and family heartfelt roast/toast speeches.",
+                    activity="Sparkling mocktail toast with close friends and family heartfelt roast/toast speeches.",
                 )
             )
 
-    # Guest experience
+    # 4. Guest experience
     guest_exp: list[str] = [
-        "Welcome hospitality basket placed in hotel rooms with savory snacks, sweets, hydration packets, and itinerary.",
+        "Welcome hospitality basket placed in hotel rooms with savory snacks, sweets, hydration packets, and wedding itinerary.",
         "QR code printed on ceremony stationery for guests to instantly upload candid phone photos to a shared live gallery.",
         "Comfort station offering women heel-friendly dancing flats (juttis/slippers) during high-energy Sangeet and Baraat.",
     ]
+    if "eco" in special_lower or style_val == "Eco-friendly":
+        guest_exp.append("Potted tulsi or jasmine sapling return gifts for elders and guests as a living blessing.")
+    if "destination" in special_lower or style_val == "Destination":
+        guest_exp.append("Dedicated 24/7 hospitality lounge with refreshments, garment steaming service, and shuttle transit assistance.")
 
-    # Money saving hacks
+    # 5. Number-specific money saving hacks
+    trim_count = max(10, guest_count // 10)
+    trim_savings = trim_count * max(500, int(cost_per_guest * 0.45))
     saving_hacks: list[str] = [
-        "Select locally grown seasonal blooms (marigold and tuberose) rather than imported exotics to save up to 35% on floral decor.",
-        "Consolidate daytime functions like Haldi and Mehendi into a unified daytime venue slot to avoid duplicate venue rentals.",
-        "Adopt designer digital video e-invitations and WhatsApp itineraries to drastically trim card printing and postal courier costs.",
-        "Negotiate directly with independent local dhol and brass band troupes rather than booking through multiple middlemen agencies.",
+        f"Trimming just {trim_count} guests from your current {guest_count} guest list instantly saves approximately {format_inr(trim_savings)} on food plates and per-head venue charges alone.",
     ]
+    if len(func_names) > 3:
+        approx_combo = max(25000, int(total_budget * 0.08))
+        saving_hacks.append(
+            f"Clubbing daytime ceremonies (e.g. Haldi and Mehendi into a unified daytime carnival) saves ~{format_inr(approx_combo)} on separate venue fees and decorator call-out charges."
+        )
+    saving_hacks.extend([
+        f"Switching from physical boxed wedding cards to designer digital video e-invitations with WhatsApp RSVP saves {format_inr(30000)}–{format_inr(75000)} across {guest_count} guests.",
+        "Prioritize locally grown seasonal blooms (marigold, tuberose, and mogra) over imported blooms to reduce floral decoration bills by 30% to 40%.",
+        "Negotiate directly with independent local dhol and brass band troupes rather than booking through multiple middlemen agencies.",
+    ])
+
+    # 6. Strict filter: if tight or budget-smart, remove any forbidden premium terms
+    if is_tight:
+        def _clean_str(text: str) -> str:
+            res = text
+            for term in FORBIDDEN_PREMIUM_TERMS:
+                if term in res.lower():
+                    res = res.replace(term, "seasonal floral").replace(term.capitalize(), "Seasonal floral")
+            return res
+
+        themes = [_clean_str(t) for t in themes]
+        menu_ideas = [_clean_str(m) for m in menu_ideas]
+        guest_exp = [_clean_str(g) for g in guest_exp]
+        saving_hacks = [_clean_str(h) for h in saving_hacks]
+        for a in activities:
+            a.activity = _clean_str(a.activity)
 
     overview_summary = (
         f"A customized {style_val.lower()} celebration curated for {city} ({city_tier.value}). "
@@ -194,7 +264,7 @@ async def generate_wedding_ideas(
         "style": style.value,
         "funcs": sorted(func_str_list),
         "priorities": sorted(priority_str_list),
-        "special": clean_special.lower(),
+        "special": (clean_special or "").lower(),
         "budget_bracket": total_budget // 100_000,
         "guest_bracket": guest_count // 50,
     }
@@ -205,12 +275,19 @@ async def generate_wedding_ideas(
         logger.info("Serving wedding ideas from TTL cache (hash: %s...)", cache_key[:8])
         return cached_ideas
 
-    # 3. If Gemini API key is missing, immediately use deterministic fallback
+    # 3. If Gemini API key is missing or placeholder, immediately use deterministic fallback
     api_key = settings.gemini_api_key.strip()
-    if not api_key:
+    if not api_key or api_key in ("your_gemini_api_key_here", "None"):
         logger.info("Gemini API key not configured. Using deterministic Indian wedding engine.")
         fallback = build_fallback_ideas(
-            clean_city, city_tier, style, functions, priorities, clean_special
+            clean_city,
+            city_tier,
+            style,
+            functions,
+            priorities,
+            clean_special,
+            total_budget=total_budget,
+            guest_count=guest_count,
         )
         ideas_cache.set(cache_key, fallback)
         return fallback
@@ -255,7 +332,6 @@ async def generate_wedding_ideas(
         client = genai.Client(api_key=api_key)
         model_name = settings.gemini_model or "gemini-2.5-flash"
 
-        # Configure structured schema and capped tokens
         config = types.GenerateContentConfig(
             system_instruction=system_instruction,
             response_mime_type="application/json",
@@ -285,7 +361,14 @@ async def generate_wedding_ideas(
 
     # 5. Fallback on any failure
     fallback = build_fallback_ideas(
-        clean_city, city_tier, style, functions, priorities, clean_special
+        clean_city,
+        city_tier,
+        style,
+        functions,
+        priorities,
+        clean_special,
+        total_budget=total_budget,
+        guest_count=guest_count,
     )
     ideas_cache.set(cache_key, fallback)
     return fallback
