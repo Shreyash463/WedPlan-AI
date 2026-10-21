@@ -211,84 +211,87 @@ flowchart TD
 - **Touch Targets:** Interactive buttons, tabs, and stepper controls enforce a minimum touch target of $44 \times 44$ px.
 
 ### Testing & Verification
-- **Backend (Pytest + Coverage):** 23 unit and integration tests covering budget allocation, Hamilton/Hare exact rupee sums, priority adjustments, timeline compression, vendor budget linkages, rate limiting, security headers, prompt injection resistance, and fallback activation. **Test coverage: 93%**.
-- **Frontend (Vitest + React Testing Library):** 15 tests verifying form validation, tight timeline notices, 5-tab switching, ARIA keyboard navigation, task completion in `localStorage`, debounced recalculation, and WCAG accessibility semantics.
+- **Backend (Pytest + Coverage):** 30 unit, integration, and security tests covering budget allocation, Hamilton/Hare exact rupee sums, priority adjustments, chronological timeline sorting across varied wedding lead times, vendor budget linkages, rate limiting, security headers, prompt injection resistance, and fallback activation. **Test coverage: 94%**.
+- **Frontend (Vitest + React Testing Library):** 25 tests verifying form validation, tight timeline notices, 5-tab switching, chronological timeline phase ordering, full print layout generation, ARIA keyboard navigation, task completion in `localStorage`, debounced recalculation, and WCAG accessibility semantics.
 
 ---
 
 ## 8. Setup and Run Locally & Deploy to Vercel
 
-### A. Run Locally with ONE Command (Recommended)
+### A. Run Locally
 
-#### Prerequisites
-- Python 3.11+
-- Node.js 18+ and npm
-
-#### 1. Setup Environment
-```bash
-# Clone the repository and navigate into it
-cd "WedPlan AI"
-
-# Copy environment variables (leave GEMINI_API_KEY empty to use the expert fallback engine)
-cp .env.example .env
-
-# Install Python backend dependencies in virtual environment
-python -m venv .venv
-# Windows:
-.\.venv\Scripts\Activate.ps1; pip install -r requirements.txt
-# Linux / macOS:
-source .venv/bin/activate && pip install -r requirements.txt
-
-# Install frontend dependencies
-cd frontend && npm install && cd ..
-```
-
-#### 2. Run Both Backend & Frontend with ONE Command
-```bash
-npm run dev
-```
-That's it! `npm run dev` starts both the FastAPI backend on `http://127.0.0.1:8000` and the Vite frontend on `http://localhost:5173`. Open **`http://localhost:5173`** in your browser.
+#### Option 1: Double-Click `start-wedplan.bat` (Windows - Fastest & Zero Setup)
+Simply double-click **`start-wedplan.bat`** at the repository root:
+1. Automatically creates Python `.venv` and installs `backend/requirements.txt` if missing.
+2. Automatically installs root and frontend npm dependencies if missing.
+3. Copies `.env.example` to `.env` if not present.
+4. Concurrently starts FastAPI backend on `http://127.0.0.1:8000` and Vite frontend on `http://localhost:5173`.
+5. Automatically opens **`http://localhost:5173`** in your default web browser!
 
 ---
 
-### Alternative: Two-Terminal Method (Fallback)
+#### Option 2: ONE Terminal Command (`npm run dev`)
+From the repo root:
+```bash
+npm run dev
+```
+Powered by `concurrently` and `scripts/dev.js`:
+- Automatically detects `.venv` Python across Windows, macOS, and Linux.
+- Safely handles path names with spaces (e.g. `WedPlan AI`).
+- Concurrently runs the backend on `http://127.0.0.1:8000` and frontend on `http://localhost:5173`.
+- Proxies `/api/*` seamlessly with zero CORS friction.
 
-If you prefer running the servers in separate terminals:
+> [!NOTE]
+> **Windows PowerShell Execution Policy Note:**
+> If running `npm` in PowerShell produces `PSSecurityError: UnauthorizedAccess (npm.ps1 cannot be loaded because running scripts is disabled on this system)`:
+> 1. Run once in PowerShell:
+>    ```powershell
+>    Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
+>    ```
+> 2. Or bypass PowerShell script policy by using:
+>    ```cmd
+>    cmd /c npm run dev
+>    ```
+> 3. Or simply double-click **`start-wedplan.bat`**.
+
+---
+
+#### Option 3: Two-Terminal Method (Manual Fallback)
 
 **Terminal 1 (Backend):**
 ```bash
-# Activate virtual environment and run uvicorn
+# Windows
 .\.venv\Scripts\python.exe -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+
+# Linux / macOS
+source .venv/bin/activate
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
-API docs will be available at `http://127.0.0.1:8000/api/docs`.
+Interactive OpenAPI documentation: `http://127.0.0.1:8000/api/docs`.
 
 **Terminal 2 (Frontend):**
 ```bash
 cd frontend
 npm run dev
 ```
-Open `http://localhost:5173`. Frontend automatically proxies all `/api/*` requests to port 8000 with zero CORS friction.
-cd frontend
-npm install
-npm run dev
-```
-Open `http://localhost:5173` in your browser.
+Open `http://localhost:5173`.
 
-#### 4. Run Test Suites
+---
+
+#### Run Test Suites
 ```bash
-# Run backend pytest suite with coverage
+# Backend pytest suite with coverage (30 tests, 94% coverage)
 python -m pytest backend/tests/ -v --cov=backend.app
 
-# Run backend linter
+# Backend linter
 python -m ruff check backend/
 
-# Run frontend tests
-cd frontend
-npm test
+# Frontend Vitest suite (25 tests)
+npm --prefix frontend test
 
-# Run frontend linter & production build
-npm run lint
-npm run build
+# Frontend linter & production build
+npm --prefix frontend run lint
+npm --prefix frontend run build
 ```
 
 ---

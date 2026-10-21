@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { concurrently } from "concurrently";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -26,51 +26,42 @@ if (isWindows && fs.existsSync(venvPythonWin)) {
 
 console.log(`[WedPlan AI] Using Python: ${pythonCmd}`);
 
-// 2. Start Backend Process (FastAPI / Uvicorn on 127.0.0.1:8000)
-console.log("[WedPlan AI] Launching backend server on http://127.0.0.1:8000 ...");
-const backend = spawn(
-  pythonCmd,
-  ["-m", "uvicorn", "backend.app.main:app", "--host", "127.0.0.1", "--port", "8000", "--reload"],
+// Quote python executable and prefix paths to safely handle spaces in directory names (e.g. "WedPlan AI")
+const backendCommand = `"${pythonCmd}" -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload`;
+const frontendCommand = isWindows
+  ? `npm.cmd --prefix "${path.join(ROOT_DIR, "frontend")}" run dev`
+  : `npm --prefix "${path.join(ROOT_DIR, "frontend")}" run dev`;
+
+console.log("[WedPlan AI] Starting backend and frontend concurrently...\n");
+
+const { result } = concurrently(
+  [
+    {
+      command: backendCommand,
+      name: "backend",
+      prefixColor: "blue",
+    },
+    {
+      command: frontendCommand,
+      name: "frontend",
+      prefixColor: "magenta",
+    },
+  ],
   {
+    prefix: "name",
+    killOthers: ["failure", "success"],
+    restartTries: 0,
     cwd: ROOT_DIR,
-    stdio: "inherit",
-    shell: isWindows,
   }
 );
 
-// 3. Start Frontend Process (Vite on http://localhost:5173)
-const npmCmd = isWindows ? "npm.cmd" : "npm";
-console.log("[WedPlan AI] Launching frontend Vite on http://localhost:5173 ...");
-const frontend = spawn(npmCmd, ["run", "dev"], {
-  cwd: path.join(ROOT_DIR, "frontend"),
-  stdio: "inherit",
-  shell: isWindows,
-});
-
-// 4. Handle Clean Termination on Ctrl+C
-function cleanup() {
-  console.log("\n[WedPlan AI] Stopping servers...");
-  try {
-    if (isWindows) {
-      if (backend.pid) spawn("taskkill", ["/pid", backend.pid.toString(), "/f", "/t"]);
-      if (frontend.pid) spawn("taskkill", ["/pid", frontend.pid.toString(), "/f", "/t"]);
-    } else {
-      backend.kill("SIGTERM");
-      frontend.kill("SIGTERM");
-    }
-  } catch {
-    // Ignore shutdown errors
+result.then(
+  () => {
+    console.log("\n[WedPlan AI] Processes stopped successfully.");
+    process.exit(0);
+  },
+  (err) => {
+    // Normal termination or interrupt
+    process.exit(0);
   }
-  process.exit(0);
-}
-
-process.on("SIGINT", cleanup);
-process.on("SIGTERM", cleanup);
-
-backend.on("error", (err) => {
-  console.error("[WedPlan AI Backend Error]:", err);
-});
-
-frontend.on("error", (err) => {
-  console.error("[WedPlan AI Frontend Error]:", err);
-});
+);
