@@ -61,6 +61,19 @@ export interface BudgetPlan {
   suggestions: string[];
 }
 
+export const CANONICAL_PHASES: string[] = [
+  "6+ Months",
+  "5-6 Months",
+  "3-4 Months",
+  "2 Months",
+  "1 Month",
+  "2 Weeks",
+  "Final Week",
+  "Final 72 Hours",
+  "Wedding Day",
+  "After Wedding",
+];
+
 export interface TimelineTask {
   id: string;
   title: string;
@@ -69,6 +82,7 @@ export interface TimelineTask {
   priority: TaskPriority;
   related_vendor_category?: string;
   description: string;
+  is_overdue_standard?: boolean;
 }
 
 export interface TimelinePlan {
@@ -121,6 +135,8 @@ export interface OverviewData {
   health_status: BudgetHealth;
   summary: string;
   key_warnings: string[];
+  tier_min_healthy?: number;
+  tier_min_tight?: number;
 }
 
 export interface PlanResponse {

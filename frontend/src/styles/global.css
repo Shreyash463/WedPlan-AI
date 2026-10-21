@@ -15,12 +15,15 @@ html {
   background-color: var(--color-bg-app);
   color: var(--color-text-main);
   scroll-behavior: smooth;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--color-bg-app);
+  color: var(--color-text-main);
 }
 
 #root {
@@ -29,13 +32,18 @@ body {
   min-height: 100vh;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  color: var(--color-text-main);
+}
+
 /* Skip link for keyboard accessibility */
 .skip-link {
   position: absolute;
   top: -100px;
   left: var(--space-md);
   background: var(--color-primary);
-  color: var(--color-text-inverse);
+  color: #FFFFFF;
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
   font-weight: 600;
@@ -46,17 +54,17 @@ body {
 
 .skip-link:focus {
   top: var(--space-md);
-  outline: 3px solid var(--color-gold);
+  outline: 3px solid var(--color-accent-gold);
   outline-offset: 2px;
 }
 
-/* App Header & Navigation */
+/* App Header & Brand */
 .app-header {
   background: var(--color-primary);
-  color: var(--color-text-inverse);
+  color: #FFFFFF;
   padding: var(--space-md) var(--space-lg);
-  border-bottom: 3px solid var(--color-gold);
   box-shadow: var(--shadow-sm);
+  position: relative;
 }
 
 .header-container {
@@ -78,20 +86,52 @@ body {
 .brand-icon {
   width: 34px;
   height: 34px;
-  fill: currentColor;
+  fill: var(--color-accent-gold);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
 }
 
 .brand-title {
-  font-size: 1.5rem;
+  font-family: var(--font-serif);
+  font-size: 1.55rem;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: var(--color-text-inverse);
+  color: #FFFFFF;
+  line-height: 1.2;
 }
 
 .brand-tagline {
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   color: #F8D7DA;
   display: block;
+}
+
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #FFFFFF;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #FFFFFF;
+}
+
+.header-gold-accent-line {
+  height: 3px;
+  background: linear-gradient(90deg, #D4AF37 0%, #F3E5AB 50%, #D4AF37 100%);
+  width: 100%;
 }
 
 /* Main Container */
@@ -117,7 +157,7 @@ body {
   gap: var(--space-xs);
   min-height: var(--touch-target-min);
   padding: var(--space-sm) var(--space-lg);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   border-radius: var(--radius-md);
   border: 1px solid transparent;
@@ -132,7 +172,7 @@ body {
 
 .btn-primary {
   background-color: var(--color-primary);
-  color: var(--color-text-inverse);
+  color: #FFFFFF;
   border-color: var(--color-primary);
 }
 
@@ -156,13 +196,13 @@ body {
   cursor: not-allowed;
 }
 
-/* Footer */
+/* Footer (Clean, Lighter aesthetic blending with theme) */
 .app-footer {
-  background-color: #261C1D;
-  color: #D6CBC7;
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
   padding: var(--space-lg) var(--space-md);
   margin-top: auto;
-  border-top: 1px solid #3E2F31;
+  border-top: 1px solid var(--color-border);
   font-size: 0.875rem;
 }
 
@@ -171,13 +211,14 @@ body {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 4px;
   text-align: center;
 }
 
 .footer-disclaimer {
-  color: #A89B98;
+  color: var(--color-text-muted);
   font-size: 0.8rem;
+  opacity: 0.85;
 }
 
 /* Visually Hidden Helper (Screen-reader only) */

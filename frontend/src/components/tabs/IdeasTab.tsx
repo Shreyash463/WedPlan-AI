@@ -7,6 +7,14 @@ import {
   WeddingStyle,
 } from "../../types";
 import { regenerateIdeas } from "../../api/client";
+import {
+  HeartHandshakeIcon,
+  MusicIcon,
+  RefreshIcon,
+  SparklesIcon,
+  TagIcon,
+  UtensilsIcon,
+} from "../common/Icons";
 
 interface IdeasTabProps {
   ideasPlan: IdeasPlan;
@@ -61,67 +69,58 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
   return (
     <div className="ideas-container">
       {/* Header and Source Indicator */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "10px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <div className="ideas-top-bar">
+        <div className="ideas-meta-badge-group">
           <span
             className={`ideas-source-badge ${
               ideasPlan.ideas_source === "gemini" ? "gemini" : "fallback"
             }`}
           >
+            <SparklesIcon size={14} />
             {ideasPlan.ideas_source === "gemini"
-              ? "✨ GenAI-Personalized (Gemini)"
-              : "🛡️ Culturally Curated Expert Engine"}
+              ? "GenAI Powered (Gemini Flash)"
+              : "Culturally Curated Indian Wedding Engine"}
           </span>
-          <span style={{ fontSize: "0.85rem", color: "var(--color-text-muted)" }}>
-            Theme: <strong>{style}</strong> in <strong>{city}</strong>
+          <span className="ideas-vibe-tag">
+            Vibe: <strong>{style}</strong> • {city} ({cityTier})
           </span>
         </div>
 
         <button
           type="button"
-          className="btn btn-secondary"
+          className="btn btn-secondary refresh-btn"
           onClick={handleRegenerate}
           disabled={isRegenerating}
-          aria-label="Regenerate ideas using AI"
+          aria-label="Refresh ideas"
         >
-          {isRegenerating ? "Refreshing Ideas..." : "🔄 Refresh Ideas"}
+          <RefreshIcon size={16} className={isRegenerating ? "spinning" : ""} />
+          <span>{isRegenerating ? "Refreshing Ideas..." : "Refresh Concepts"}</span>
         </button>
       </div>
 
       {errorMsg && (
-        <div
-          role="alert"
-          style={{
-            color: "var(--color-unrealistic)",
-            fontSize: "0.9rem",
-            fontWeight: 500,
-          }}
-        >
+        <div role="alert" className="ideas-error-banner">
           {errorMsg}
         </div>
       )}
 
-      {/* Overview Summary */}
-      <div className="overview-summary-box">
+      {/* Overview Narrative */}
+      <div className="ideas-overview-narrative">
         <p>{ideasPlan.overview_summary}</p>
       </div>
 
       <div className="ideas-card-grid">
         {/* Themes & Decor */}
         <section className="idea-card" aria-labelledby="themes-heading">
-          <h3 id="themes-heading">🌺 Themes & Mandap Decor</h3>
+          <div className="idea-card-header">
+            <SparklesIcon size={18} color="var(--color-primary)" />
+            <h3 id="themes-heading">Themes & Mandap Decor</h3>
+          </div>
           <ul className="idea-items-list">
             {ideasPlan.themes_and_decor.map((item, idx) => (
               <li key={idx} className="idea-item">
-                {item}
+                <span className="bullet-point">•</span>
+                <span>{item}</span>
               </li>
             ))}
           </ul>
@@ -129,11 +128,15 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
 
         {/* Catering & Menu */}
         <section className="idea-card" aria-labelledby="menu-heading">
-          <h3 id="menu-heading">🍽️ Culinary & Food Spread</h3>
+          <div className="idea-card-header">
+            <UtensilsIcon size={18} color="var(--color-primary)" />
+            <h3 id="menu-heading">Culinary Highlights & Stalls</h3>
+          </div>
           <ul className="idea-items-list">
             {ideasPlan.catering_and_menu.map((item, idx) => (
               <li key={idx} className="idea-item">
-                {item}
+                <span className="bullet-point">•</span>
+                <span>{item}</span>
               </li>
             ))}
           </ul>
@@ -141,11 +144,17 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
 
         {/* Function Activities */}
         <section className="idea-card" aria-labelledby="activities-heading">
-          <h3 id="activities-heading">🎉 Function Activities & Entertainment</h3>
+          <div className="idea-card-header">
+            <MusicIcon size={18} color="var(--color-primary)" />
+            <h3 id="activities-heading">Ceremony Activities & Entertainment</h3>
+          </div>
           <ul className="idea-items-list">
             {ideasPlan.function_activities.map((item, idx) => (
               <li key={idx} className="idea-item">
-                <strong>{item.function}:</strong> {item.activity}
+                <span className="bullet-point">•</span>
+                <span>
+                  <strong>{item.function}:</strong> {item.activity}
+                </span>
               </li>
             ))}
           </ul>
@@ -153,34 +162,34 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
 
         {/* Guest Experience */}
         <section className="idea-card" aria-labelledby="experience-heading">
-          <h3 id="experience-heading">💖 Thoughtful Guest Hospitality</h3>
+          <div className="idea-card-header">
+            <HeartHandshakeIcon size={18} color="var(--color-primary)" />
+            <h3 id="experience-heading">Thoughtful Guest Hospitality</h3>
+          </div>
           <ul className="idea-items-list">
             {ideasPlan.guest_experience_ideas.map((item, idx) => (
               <li key={idx} className="idea-item">
-                {item}
+                <span className="bullet-point">•</span>
+                <span>{item}</span>
               </li>
             ))}
           </ul>
         </section>
 
-        {/* Money Saving Hacks */}
+        {/* Number-Specific Money Saving Hacks */}
         <section
-          className="idea-card"
+          className="idea-card full-width-card"
           aria-labelledby="hacks-heading"
-          style={{ gridColumn: "1 / -1" }}
         >
-          <h3 id="hacks-heading">💰 Practical Money-Saving Hacks</h3>
-          <ul
-            className="idea-items-list"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "12px",
-            }}
-          >
+          <div className="idea-card-header">
+            <TagIcon size={18} color="var(--color-primary)" />
+            <h3 id="hacks-heading">Tailored Money-Saving Hacks</h3>
+          </div>
+          <ul className="idea-items-grid">
             {ideasPlan.money_saving_hacks.map((item, idx) => (
-              <li key={idx} className="idea-item">
-                {item}
+              <li key={idx} className="idea-hack-item">
+                <span className="hack-number">{idx + 1}</span>
+                <p>{item}</p>
               </li>
             ))}
           </ul>

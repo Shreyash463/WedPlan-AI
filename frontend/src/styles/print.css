@@ -1,71 +1,220 @@
-/* Print-Optimized Styles */
+/* Screen View: Hide print root completely */
+#print-root {
+  display: none !important;
+}
+
+/* Print View: Dedicated High-Contrast 3-5 Page Document */
 @media print {
-  /* Hide non-printable navigation, buttons, and form inputs */
+  /* Hide all interactive screen UI */
   .app-header,
   .app-footer,
   .skip-link,
-  .dashboard-actions,
-  .tabs-navigation-wrapper,
-  .what-if-panel,
-  .btn,
+  .theme-toggle-btn,
   .toast-msg,
-  .accordion-section summary,
-  .task-checkbox-wrapper {
+  #interactive-dashboard-root {
     display: none !important;
+  }
+
+  /* Show dedicated print root */
+  #print-root {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 1.2cm 1cm;
   }
 
   body, html {
     background: #FFFFFF !important;
-    color: #000000 !important;
-    font-size: 12pt;
-    line-height: 1.4;
+    color: #111111 !important;
+    font-family: system-ui, -apple-system, sans-serif !important;
+    font-size: 9.5pt !important;
+    line-height: 1.35 !important;
   }
 
-  .main-content {
-    max-width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Make all tab panels visible for complete printout */
-  .tab-panel {
-    display: block !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 1rem 0 !important;
+  /* Print Header */
+  .print-header {
+    border-bottom: 2px solid #222222;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
     page-break-inside: avoid;
   }
 
-  .dashboard-header-card,
-  .stat-card,
-  .task-card,
-  .vendor-card,
-  .idea-card {
-    border: 1px solid #CCCCCC !important;
-    box-shadow: none !important;
+  .print-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .print-main-title {
+    font-family: Georgia, serif !important;
+    font-size: 16pt !important;
+    font-weight: 700;
+    color: #000000 !important;
+    margin: 0 0 4px 0;
+  }
+
+  .print-meta-line {
+    font-size: 9pt;
+    color: #444444;
+  }
+
+  .print-badge-col {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: flex-end;
+  }
+
+  .print-stat-pill {
+    font-size: 8.5pt;
+    padding: 2px 6px;
+    border: 1px solid #777777;
+    border-radius: 4px;
+    background: #F9F9F9;
+  }
+
+  /* Section Styling */
+  .print-section {
+    margin-bottom: 14px;
     page-break-inside: avoid;
     break-inside: avoid;
-    margin-bottom: 1rem !important;
   }
 
-  /* Ensure accordion details are open and visible */
-  details {
-    display: block !important;
-  }
-
-  details[open] .accordion-content,
-  details .accordion-content {
-    display: block !important;
-  }
-
-  /* Text contrast for print */
-  h1, h2, h3, h4 {
-    color: #000000 !important;
-  }
-
-  .vendor-budget-badge,
-  .stat-value {
-    color: #000000 !important;
+  .print-section-title {
+    font-family: Georgia, serif !important;
+    font-size: 11pt !important;
     font-weight: 700;
+    color: #000000 !important;
+    border-bottom: 1px solid #CCCCCC;
+    padding-bottom: 3px;
+    margin: 0 0 6px 0;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  .print-summary-text {
+    font-size: 9pt;
+    color: #222222;
+    margin: 0 0 6px 0;
+  }
+
+  .print-warnings-block {
+    background: #FBFBFB;
+    border-left: 3px solid #666666;
+    padding: 6px 10px;
+    font-size: 8.5pt;
+    margin-top: 4px;
+  }
+
+  .print-warnings-block ul {
+    margin: 3px 0 0 16px;
+    padding: 0;
+  }
+
+  /* Tables */
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin-bottom: 8px;
+    page-break-inside: auto;
+  }
+
+  .print-table th,
+  .print-table td {
+    border: 1px solid #DDDDDD;
+    padding: 4px 6px;
+    vertical-align: top;
+    text-align: left;
+  }
+
+  .print-table th {
+    background: #F2F2F2 !important;
+    font-weight: 700;
+    color: #000000 !important;
+  }
+
+  .print-table tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .print-table tfoot td {
+    background: #F9F9F9 !important;
+    border-top: 2px solid #555555;
+  }
+
+  .print-mini-list {
+    margin: 0;
+    padding-left: 12px;
+  }
+
+  .print-mini-list li {
+    margin-bottom: 2px;
+  }
+
+  /* Phase Blocks */
+  .print-phase-block {
+    margin-bottom: 8px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .print-phase-heading {
+    font-size: 9.5pt;
+    font-weight: 700;
+    margin: 4px 0 2px 0;
+    color: #222222;
+  }
+
+  /* Ideas Grid */
+  .print-ideas-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .print-idea-box {
+    border: 1px solid #DDDDDD;
+    padding: 6px 8px;
+    background: #FAFAFA;
+    border-radius: 4px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .print-idea-box h3 {
+    font-size: 9pt;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: #000000;
+  }
+
+  .print-idea-box ul {
+    margin: 0;
+    padding-left: 14px;
+    font-size: 8pt;
+  }
+
+  .print-idea-box li {
+    margin-bottom: 3px;
+  }
+
+  /* Print Footer */
+  .print-footer {
+    border-top: 1px solid #CCCCCC;
+    padding-top: 6px;
+    margin-top: 12px;
+    font-size: 8pt;
+    color: #666666;
+    text-align: center;
+    page-break-inside: avoid;
   }
 }

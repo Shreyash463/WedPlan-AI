@@ -1,17 +1,20 @@
 import React from "react";
 import { VendorPlan, VendorStatus } from "../../types";
-import { formatCurrencyINR } from "../../utils/formatters";
+import { formatCurrencyINR, formatDateReadable } from "../../utils/formatters";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { AlertTriangleIcon, CheckIcon, ClockIcon, UsersIcon } from "../common/Icons";
 
 interface VendorsTabProps {
   vendorPlan: VendorPlan;
+  weddingDate?: string;
 }
 
-export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan }) => {
+export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan, weddingDate }) => {
   // Persist vendor booking status per category ID
-  const [vendorStatuses, setVendorStatuses] = useLocalStorage<
-    Record<string, VendorStatus>
-  >("wedplan_vendor_statuses", {});
+  const [vendorStatuses, setVendorStatuses] = useLocalStorage<Record<string, VendorStatus>>(
+    "wedplan_vendor_statuses",
+    {}
+  );
 
   const handleStatusChange = (vendorId: string, status: VendorStatus) => {
     setVendorStatuses((prev) => ({
@@ -20,37 +23,71 @@ export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan }) => {
     }));
   };
 
-  const getStatusColor = (status: VendorStatus) => {
-    if (status === "Booked") return "var(--color-healthy)";
-    if (status === "Contacted") return "var(--color-tight)";
-    return "var(--color-text-muted)";
+  const getStatusChipClass = (status: VendorStatus) => {
+    if (status === "Booked") return "status-chip-booked";
+    if (status === "Contacted") return "status-chip-contacted";
+    return "status-chip-not-started";
+  };
+
+  // Helper to compute book-by date
+  const computeBookByDate = (leadTimeWeeks: number): string | null => {
+    if (!weddingDate) return null;
+    try {
+      const parts = weddingDate.split("-");
+      if (parts.length === 3) {
+        const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        d.setDate(d.getDate() - leadTimeWeeks * 7);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      }
+    } catch {
+      return null;
+    }
+    return null;
   };
 
   return (
     <div className="vendors-tab-container">
-      <div
-        style={{
-          marginBottom: "var(--space-lg)",
-          color: "var(--color-text-muted)",
-          fontSize: "0.95rem",
-        }}
-      >
-        Track your booking conversations, inspect allocated budgets, and verify
-        critical contract clauses tailored for Indian vendor negotiations.
+      <div className="vendors-header-banner">
+        <div>
+          <h2 className="vendors-section-title">
+            <UsersIcon size={20} color="var(--color-primary)" /> Vendor Procurement & Checklist
+          </h2>
+          <p className="vendors-section-subtitle">
+            Manage your booking pipeline, track payments, and verify contract requirements tailored for Indian wedding vendors.
+          </p>
+        </div>
       </div>
 
       <div className="vendors-grid">
         {vendorPlan.categories.map((vendor) => {
           const currentStatus: VendorStatus =
             vendorStatuses[vendor.id] || vendor.default_status || "Not started";
+          const bookByIso = computeBookByDate(vendor.lead_time_weeks);
+          const isHighPriority = vendor.lead_time_weeks >= 16;
 
           return (
             <article key={vendor.id} className="vendor-card">
               <div className="vendor-card-header">
                 <div>
-                  <h3 className="vendor-title">{vendor.name}</h3>
+                  <div className="vendor-title-row">
+                    <h3 className="vendor-title">{vendor.name}</h3>
+                    {isHighPriority && (
+                      <span className="book-soon-badge">
+                        <AlertTriangleIcon size={12} /> Book Soon
+                      </span>
+                    )}
+                  </div>
                   <div className="vendor-lead-info">
-                    Recommended Lead Time: {vendor.lead_time_weeks} weeks before
+                    <ClockIcon size={14} color="var(--color-text-muted)" />
+                    <span>Lead time: {vendor.lead_time_weeks} weeks before</span>
+                    {bookByIso && (
+                      <span className="book-by-highlight">
+                        (Book by {formatDateReadable(bookByIso)})
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="vendor-budget-badge">
@@ -58,70 +95,59 @@ export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan }) => {
                 </div>
               </div>
 
-              {/* Status Selector */}
+              {/* Status Selector with Custom Chips */}
               <div className="vendor-status-row">
-                <label
-                  htmlFor={`status-select-${vendor.id}`}
-                  style={{ fontWeight: 600 }}
-                >
-                  Status:
-                </label>
-                <select
-                  id={`status-select-${vendor.id}`}
-                  className="vendor-status-select"
-                  value={currentStatus}
-                  style={{
-                    color: getStatusColor(currentStatus),
-                    borderColor: getStatusColor(currentStatus),
-                  }}
-                  onChange={(e) =>
-                    handleStatusChange(
-                      vendor.id,
-                      e.target.value as VendorStatus
-                    )
-                  }
-                >
-                  <option value="Not started">⚪ Not started</option>
-                  <option value="Contacted">🟡 Contacted</option>
-                  <option value="Booked">🟢 Booked</option>
-                </select>
+                <span className="status-label">Status:</span>
+                <div className="status-pills-group" role="radiogroup" aria-label={`Status for ${vendor.name}`}>
+                  {(["Not started", "Contacted", "Booked"] as VendorStatus[]).map((st) => {
+                    const isSelected = currentStatus === st;
+                    return (
+                      <button
+                        key={st}
+                        type="button"
+                        role="radio"
+                        aria-checked={isSelected}
+                        className={`status-pill ${getStatusChipClass(st)} ${isSelected ? "active" : ""}`}
+                        onClick={() => handleStatusChange(vendor.id, st)}
+                      >
+                        {st === "Booked" && isSelected && <CheckIcon size={12} />}
+                        {st}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Advance Payment Guidance */}
-              <div
-                style={{
-                  background: "var(--color-surface-subtle)",
-                  padding: "var(--space-sm) var(--space-md)",
-                  borderRadius: "var(--radius-sm)",
-                  fontSize: "0.85rem",
-                }}
-              >
-                <strong>Payment Schedule:</strong> {vendor.advance_payment_guidance}
+              <div className="vendor-payment-guidance">
+                <strong>Payment Terms:</strong> {vendor.advance_payment_guidance}
               </div>
 
-              {/* Accordions for Questions & Contracts */}
+              {/* Accordions for Questions & Contract Clauses */}
               <div className="accordion-section">
-                <details>
+                <details className="vendor-accordion">
                   <summary>
-                    Key Questions to Ask ({vendor.questions_to_ask.length})
+                    Questions to Ask During Tasting / Meetings ({vendor.questions_to_ask.length})
                   </summary>
-                  <ul className="accordion-content" style={{ paddingLeft: "20px" }}>
+                  <ul className="accordion-content-list">
                     {vendor.questions_to_ask.map((q, idx) => (
-                      <li key={idx} style={{ marginBottom: "6px" }}>
-                        {q}
+                      <li key={idx} className="accordion-list-item">
+                        <span className="bullet-indicator">•</span>
+                        <span>{q}</span>
                       </li>
                     ))}
                   </ul>
                 </details>
 
-                <details>
+                <details className="vendor-accordion">
                   <summary>
-                    Contract Must-Haves ({vendor.contract_must_haves.length})
+                    Contract Clauses & Must-Haves ({vendor.contract_must_haves.length})
                   </summary>
-                  <ul className="accordion-content" style={{ paddingLeft: "20px" }}>
+                  <ul className="accordion-content-list">
                     {vendor.contract_must_haves.map((c, idx) => (
-                      <li key={idx} style={{ marginBottom: "6px" }}>
-                        {c}
+                      <li key={idx} className="accordion-list-item">
+                        <span className="bullet-indicator">•</span>
+                        <span>{c}</span>
                       </li>
                     ))}
                   </ul>

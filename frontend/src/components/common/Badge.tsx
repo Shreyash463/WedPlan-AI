@@ -1,5 +1,6 @@
 import React from "react";
 import { BudgetHealth, TaskPriority } from "../../types";
+import { AlertTriangleIcon, CheckIcon, InfoIcon } from "./Icons";
 
 interface BadgeProps {
   type: "health" | "priority" | "status" | "source";
@@ -11,16 +12,50 @@ export const Badge: React.FC<BadgeProps> = ({ type, value }) => {
     const health = value as BudgetHealth;
     let bg = "var(--color-healthy-bg)";
     let color = "var(--color-healthy)";
-    let icon = "✓";
+    let icon = <CheckIcon size={13} color="currentColor" />;
 
     if (health === "Tight") {
       bg = "var(--color-tight-bg)";
       color = "var(--color-tight)";
-      icon = "!";
+      icon = <InfoIcon size={13} color="currentColor" />;
     } else if (health === "Unrealistic") {
       bg = "var(--color-unrealistic-bg)";
       color = "var(--color-unrealistic)";
-      icon = "⚠";
+      icon = <AlertTriangleIcon size={13} color="currentColor" />;
+    }
+
+    return (
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "5px",
+          padding: "4px 10px",
+          borderRadius: "9999px",
+          fontSize: "0.825rem",
+          fontWeight: 700,
+          backgroundColor: bg,
+          color: color,
+          border: `1px solid ${color}`,
+        }}
+      >
+        {icon}
+        <span>{health} Budget</span>
+      </span>
+    );
+  }
+
+  if (type === "priority") {
+    const priority = value as TaskPriority;
+    let bg = "var(--color-surface-subtle)";
+    let color = "var(--color-text-muted)";
+
+    if (priority === "Urgent") {
+      bg = "rgba(155, 27, 48, 0.12)";
+      color = "var(--color-primary)";
+    } else if (priority === "High") {
+      bg = "rgba(217, 119, 6, 0.12)";
+      color = "#B45309";
     }
 
     return (
@@ -29,40 +64,6 @@ export const Badge: React.FC<BadgeProps> = ({ type, value }) => {
           display: "inline-flex",
           alignItems: "center",
           gap: "4px",
-          padding: "4px 10px",
-          borderRadius: "9999px",
-          fontSize: "0.875rem",
-          fontWeight: 700,
-          backgroundColor: bg,
-          color: color,
-          border: `1px solid ${color}`,
-        }}
-      >
-        <span aria-hidden="true">{icon}</span>
-        <span>{health} Budget</span>
-      </span>
-    );
-  }
-
-  if (type === "priority") {
-    const priority = value as TaskPriority;
-    let bg = "#F3F4F6";
-    let color = "#374151";
-
-    if (priority === "Urgent") {
-      bg = "#FEE2E2";
-      color = "#991B1B";
-    } else if (priority === "High") {
-      bg = "#FEF3C7";
-      color = "#92400E";
-    }
-
-    return (
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "3px",
           padding: "2px 8px",
           borderRadius: "4px",
           fontSize: "0.75rem",
@@ -71,7 +72,7 @@ export const Badge: React.FC<BadgeProps> = ({ type, value }) => {
           color: color,
         }}
       >
-        {priority === "Urgent" && <span aria-hidden="true">⚡ </span>}
+        {priority === "Urgent" && <AlertTriangleIcon size={11} color="currentColor" />}
         {priority}
       </span>
     );

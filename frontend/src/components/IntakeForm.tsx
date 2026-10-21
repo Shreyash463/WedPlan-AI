@@ -6,7 +6,16 @@ import {
   WeddingFunction,
   WeddingStyle,
 } from "../types";
+import {
+  formatCurrencyINR,
+  formatNumberToIndianWords,
+} from "../utils/formatters";
 import { Notice } from "./common/Notice";
+import {
+  CheckIcon,
+  PlusIcon,
+  SparklesIcon,
+} from "./common/Icons";
 
 interface IntakeFormProps {
   onSubmit: (formData: PlanFormInput) => void;
@@ -80,7 +89,7 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
     initialValues?.special_requests || ""
   );
 
-  // Validation errors
+  // Validation errors & touched states
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -111,7 +120,7 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         if (target <= today) {
-          newErrors.weddingDate = "Wedding date must be in the future.";
+          newErrors.weddingDate = "Wedding date must be strictly in the future.";
         } else {
           delete newErrors.weddingDate;
         }
@@ -182,7 +191,6 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
         return prev.filter((item) => item !== p);
       }
       if (prev.length >= 3) {
-        // Max 3 priorities allowed
         return prev;
       }
       return [...prev, p];
@@ -192,7 +200,6 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Mark all fields touched
     setTouched({
       weddingDate: true,
       city: true,
@@ -218,311 +225,354 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
     });
   };
 
+  // Live per-guest calculation
+  const livePerGuest = guestCount > 0 ? Math.round(totalBudget / guestCount) : 0;
+  const inWords = formatNumberToIndianWords(totalBudget);
+
   return (
     <section aria-labelledby="form-heading" className="form-card">
       <div className="form-header">
-        <h1 id="form-heading">Plan Your Dream Indian Wedding</h1>
+        <h1 id="form-heading" className="form-title">
+          Plan Your Dream Indian Wedding
+        </h1>
         <p className="form-intro">
-          Fill in your celebration details to receive an instant, AI-customized
-          budget allocation, vendor checklist, and planning countdown.
+          Enter your celebration details below to generate a tailored budget allocation, vendor procurement checklist, and countdown timeline.
         </p>
       </div>
 
       {isTightTimelineNotice() && (
-        <Notice
-          type="warning"
-          title="Very Tight Timeline Notice"
-        >
-          Your wedding date is within 14 days! WedPlan AI will automatically
-          compress your preparation roadmap and mark critical vendor bookings
-          as Urgent.
+        <Notice type="warning" title="Very Tight Timeline Notice">
+          Your wedding is within 14 days! WedPlan AI will automatically adapt your preparation timeline and mark vendor bookings as Urgent.
         </Notice>
       )}
 
-      {/* Screen reader live notification of form errors */}
       <div aria-live="polite" className="sr-only">
         {Object.keys(errors).length > 0 &&
           `Form has ${Object.keys(errors).length} validation errors.`}
       </div>
 
       <form onSubmit={handleSubmit} noValidate>
-        <div className="form-grid">
-          {/* Couple / Event Name */}
-          <div className="form-group">
-            <label htmlFor="coupleName" className="form-label">
-              Couple / Event Name <span className="field-help">(Optional)</span>
-            </label>
-            <input
-              id="coupleName"
-              type="text"
-              className="form-input"
-              value={coupleName}
-              maxLength={60}
-              placeholder="e.g. Priya & Rohan"
-              onChange={(e) => setCoupleName(e.target.value)}
-              aria-describedby="coupleName-help"
-            />
-            <span id="coupleName-help" className="field-help">
-              Personalizes your dashboard & print plan (max 60 chars)
-            </span>
-          </div>
+        {/* SECTION 1: BASICS */}
+        <fieldset className="form-section-fieldset">
+          <legend className="section-legend">
+            <span className="section-number">1</span>
+            <span>Celebration Basics</span>
+          </legend>
 
-          {/* Wedding Date */}
-          <div className="form-group">
-            <label htmlFor="weddingDate" className="form-label">
-              Wedding Date <span className="required-indicator">*</span>
-            </label>
-            <input
-              id="weddingDate"
-              type="date"
-              required
-              className="form-input"
-              value={weddingDate}
-              onChange={(e) => {
-                setWeddingDate(e.target.value);
-                if (touched.weddingDate) validateField("weddingDate");
-              }}
-              onBlur={() => handleBlur("weddingDate")}
-              aria-invalid={!!(touched.weddingDate && errors.weddingDate)}
-              aria-describedby={
-                errors.weddingDate ? "weddingDate-error" : "weddingDate-help"
-              }
-            />
-            {touched.weddingDate && errors.weddingDate ? (
-              <span id="weddingDate-error" className="field-error" role="alert">
-                {errors.weddingDate}
+          <div className="form-grid">
+            {/* Couple / Event Name */}
+            <div className="form-group">
+              <label htmlFor="coupleName" className="form-label">
+                Couple / Event Name <span className="field-help">(Optional)</span>
+              </label>
+              <input
+                id="coupleName"
+                type="text"
+                className="form-input"
+                value={coupleName}
+                maxLength={60}
+                placeholder="e.g. Priya & Rohan"
+                onChange={(e) => setCoupleName(e.target.value)}
+                aria-describedby="coupleName-help"
+              />
+              <span id="coupleName-help" className="field-help">
+                Appears on your plan and printed layout (max 60 chars)
               </span>
-            ) : (
-              <span id="weddingDate-help" className="field-help">
-                Must be in the future
-              </span>
-            )}
-          </div>
-
-          {/* City */}
-          <div className="form-group">
-            <label htmlFor="city" className="form-label">
-              Wedding City <span className="required-indicator">*</span>
-            </label>
-            <input
-              id="city"
-              type="text"
-              required
-              className="form-input"
-              maxLength={60}
-              value={city}
-              placeholder="e.g. Jaipur, Mumbai, Lucknow"
-              onChange={(e) => {
-                setCity(e.target.value);
-                if (touched.city) validateField("city");
-              }}
-              onBlur={() => handleBlur("city")}
-              aria-invalid={!!(touched.city && errors.city)}
-              aria-describedby={errors.city ? "city-error" : "city-help"}
-            />
-            {touched.city && errors.city ? (
-              <span id="city-error" className="field-error" role="alert">
-                {errors.city}
-              </span>
-            ) : (
-              <span id="city-help" className="field-help">
-                City where the primary celebrations take place
-              </span>
-            )}
-          </div>
-
-          {/* City Tier */}
-          <div className="form-group">
-            <label htmlFor="cityTier" className="form-label">
-              City Tier <span className="required-indicator">*</span>
-            </label>
-            <select
-              id="cityTier"
-              className="form-select"
-              value={cityTier}
-              onChange={(e) => setCityTier(e.target.value as CityTier)}
-              aria-describedby="cityTier-help"
-            >
-              <option value="Metro">Metro (Mumbai, Delhi NCR, Bengaluru, etc.)</option>
-              <option value="Tier-2">Tier-2 (Jaipur, Pune, Lucknow, Chandigarh, etc.)</option>
-              <option value="Tier-3">Tier-3 (Smaller cities, towns & ancestral venues)</option>
-            </select>
-            <span id="cityTier-help" className="field-help">
-              Calibrates standard per-guest catering & venue benchmarks
-            </span>
-          </div>
-
-          {/* Total Budget */}
-          <div className="form-group">
-            <label htmlFor="totalBudget" className="form-label">
-              Total Budget (INR ₹) <span className="required-indicator">*</span>
-            </label>
-            <input
-              id="totalBudget"
-              type="number"
-              required
-              min={50000}
-              max={100000000}
-              step={25000}
-              className="form-input"
-              value={totalBudget}
-              onChange={(e) => {
-                setTotalBudget(Number(e.target.value));
-                if (touched.totalBudget) validateField("totalBudget");
-              }}
-              onBlur={() => handleBlur("totalBudget")}
-              aria-invalid={!!(touched.totalBudget && errors.totalBudget)}
-              aria-describedby={
-                errors.totalBudget ? "totalBudget-error" : "totalBudget-help"
-              }
-            />
-            {touched.totalBudget && errors.totalBudget ? (
-              <span id="totalBudget-error" className="field-error" role="alert">
-                {errors.totalBudget}
-              </span>
-            ) : (
-              <span id="totalBudget-help" className="field-help">
-                ₹50,000 to ₹10,00,00,000 (Allocated to 100% without rounding loss)
-              </span>
-            )}
-          </div>
-
-          {/* Guest Count */}
-          <div className="form-group">
-            <label htmlFor="guestCount" className="form-label">
-              Guest Count <span className="required-indicator">*</span>
-            </label>
-            <input
-              id="guestCount"
-              type="number"
-              required
-              min={10}
-              max={5000}
-              step={10}
-              className="form-input"
-              value={guestCount}
-              onChange={(e) => {
-                setGuestCount(Number(e.target.value));
-                if (touched.guestCount) validateField("guestCount");
-              }}
-              onBlur={() => handleBlur("guestCount")}
-              aria-invalid={!!(touched.guestCount && errors.guestCount)}
-              aria-describedby={
-                errors.guestCount ? "guestCount-error" : "guestCount-help"
-              }
-            />
-            {touched.guestCount && errors.guestCount ? (
-              <span id="guestCount-error" className="field-error" role="alert">
-                {errors.guestCount}
-              </span>
-            ) : (
-              <span id="guestCount-help" className="field-help">
-                Min 10, max 5,000 attendees
-              </span>
-            )}
-          </div>
-
-          {/* Wedding Style / Vibe */}
-          <div className="form-group">
-            <label htmlFor="style" className="form-label">
-              Style / Vibe <span className="required-indicator">*</span>
-            </label>
-            <select
-              id="style"
-              className="form-select"
-              value={style}
-              onChange={(e) => setStyle(e.target.value as WeddingStyle)}
-              aria-describedby="style-help"
-            >
-              {ALL_STYLES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <span id="style-help" className="field-help">
-              Tailors budget weights, decor concepts, and themes
-            </span>
-          </div>
-
-          {/* Celebrated Functions */}
-          <div className="form-group form-group-full">
-            <span id="functions-label" className="form-label">
-              Celebrated Functions <span className="required-indicator">*</span>
-            </span>
-            <div
-              role="group"
-              aria-labelledby="functions-label"
-              className="chips-group"
-            >
-              {ALL_FUNCTIONS.map((fn) => {
-                const isSelected = functions.includes(fn);
-                return (
-                  <button
-                    key={fn}
-                    type="button"
-                    className={`chip-btn ${isSelected ? "selected" : ""}`}
-                    aria-pressed={isSelected}
-                    onClick={() => toggleFunction(fn)}
-                  >
-                    <span aria-hidden="true">{isSelected ? "✓" : "+"}</span>
-                    {fn}
-                  </button>
-                );
-              })}
             </div>
-            {errors.functions && (
-              <span id="functions-error" className="field-error" role="alert">
-                {errors.functions}
-              </span>
-            )}
-          </div>
 
-          {/* Top 3 Priorities */}
-          <div className="form-group form-group-full">
-            <span id="priorities-label" className="form-label">
-              Top 3 Priorities{" "}
-              <span className="field-help">(Choose up to 3)</span>
-            </span>
-            <div
-              role="group"
-              aria-labelledby="priorities-label"
-              className="chips-group"
-            >
-              {ALL_PRIORITIES.map((p) => {
-                const isSelected = priorities.includes(p);
-                return (
-                  <button
-                    key={p}
-                    type="button"
-                    className={`chip-btn ${isSelected ? "selected" : ""}`}
-                    aria-pressed={isSelected}
-                    onClick={() => togglePriority(p)}
-                  >
-                    <span aria-hidden="true">{isSelected ? "★" : "☆"}</span>
-                    {p}
-                  </button>
-                );
-              })}
+            {/* Wedding Date */}
+            <div className="form-group">
+              <label htmlFor="weddingDate" className="form-label">
+                Wedding Date <span className="required-indicator">*</span>
+              </label>
+              <input
+                id="weddingDate"
+                type="date"
+                required
+                className="form-input"
+                value={weddingDate}
+                onChange={(e) => {
+                  setWeddingDate(e.target.value);
+                  if (touched.weddingDate) validateField("weddingDate");
+                }}
+                onBlur={() => handleBlur("weddingDate")}
+                aria-invalid={!!(touched.weddingDate && errors.weddingDate)}
+                aria-describedby={
+                  errors.weddingDate ? "weddingDate-error" : "weddingDate-help"
+                }
+              />
+              {touched.weddingDate && errors.weddingDate ? (
+                <span id="weddingDate-error" className="field-error" role="alert">
+                  {errors.weddingDate}
+                </span>
+              ) : (
+                <span id="weddingDate-help" className="field-help">
+                  Must be in the future
+                </span>
+              )}
             </div>
-            <span className="field-help">
-              {priorities.length} / 3 priorities selected. These receive boosted
-              budget weights.
-            </span>
-          </div>
 
-          {/* Special Requests */}
+            {/* Wedding City */}
+            <div className="form-group">
+              <label htmlFor="city" className="form-label">
+                Wedding City <span className="required-indicator">*</span>
+              </label>
+              <input
+                id="city"
+                type="text"
+                required
+                className="form-input"
+                maxLength={60}
+                value={city}
+                placeholder="e.g. Jaipur, New Delhi, Lucknow"
+                onChange={(e) => {
+                  setCity(e.target.value);
+                  if (touched.city) validateField("city");
+                }}
+                onBlur={() => handleBlur("city")}
+                aria-invalid={!!(touched.city && errors.city)}
+                aria-describedby={errors.city ? "city-error" : "city-help"}
+              />
+              {touched.city && errors.city ? (
+                <span id="city-error" className="field-error" role="alert">
+                  {errors.city}
+                </span>
+              ) : (
+                <span id="city-help" className="field-help">
+                  Primary host city for the celebration
+                </span>
+              )}
+            </div>
+
+            {/* City Tier */}
+            <div className="form-group">
+              <label htmlFor="cityTier" className="form-label">
+                City Classification Tier <span className="required-indicator">*</span>
+              </label>
+              <select
+                id="cityTier"
+                className="form-select"
+                value={cityTier}
+                onChange={(e) => setCityTier(e.target.value as CityTier)}
+                aria-describedby="cityTier-help"
+              >
+                <option value="Metro">Metro (Delhi NCR, Mumbai, Bengaluru, Chennai, etc.)</option>
+                <option value="Tier-2">Tier-2 (Jaipur, Pune, Lucknow, Chandigarh, Ahmedabad, etc.)</option>
+                <option value="Tier-3">Tier-3 (Smaller cities, towns & ancestral roots)</option>
+              </select>
+              <span id="cityTier-help" className="field-help">
+                Sets regional per-guest catering and banquet benchmarks
+              </span>
+            </div>
+          </div>
+        </fieldset>
+
+        {/* SECTION 2: BUDGET & GUEST SCALE */}
+        <fieldset className="form-section-fieldset">
+          <legend className="section-legend">
+            <span className="section-number">2</span>
+            <span>Budget & Guest Scale</span>
+          </legend>
+
+          <div className="form-grid">
+            {/* Total Budget */}
+            <div className="form-group">
+              <div className="label-with-preview">
+                <label htmlFor="totalBudget" className="form-label">
+                  Total Budget (INR) <span className="required-indicator">*</span>
+                </label>
+                {inWords && (
+                  <span className="live-words-pill">
+                    {formatCurrencyINR(totalBudget)} ({inWords})
+                  </span>
+                )}
+              </div>
+              <input
+                id="totalBudget"
+                type="number"
+                required
+                min={50000}
+                max={100000000}
+                step={25000}
+                className="form-input"
+                value={totalBudget}
+                onChange={(e) => {
+                  setTotalBudget(Number(e.target.value));
+                  if (touched.totalBudget) validateField("totalBudget");
+                }}
+                onBlur={() => handleBlur("totalBudget")}
+                aria-invalid={!!(touched.totalBudget && errors.totalBudget)}
+                aria-describedby={
+                  errors.totalBudget ? "totalBudget-error" : "totalBudget-help"
+                }
+              />
+              {touched.totalBudget && errors.totalBudget ? (
+                <span id="totalBudget-error" className="field-error" role="alert">
+                  {errors.totalBudget}
+                </span>
+              ) : (
+                <span id="totalBudget-help" className="field-help">
+                  Range: ₹50,000 to ₹10,00,00,000 (10 Cr)
+                </span>
+              )}
+            </div>
+
+            {/* Guest Count */}
+            <div className="form-group">
+              <div className="label-with-preview">
+                <label htmlFor="guestCount" className="form-label">
+                  Guest Count <span className="required-indicator">*</span>
+                </label>
+                <span className="live-words-pill">
+                  Est. {formatCurrencyINR(livePerGuest)} / guest
+                </span>
+              </div>
+              <input
+                id="guestCount"
+                type="number"
+                required
+                min={10}
+                max={5000}
+                step={10}
+                className="form-input"
+                value={guestCount}
+                onChange={(e) => {
+                  setGuestCount(Number(e.target.value));
+                  if (touched.guestCount) validateField("guestCount");
+                }}
+                onBlur={() => handleBlur("guestCount")}
+                aria-invalid={!!(touched.guestCount && errors.guestCount)}
+                aria-describedby={
+                  errors.guestCount ? "guestCount-error" : "guestCount-help"
+                }
+              />
+              {touched.guestCount && errors.guestCount ? (
+                <span id="guestCount-error" className="field-error" role="alert">
+                  {errors.guestCount}
+                </span>
+              ) : (
+                <span id="guestCount-help" className="field-help">
+                  Between 10 and 5,000 attendees
+                </span>
+              )}
+            </div>
+          </div>
+        </fieldset>
+
+        {/* SECTION 3: CELEBRATION STYLE & PRIORITIES */}
+        <fieldset className="form-section-fieldset">
+          <legend className="section-legend">
+            <span className="section-number">3</span>
+            <span>Celebration Style & Priorities</span>
+          </legend>
+
+          <div className="form-grid">
+            {/* Style / Vibe */}
+            <div className="form-group form-group-full">
+              <label htmlFor="style" className="form-label">
+                Wedding Style / Vibe <span className="required-indicator">*</span>
+              </label>
+              <select
+                id="style"
+                className="form-select"
+                value={style}
+                onChange={(e) => setStyle(e.target.value as WeddingStyle)}
+                aria-describedby="style-help"
+              >
+                {ALL_STYLES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <span id="style-help" className="field-help">
+                Customizes budget weightings, decor aesthetics, and vendor checklists
+              </span>
+            </div>
+
+            {/* Celebrated Functions */}
+            <div className="form-group form-group-full">
+              <span id="functions-label" className="form-label">
+                Celebrated Functions (Select all that apply) <span className="required-indicator">*</span>
+              </span>
+              <div
+                role="group"
+                aria-labelledby="functions-label"
+                className="chips-group"
+              >
+                {ALL_FUNCTIONS.map((fn) => {
+                  const isSelected = functions.includes(fn);
+                  return (
+                    <button
+                      key={fn}
+                      type="button"
+                      className={`chip-btn ${isSelected ? "selected" : ""}`}
+                      aria-pressed={isSelected}
+                      onClick={() => toggleFunction(fn)}
+                    >
+                      {isSelected ? <CheckIcon size={14} /> : <PlusIcon size={14} />}
+                      <span>{fn}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {errors.functions && (
+                <span id="functions-error" className="field-error" role="alert">
+                  {errors.functions}
+                </span>
+              )}
+            </div>
+
+            {/* Top 3 Priorities */}
+            <div className="form-group form-group-full">
+              <span id="priorities-label" className="form-label">
+                Top Priorities <span className="field-help">(Choose up to 3 to boost budget allocation)</span>
+              </span>
+              <div
+                role="group"
+                aria-labelledby="priorities-label"
+                className="chips-group"
+              >
+                {ALL_PRIORITIES.map((p) => {
+                  const isSelected = priorities.includes(p);
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      className={`chip-btn ${isSelected ? "selected" : ""}`}
+                      aria-pressed={isSelected}
+                      onClick={() => togglePriority(p)}
+                    >
+                      {isSelected ? <CheckIcon size={14} /> : <PlusIcon size={14} />}
+                      <span>{p}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <span className="field-help">
+                {priorities.length}/3 selected. These categories receive higher percentage shares.
+              </span>
+            </div>
+          </div>
+        </fieldset>
+
+        {/* SECTION 4: SPECIAL REQUESTS & TRADITIONS */}
+        <fieldset className="form-section-fieldset">
+          <legend className="section-legend">
+            <span className="section-number">4</span>
+            <span>Special Requests & Traditions</span>
+          </legend>
+
           <div className="form-group form-group-full">
             <label htmlFor="specialRequests" className="form-label">
-              Special Requests & Traditions{" "}
-              <span className="field-help">(Optional, max 300 chars)</span>
+              Unique Requests or Traditions <span className="field-help">(Optional, max 300 chars)</span>
             </label>
             <textarea
               id="specialRequests"
-              rows={2}
+              rows={3}
               className="form-textarea"
               maxLength={300}
-              placeholder="e.g. Pure Jain vegetarian menu, eco-friendly varmalas, sunset outdoor ceremony, Punjabi Baraat"
+              placeholder="e.g. Pure Jain catering with zero root vegetables, sunset outdoor lawn pheras, eco-friendly seed-paper favors, Punjabi live dhol welcome"
               value={specialRequests}
               onChange={(e) => setSpecialRequests(e.target.value)}
               aria-describedby="specialRequests-help"
@@ -531,7 +581,7 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
               {300 - specialRequests.length} characters remaining
             </span>
           </div>
-        </div>
+        </fieldset>
 
         <div className="form-actions">
           <button
@@ -542,10 +592,13 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
             {isLoading ? (
               <>
                 <span className="spinner" aria-hidden="true" />
-                <span>Crafting Your Wedding Plan...</span>
+                <span>Assembling Your Dream Wedding Plan...</span>
               </>
             ) : (
-              <span>Generate Wedding Plan ✨</span>
+              <>
+                <SparklesIcon size={18} />
+                <span>Generate Wedding Plan</span>
+              </>
             )}
           </button>
         </div>

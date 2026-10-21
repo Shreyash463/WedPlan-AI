@@ -6,13 +6,19 @@ import {
   WeddingFunction,
   WeddingStyle,
 } from "../../types";
-import { formatCurrencyINR, formatPercentage } from "../../utils/formatters";
-import { ProgressBar } from "../common/ProgressBar";
+import {
+  formatCurrencyCompactINR,
+  formatCurrencyINR,
+  formatPercentage,
+} from "../../utils/formatters";
 import { Badge } from "../common/Badge";
 import { recalculatePlan } from "../../api/client";
+import { CATEGORY_COLORS } from "./OverviewTab";
+import { MinusIcon, PlusIcon, RupeeIcon, UsersIcon } from "../common/Icons";
 
 interface BudgetTabProps {
   budgetPlan: BudgetPlan;
+  originalBudget?: number;
   city: string;
   cityTier: CityTier;
   weddingDate: string;
@@ -31,8 +37,30 @@ const ALL_PRIORITIES: Priority[] = [
   "Guest Experience",
 ];
 
+const MIN_BUDGET = 50_000;
+const MAX_BUDGET = 100_000_000;
+const LOG_MIN = Math.log(MIN_BUDGET);
+const LOG_MAX = Math.log(MAX_BUDGET);
+
+function budgetToSlider(b: number): number {
+  const clamped = Math.max(MIN_BUDGET, Math.min(MAX_BUDGET, b));
+  return Math.round(((Math.log(clamped) - LOG_MIN) / (LOG_MAX - LOG_MIN)) * 1000);
+}
+
+function sliderToBudget(val: number): number {
+  const b = Math.exp(LOG_MIN + (val / 1000) * (LOG_MAX - LOG_MIN));
+  if (b < 1_000_000) {
+    return Math.round(b / 10_000) * 10_000;
+  }
+  if (b < 10_000_000) {
+    return Math.round(b / 50_000) * 50_000;
+  }
+  return Math.round(b / 100_000) * 100_000;
+}
+
 export const BudgetTab: React.FC<BudgetTabProps> = ({
   budgetPlan,
+  originalBudget,
   city,
   cityTier,
   weddingDate,
@@ -45,6 +73,7 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
   const [stepperGuests, setStepperGuests] = useState<number>(budgetPlan.guest_count);
   const [selectedPriorities, setSelectedPriorities] = useState<Priority[]>(initialPriorities);
   const [isRecalculating, setIsRecalculating] = useState<boolean>(false);
+  const [displayMode, setDisplayMode] = useState<"inr" | "percentage">("inr");
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -56,7 +85,6 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
 
   // Debounced recalculation effect
   useEffect(() => {
-    // If no changes from current plan, skip
     if (
       sliderBudget === budgetPlan.total_budget &&
       stepperGuests === budgetPlan.guest_count &&
@@ -66,7 +94,6 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
     }
 
     const timer = setTimeout(async () => {
-      // Cancel any ongoing recalculation request
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -90,7 +117,7 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
         onBudgetUpdated(res.budget);
       } catch (err: unknown) {
         if ((err as Error)?.name !== "AbortError") {
-          // Log or silently ignore canceled requests
+          // Ignore canceled requests
         }
       } finally {
         setIsRecalculating(false);
@@ -129,122 +156,152 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
     setStepperGuests((prev) => Math.max(10, Math.min(5000, prev + delta)));
   };
 
+  const handleExactBudgetInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value, 10);
+    if (!isNaN(val)) {
+      setSliderBudget(Math.max(MIN_BUDGET, Math.min(MAX_BUDGET, val)));
+    }
+  };
+
+  // Delta calculation vs original plan
+  const baseBudget = originalBudget ?? budgetPlan.total_budget;
+  const budgetDelta = sliderBudget - baseBudget;
+
   return (
     <div className="budget-tab-container">
       {/* Interactive What-If Simulator Panel */}
       <section className="what-if-panel" aria-labelledby="what-if-heading">
         <div className="what-if-header">
-          <h2 id="what-if-heading">
-            Live What-If Simulator{" "}
-            {isRecalculating && (
-              <span
-                style={{
-                  fontSize: "0.8rem",
-                  color: "var(--color-primary)",
-                  fontWeight: "normal",
-                  marginLeft: "8px",
-                }}
-              >
-                (Recomputing...)
-              </span>
-            )}
-          </h2>
-          <Badge type="health" value={budgetPlan.health_status} />
+          <div>
+            <h2 id="what-if-heading" className="what-if-title">
+              Instant What-If Budget Simulator
+            </h2>
+            <p className="what-if-subtitle">
+              Adjust budget, guest count, or priorities to immediately test feasibility. Pure instant calculation, zero AI latency.
+            </p>
+          </div>
+          <div className="what-if-status-badges">
+            {isRecalculating && <span className="recalculating-pill">Recomputing...</span>}
+            <Badge type="health" value={budgetPlan.health_status} />
+          </div>
         </div>
 
         <div className="what-if-grid">
-          {/* Budget Range Slider */}
-          <div className="slider-group">
-            <div className="slider-label-row">
-              <label htmlFor="budgetSlider">What-If Total Budget</label>
-              <span style={{ color: "var(--color-primary)" }}>
-                {formatCurrencyINR(sliderBudget)}
-              </span>
+          {/* Budget Range Slider + Synchronized Input */}
+          <div className="simulator-field-group">
+            <div className="field-label-row">
+              <label htmlFor="budgetSlider" className="simulator-label">
+                <RupeeIcon size={16} /> What-If Total Budget (INR)
+              </label>
+              <div className="delta-container">
+                {budgetDelta === 0 ? (
+                  <span className="delta-pill neutral">Original Budget</span>
+                ) : budgetDelta > 0 ? (
+                  <span className="delta-pill positive">+{formatCurrencyCompactINR(budgetDelta)} vs original</span>
+                ) : (
+                  <span className="delta-pill negative">-{formatCurrencyCompactINR(Math.abs(budgetDelta))} vs original</span>
+                )}
+              </div>
             </div>
-            <input
-              id="budgetSlider"
-              type="range"
-              min={100000}
-              max={15000000}
-              step={50000}
-              className="budget-slider"
-              value={sliderBudget}
-              onChange={(e) => setSliderBudget(Number(e.target.value))}
-              aria-valuemin={100000}
-              aria-valuemax={15000000}
-              aria-valuenow={sliderBudget}
-              aria-valuetext={formatCurrencyINR(sliderBudget)}
-            />
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: "0.75rem",
-                color: "var(--color-text-muted)",
-              }}
-            >
-              <span>₹1 Lakh</span>
-              <span>₹1.5 Crore</span>
+
+            <div className="budget-input-sync-row">
+              <div className="budget-slider-wrapper">
+                <input
+                  id="budgetSlider"
+                  type="range"
+                  min={0}
+                  max={1000}
+                  step={1}
+                  className="budget-slider"
+                  value={budgetToSlider(sliderBudget)}
+                  onChange={(e) => setSliderBudget(sliderToBudget(Number(e.target.value)))}
+                  aria-label="What-If Total Budget"
+                />
+                <div className="slider-ticks">
+                  <span>{formatCurrencyCompactINR(MIN_BUDGET)}</span>
+                  <span>₹25 L</span>
+                  <span>₹1 Cr</span>
+                  <span>{formatCurrencyCompactINR(MAX_BUDGET)}</span>
+                </div>
+              </div>
+
+              <div className="exact-input-wrapper">
+                <label htmlFor="exactBudgetInput" className="sr-only">Type exact budget amount</label>
+                <div className="rupee-input-prefix">₹</div>
+                <input
+                  id="exactBudgetInput"
+                  type="number"
+                  min={MIN_BUDGET}
+                  max={MAX_BUDGET}
+                  step={10000}
+                  value={sliderBudget}
+                  onChange={handleExactBudgetInput}
+                  className="exact-budget-input"
+                  aria-label="Type exact budget in INR"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Guest Count Stepper */}
-          <div className="slider-group">
-            <div className="slider-label-row">
-              <label id="guestStepperLabel">What-If Guest Count</label>
-              <span style={{ color: "var(--color-primary)" }}>
-                {stepperGuests} Guests
+          {/* Guest Count Stepper + Number Input */}
+          <div className="simulator-field-group">
+            <div className="field-label-row">
+              <label htmlFor="whatIfGuestInput" className="simulator-label">
+                <UsersIcon size={16} /> Guest Count: <span className="stepper-val-text">{stepperGuests}</span>
+              </label>
+              <span className="per-guest-calc">
+                {formatCurrencyINR(budgetPlan.cost_per_guest)} / guest
               </span>
             </div>
-            <div
-              className="stepper-control"
-              role="group"
-              aria-labelledby="guestStepperLabel"
-            >
+
+            <div className="guest-stepper-control" role="group" aria-label="Guest count stepper">
               <button
                 type="button"
-                className="stepper-btn"
+                className="stepper-action-btn"
                 onClick={() => handleGuestStep(-25)}
                 aria-label="Decrease guest count by 25"
                 disabled={stepperGuests <= 10}
               >
-                -
+                <MinusIcon size={16} />
               </button>
-              <span className="stepper-value" aria-live="polite">
-                {stepperGuests}
-              </span>
+
+              <input
+                id="whatIfGuestInput"
+                type="number"
+                min={10}
+                max={5000}
+                step={1}
+                value={stepperGuests}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  if (!isNaN(val)) setStepperGuests(Math.max(10, Math.min(5000, val)));
+                }}
+                className="guest-stepper-input"
+                aria-label="Exact guest count"
+              />
+
               <button
                 type="button"
-                className="stepper-btn"
+                className="stepper-action-btn"
                 onClick={() => handleGuestStep(25)}
                 aria-label="Increase guest count by 25"
                 disabled={stepperGuests >= 5000}
               >
-                +
+                <PlusIcon size={16} />
               </button>
             </div>
-            <span style={{ fontSize: "0.75rem", color: "var(--color-text-muted)" }}>
-              Per-guest spend: {formatCurrencyINR(budgetPlan.cost_per_guest)}
-            </span>
+            <div className="stepper-hint">Min 10, max 5,000 guests. Use - / + or type directly.</div>
           </div>
 
           {/* Priorities Re-weighting */}
-          <div style={{ gridColumn: "1 / -1" }}>
-            <span
-              id="priorityToggleLabel"
-              style={{
-                fontSize: "0.9rem",
-                fontWeight: 600,
-                display: "block",
-                marginBottom: "6px",
-              }}
-            >
-              Active Priorities (Boosted Allocations):
+          <div className="priorities-simulator-group">
+            <span id="priorityToggleLabel" className="simulator-label">
+              Dynamic Priority Focus (Select up to 3 to shift budget weights):
             </span>
             <div
+              className="priority-chips-row"
               role="group"
               aria-labelledby="priorityToggleLabel"
-              className="chips-group"
             >
               {ALL_PRIORITIES.map((p) => {
                 const isSelected = selectedPriorities.includes(p);
@@ -252,11 +309,10 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
                   <button
                     key={p}
                     type="button"
-                    className={`chip-btn ${isSelected ? "selected" : ""}`}
-                    aria-pressed={isSelected}
+                    className={`priority-chip ${isSelected ? "selected" : ""}`}
                     onClick={() => handlePriorityToggle(p)}
+                    aria-pressed={isSelected}
                   >
-                    <span aria-hidden="true">{isSelected ? "★" : "☆"}</span>
                     {p}
                   </button>
                 );
@@ -266,93 +322,105 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
         </div>
       </section>
 
-      {/* Concrete Planner Suggestions */}
-      {budgetPlan.suggestions && budgetPlan.suggestions.length > 0 && (
-        <div
-          style={{
-            background: "var(--color-surface-subtle)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-md)",
-            padding: "var(--space-md)",
-            marginBottom: "var(--space-lg)",
-          }}
-        >
-          <h3
-            style={{
-              fontSize: "1rem",
-              color: "var(--color-primary)",
-              marginBottom: "8px",
-            }}
-          >
-            💡 Smart Budget Optimization Suggestions
-          </h3>
-          <ul style={{ paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "0.95rem" }}>
-            {budgetPlan.suggestions.map((sugg, idx) => (
-              <li key={idx}>{sugg}</li>
-            ))}
-          </ul>
+      {/* Category Breakdown Table */}
+      <section className="budget-table-section" aria-labelledby="category-breakdown-heading">
+        <div className="table-header-bar">
+          <div>
+            <h3 id="category-breakdown-heading" className="section-title">
+              Category Allocation Details
+            </h3>
+            <p className="section-subtitle">
+              Calculated using the Largest Remainder (Hamilton) method. Sums to exactly {formatCurrencyINR(budgetPlan.total_budget)} with 0 rupee rounding errors.
+            </p>
+          </div>
+          {/* Toggle between INR and Percentage */}
+          <div className="display-mode-toggle" role="group" aria-label="Display mode toggle">
+            <button
+              type="button"
+              className={`toggle-option ${displayMode === "inr" ? "active" : ""}`}
+              onClick={() => setDisplayMode("inr")}
+            >
+              Rupees (₹)
+            </button>
+            <button
+              type="button"
+              className={`toggle-option ${displayMode === "percentage" ? "active" : ""}`}
+              onClick={() => setDisplayMode("percentage")}
+            >
+              Percentage (%)
+            </button>
+          </div>
         </div>
-      )}
 
-      {/* Category Allocation Table with Pure CSS/SVG Bars */}
-      <div className="budget-table-wrapper">
-        <table className="budget-table" aria-label="Wedding Budget Allocations">
-          <thead>
-            <tr>
-              <th scope="col" style={{ width: "30%" }}>Category</th>
-              <th scope="col" style={{ width: "20%" }}>Allocated Amount</th>
-              <th scope="col" style={{ width: "15%" }}>Share</th>
-              <th scope="col" style={{ width: "35%" }}>Distribution Breakdown</th>
-            </tr>
-          </thead>
-          <tbody>
-            {budgetPlan.allocations.map((alloc) => (
-              <tr key={alloc.category}>
-                <td>
-                  <strong>{alloc.category}</strong>
-                  <div
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "var(--color-text-muted)",
-                      marginTop: "2px",
-                    }}
-                  >
-                    {alloc.description}
-                  </div>
+        <div className="table-responsive">
+          <table className="budget-table" aria-label="Wedding budget allocations">
+            <thead>
+              <tr>
+                <th scope="col" style={{ width: "28%" }}>Category</th>
+                <th scope="col" style={{ width: "32%" }}>Allocation Distribution</th>
+                <th scope="col" style={{ width: "15%", textAlign: "right" }}>Percentage</th>
+                <th scope="col" style={{ width: "25%", textAlign: "right" }}>Amount (INR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {budgetPlan.allocations.map((alloc) => {
+                const catColor = CATEGORY_COLORS[alloc.category] || "var(--color-primary)";
+                return (
+                  <tr key={alloc.category}>
+                    <td>
+                      <div className="cat-cell-content">
+                        <span className="cat-color-swatch" style={{ backgroundColor: catColor }} />
+                        <div>
+                          <strong className="cat-name">{alloc.category}</strong>
+                          <div className="cat-desc">{alloc.description}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="table-progress-cell">
+                        <div className="table-progress-track">
+                          <div
+                            className="table-progress-fill"
+                            style={{
+                              width: `${Math.min(100, alloc.percentage * 2.5)}%`,
+                              backgroundColor: catColor,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ textAlign: "right", fontWeight: displayMode === "percentage" ? 700 : 500 }}>
+                      <span className={`value-badge ${displayMode === "percentage" ? "highlight" : ""}`}>
+                        {formatPercentage(alloc.percentage)}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: "right", fontWeight: displayMode === "inr" ? 700 : 500 }}>
+                      <span className={`value-badge ${displayMode === "inr" ? "highlight" : ""}`}>
+                        {formatCurrencyINR(alloc.amount)}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={2}>
+                  <strong>Total Wedding Budget Allocation</strong>
                 </td>
-                <td style={{ fontWeight: 700, color: "var(--color-text-main)" }}>
-                  {formatCurrencyINR(alloc.amount)}
+                <td style={{ textAlign: "right" }}>
+                  <strong>100.0%</strong>
                 </td>
-                <td>
-                  <span style={{ fontWeight: 600 }}>
-                    {formatPercentage(alloc.percentage)}
-                  </span>
-                </td>
-                <td>
-                  <ProgressBar
-                    percentage={alloc.percentage}
-                    aria-label={`${alloc.category} ${alloc.percentage.toFixed(1)}%`}
-                  />
+                <td style={{ textAlign: "right" }}>
+                  <strong style={{ color: "var(--color-primary)" }}>
+                    {formatCurrencyINR(budgetPlan.total_budget)}
+                  </strong>
                 </td>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr style={{ background: "var(--color-surface-subtle)", fontWeight: 700 }}>
-              <td>Total Reconciled Budget</td>
-              <td style={{ color: "var(--color-primary)" }}>
-                {formatCurrencyINR(budgetPlan.total_budget)}
-              </td>
-              <td>100.0%</td>
-              <td>
-                <span style={{ fontSize: "0.85rem", color: "var(--color-healthy)" }}>
-                  ✓ Exact match (Hamilton/Hare Method)
-                </span>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+            </tfoot>
+          </table>
+        </div>
+      </section>
     </div>
   );
 };
