@@ -1,0 +1,71 @@
+/* Print-Optimized Styles */
+@media print {
+  /* Hide non-printable navigation, buttons, and form inputs */
+  .app-header,
+  .app-footer,
+  .skip-link,
+  .dashboard-actions,
+  .tabs-navigation-wrapper,
+  .what-if-panel,
+  .btn,
+  .toast-msg,
+  .accordion-section summary,
+  .task-checkbox-wrapper {
+    display: none !important;
+  }
+
+  body, html {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+
+  .main-content {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Make all tab panels visible for complete printout */
+  .tab-panel {
+    display: block !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 1rem 0 !important;
+    page-break-inside: avoid;
+  }
+
+  .dashboard-header-card,
+  .stat-card,
+  .task-card,
+  .vendor-card,
+  .idea-card {
+    border: 1px solid #CCCCCC !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Ensure accordion details are open and visible */
+  details {
+    display: block !important;
+  }
+
+  details[open] .accordion-content,
+  details .accordion-content {
+    display: block !important;
+  }
+
+  /* Text contrast for print */
+  h1, h2, h3, h4 {
+    color: #000000 !important;
+  }
+
+  .vendor-budget-badge,
+  .stat-value {
+    color: #000000 !important;
+    font-weight: 700;
+  }
+}

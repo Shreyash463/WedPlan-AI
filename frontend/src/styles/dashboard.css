@@ -1,0 +1,133 @@
+/* Dashboard Layout & Shell */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.dashboard-header-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg) var(--space-xl);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.dashboard-title-group h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.dashboard-subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.dashboard-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* Tab Navigation - WAI-ARIA Tabs Pattern */
+.tabs-navigation-wrapper {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs);
+  box-shadow: var(--shadow-sm);
+}
+
+.tab-list {
+  display: flex;
+  gap: var(--space-xs);
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: var(--touch-target-min);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.tab-btn:hover:not([aria-selected="true"]) {
+  background: var(--color-surface-subtle);
+  color: var(--color-text-main);
+}
+
+.tab-btn[aria-selected="true"] {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  box-shadow: 0 2px 4px rgba(122, 21, 38, 0.2);
+}
+
+.tab-icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* Tab Content Panels */
+.tab-panel {
+  display: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.tab-panel:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 4px;
+}
+
+/* Notification & Copy Toast */
+.toast-msg {
+  position: fixed;
+  bottom: var(--space-lg);
+  right: var(--space-lg);
+  background: #1F2937;
+  color: #FFFFFF;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-size: 0.9rem;
+  font-weight: 500;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
