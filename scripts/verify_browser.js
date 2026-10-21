@@ -71,19 +71,17 @@ async function run() {
   await page.fill("#guestCount", "150");
   await page.selectOption("#style", "Traditional");
 
-  // Select 3 functions: Haldi, Sangeet, Wedding (toggle others off/on as needed)
+  // Select 3 functions: Haldi, Sangeet, Wedding (deselect Mehendi)
   console.log("[Browser] Configuring 3 functions (Haldi, Sangeet, Wedding)...");
-  // Default selected: Haldi, Mehendi, Sangeet, Wedding. Deselect Mehendi:
   const mehendiBtn = page.locator('button.chip-btn:has-text("Mehendi")');
   await mehendiBtn.click();
 
   // Select 3 priorities: Food, Venue & Decor, Photography
   console.log("[Browser] Configuring 3 priorities (Food, Venue & Decor, Photography)...");
-  // Default has Food and Venue & Decor. Click Photography:
   const photoBtn = page.locator('button.chip-btn:has-text("Photography")');
   await photoBtn.click();
 
-  await page.fill("#specialRequests", "Awadhi vegetarian royal feast, sunset Phere");
+  await page.fill("#specialRequests", "Awadhi pure vegetarian royal feast, sunset outdoor lawn pheras");
 
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "02-intake-form-filled.png") });
   console.log("  Saved: screenshots/02-intake-form-filled.png");
@@ -98,41 +96,52 @@ async function run() {
 
   // TAB 1: Overview
   console.log("[Browser] Inspecting Tab 1: Overview...");
-  const budgetText = await page.locator(".stat-value >> nth=0").innerText();
-  const healthBadge = await page.locator(".stat-card >> nth=1").innerText();
-  const perGuest = await page.locator(".stat-value >> nth=1").innerText();
+  const budgetText = await page.locator(".stat-card >> nth=0 >> .stat-value").innerText();
+  const perGuest = await page.locator(".stat-card >> nth=1 >> .stat-value").innerText();
   console.log(`  Budget displayed: ${budgetText}`);
-  console.log(`  Health status: ${healthBadge.trim().replace(/\n/g, " ")}`);
   console.log(`  Spend per guest: ${perGuest}`);
+
+  // Confirm SVG Donut Chart is rendered
+  const donutSvg = page.locator(".donut-svg");
+  const isDonutRendered = await donutSvg.isVisible();
+  console.log(`  SVG Donut chart visible: ${isDonutRendered}`);
+
+  // Confirm Progress Ring is rendered
+  const ringSvg = page.locator(".progress-ring-svg");
+  const isRingRendered = await ringSvg.isVisible();
+  console.log(`  SVG Progress ring visible: ${isRingRendered}`);
 
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "03-tab1-overview.png") });
   console.log("  Saved: screenshots/03-tab1-overview.png");
 
   // TAB 2: Budget & What-If Simulator
   console.log("\n[Browser] Switching to Tab 2: Budget & What-If...");
-  await page.click('#tab-budget');
-  await page.waitForSelector(".budget-table-wrapper");
+  await page.click("#tab-budget");
+  await page.waitForSelector(".budget-table");
 
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "04-tab2-budget-initial.png") });
   console.log("  Saved: screenshots/04-tab2-budget-initial.png");
 
-  // Test What-If slider change
-  console.log("[Browser] Adjusting What-If budget slider to 12,00,000...");
-  await page.fill("#budgetSlider", "1200000");
-  await page.dispatchEvent("#budgetSlider", "change");
+  // Test What-If typing exact budget into synchronized numeric input
+  console.log("[Browser] Typing exact budget 12,00,000 into synchronized numeric input...");
+  await page.fill("#exactBudgetInput", "1200000");
 
   // Wait for debounced recalculation (300ms + request)
   await page.waitForTimeout(600);
 
-  const updatedBudgetTotal = await page.locator(".budget-table tfoot td >> nth=1").innerText();
+  const updatedBudgetTotal = await page.locator(".budget-table tfoot td >> nth=2").innerText();
   console.log(`  Updated total budget in table: ${updatedBudgetTotal}`);
   if (!updatedBudgetTotal.includes("12,00,000")) {
     throw new Error(`Expected table to show 12,00,000, but got: ${updatedBudgetTotal}`);
   }
 
+  // Check delta pill
+  const deltaPill = await page.locator(".delta-pill").innerText();
+  console.log(`  Delta pill text: "${deltaPill}"`);
+
   // Test guest stepper
   console.log("[Browser] Clicking guest stepper (+25 guests)...");
-  await page.click('button.stepper-btn:has-text("+")');
+  await page.click('.stepper-action-btn[aria-label="Increase guest count by 25"]');
   await page.waitForTimeout(500);
 
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "05-tab2-budget-what-if.png") });
@@ -140,11 +149,15 @@ async function run() {
 
   // TAB 3: Timeline
   console.log("\n[Browser] Switching to Tab 3: Timeline...");
-  await page.click('#tab-timeline');
-  await page.waitForSelector(".timeline-phase-group");
+  await page.click("#tab-timeline");
+  await page.waitForSelector(".timeline-vertical-tree");
+
+  // Verify chronological phases
+  const phaseHeadings = await page.locator(".phase-title-text").allInnerTexts();
+  console.log(`  Rendered timeline phases in order: ${phaseHeadings.join(" -> ")}`);
 
   console.log("[Browser] Checking first timeline task checkbox...");
-  const firstCheckbox = page.locator(".task-checkbox >> nth=0");
+  const firstCheckbox = page.locator('.timeline-task-item input[type="checkbox"] >> nth=0');
   await firstCheckbox.check();
   const isChecked = await firstCheckbox.isChecked();
   console.log(`  Checkbox is checked: ${isChecked}`);
@@ -154,25 +167,31 @@ async function run() {
 
   // TAB 4: Vendors
   console.log("\n[Browser] Switching to Tab 4: Vendors...");
-  await page.click('#tab-vendors');
+  await page.click("#tab-vendors");
   await page.waitForSelector(".vendor-card");
 
-  console.log("[Browser] Changing first vendor status to 'Booked'...");
-  const firstVendorSelect = page.locator(".vendor-status-select >> nth=0");
-  await firstVendorSelect.selectOption("Booked");
-  const selectedStatus = await firstVendorSelect.inputValue();
-  console.log(`  Selected status: ${selectedStatus}`);
+  console.log("[Browser] Clicking 'Booked' status chip on first vendor...");
+  const firstVendorBookedBtn = page.locator(".vendor-card >> nth=0 >> button.status-chip-booked");
+  await firstVendorBookedBtn.click();
+  await page.waitForTimeout(300);
+
+  const isBookedActive = await firstVendorBookedBtn.getAttribute("aria-checked");
+  console.log(`  First vendor Booked chip active: ${isBookedActive}`);
 
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "07-tab4-vendors.png") });
   console.log("  Saved: screenshots/07-tab4-vendors.png");
 
   // TAB 5: Ideas
   console.log("\n[Browser] Switching to Tab 5: Ideas...");
-  await page.click('#tab-ideas');
+  await page.click("#tab-ideas");
   await page.waitForSelector(".ideas-card-grid");
 
   const sourceBadge = await page.locator(".ideas-source-badge").innerText();
   console.log(`  Ideas Source Badge: "${sourceBadge.trim()}"`);
+
+  // Check tailored money saving hacks
+  const firstHack = await page.locator(".idea-hack-item >> nth=0 >> p").innerText();
+  console.log(`  First money saving hack: "${firstHack}"`);
 
   await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "08-tab5-ideas.png") });
   console.log("  Saved: screenshots/08-tab5-ideas.png");
@@ -183,9 +202,9 @@ async function run() {
   await page.waitForSelector(".dashboard-container");
 
   // Switch back to timeline tab and check if task is still checked
-  await page.click('#tab-timeline');
-  await page.waitForSelector(".task-checkbox");
-  const persistedCheckbox = page.locator(".task-checkbox >> nth=0");
+  await page.click("#tab-timeline");
+  await page.waitForSelector(".timeline-task-item");
+  const persistedCheckbox = page.locator('.timeline-task-item input[type="checkbox"] >> nth=0');
   const persistedChecked = await persistedCheckbox.isChecked();
   console.log(`  Persisted task checkbox after reload: ${persistedChecked}`);
   if (!persistedChecked) {
@@ -193,16 +212,29 @@ async function run() {
   }
 
   // Switch to vendors tab and check if vendor status is still Booked
-  await page.click('#tab-vendors');
-  await page.waitForSelector(".vendor-status-select");
-  const persistedVendorSelect = page.locator(".vendor-status-select >> nth=0");
-  const persistedStatus = await persistedVendorSelect.inputValue();
-  console.log(`  Persisted vendor status after reload: "${persistedStatus}"`);
-  if (persistedStatus !== "Booked") {
-    throw new Error(`Vendor status did not persist in localStorage! Got "${persistedStatus}"`);
+  await page.click("#tab-vendors");
+  await page.waitForSelector(".vendor-card");
+  const persistedBookedBtn = page.locator(".vendor-card >> nth=0 >> button.status-chip-booked");
+  const persistedBookedActive = await persistedBookedBtn.getAttribute("aria-checked");
+  console.log(`  Persisted vendor status after reload: "${persistedBookedActive}"`);
+  if (persistedBookedActive !== "true") {
+    throw new Error(`Vendor status did not persist in localStorage! Got "${persistedBookedActive}"`);
   }
 
-  // 6. Test Unrealistic Budget Warning with a tiny budget
+  // 6. Test Dark Mode Toggle
+  console.log("\n[Browser] Testing dark mode toggle...");
+  const themeToggle = page.locator(".theme-toggle-btn");
+  await themeToggle.click();
+  await page.waitForTimeout(200);
+  const dataTheme = await page.getAttribute("html", "data-theme");
+  console.log(`  Document data-theme after toggle: "${dataTheme}"`);
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "09-dark-mode-dashboard.png") });
+  console.log("  Saved: screenshots/09-dark-mode-dashboard.png");
+
+  // Toggle back to light
+  await themeToggle.click();
+
+  // 7. Test Unrealistic Budget Warning with a tiny budget
   console.log("\n[Browser] Testing tiny budget for Unrealistic warning...");
   await page.click('button:has-text("Edit Details")');
   await page.waitForSelector("#totalBudget");
@@ -220,8 +252,8 @@ async function run() {
     throw new Error(`Expected Unrealistic badge, got: ${healthBadgeTiny}`);
   }
 
-  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "09-tiny-budget-unrealistic.png") });
-  console.log("  Saved: screenshots/09-tiny-budget-unrealistic.png");
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, "10-tiny-budget-unrealistic.png") });
+  console.log("  Saved: screenshots/10-tiny-budget-unrealistic.png");
 
   await browser.close();
 
