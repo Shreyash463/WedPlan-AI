@@ -1,25 +1,25 @@
 """End-to-end integration verification script."""
 from __future__ import annotations
 
-import os
+import contextlib
 import sys
 from pathlib import Path
 
 # Enable UTF-8 console output on Windows
 if sys.stdout.encoding != "utf-8":
-    try:
+    with contextlib.suppress(Exception):
         sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
 
 # Ensure root dir in path
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from datetime import date, timedelta
-from fastapi.testclient import TestClient
-from backend.app.main import app
+from datetime import date, timedelta  # noqa: E402
+
+from fastapi.testclient import TestClient  # noqa: E402
+
+from backend.app.main import app  # noqa: E402
 
 client = TestClient(app)
 
