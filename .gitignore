@@ -31,6 +31,8 @@ htmlcov/
 .coverage.*
 coverage.xml
 *.cover
+screenshots/
+*.png
 
 # Node / Frontend
 node_modules/

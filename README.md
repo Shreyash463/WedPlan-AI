@@ -218,36 +218,56 @@ flowchart TD
 
 ## 8. Setup and Run Locally & Deploy to Vercel
 
-### A. Run Locally
+### A. Run Locally with ONE Command (Recommended)
 
 #### Prerequisites
 - Python 3.11+
 - Node.js 18+ and npm
 
-#### 1. Clone & Setup Environment
+#### 1. Setup Environment
 ```bash
-# Clone the repository
-git clone <repo-url>
+# Clone the repository and navigate into it
 cd "WedPlan AI"
 
-# Copy environment variables
+# Copy environment variables (leave GEMINI_API_KEY empty to use the expert fallback engine)
 cp .env.example .env
+
+# Install Python backend dependencies in virtual environment
+python -m venv .venv
+# Windows:
+.\.venv\Scripts\Activate.ps1; pip install -r requirements.txt
+# Linux / macOS:
+source .venv/bin/activate && pip install -r requirements.txt
+
+# Install frontend dependencies
+cd frontend && npm install && cd ..
 ```
-*(Optional: Add your `GEMINI_API_KEY` in `.env` to enable live Gemini generation; if omitted, WedPlan AI uses its built-in expert fallback engine without errors).*
 
-#### 2. Start Backend Server
+#### 2. Run Both Backend & Frontend with ONE Command
 ```bash
-# Install backend dependencies
-python -m pip install -r requirements.txt
-
-# Run the FastAPI server
-uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+npm run dev
 ```
-The backend API is live at `http://127.0.0.1:8000` (API docs at `http://127.0.0.1:8000/api/docs`).
+That's it! `npm run dev` starts both the FastAPI backend on `http://127.0.0.1:8000` and the Vite frontend on `http://localhost:5173`. Open **`http://localhost:5173`** in your browser.
 
-#### 3. Start Frontend Dev Server
-In a separate terminal:
+---
+
+### Alternative: Two-Terminal Method (Fallback)
+
+If you prefer running the servers in separate terminals:
+
+**Terminal 1 (Backend):**
 ```bash
+# Activate virtual environment and run uvicorn
+.\.venv\Scripts\python.exe -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+API docs will be available at `http://127.0.0.1:8000/api/docs`.
+
+**Terminal 2 (Frontend):**
+```bash
+cd frontend
+npm run dev
+```
+Open `http://localhost:5173`. Frontend automatically proxies all `/api/*` requests to port 8000 with zero CORS friction.
 cd frontend
 npm install
 npm run dev

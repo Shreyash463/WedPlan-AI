@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { PlanFormInput, PlanResponse } from "./types";
 import { createPlan, ApiClientError } from "./api/client";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 import { SkipLink } from "./components/SkipLink";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
@@ -9,8 +10,12 @@ import { Dashboard } from "./components/Dashboard";
 import { Notice } from "./components/common/Notice";
 
 export const App: React.FC = () => {
-  const [currentPlan, setCurrentPlan] = useState<PlanResponse | null>(null);
-  const [activeFormData, setActiveFormData] = useState<PlanFormInput | null>(
+  const [currentPlan, setCurrentPlan] = useLocalStorage<PlanResponse | null>(
+    "wedplan_active_plan",
+    null
+  );
+  const [activeFormData, setActiveFormData] = useLocalStorage<PlanFormInput | null>(
+    "wedplan_form_data",
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
