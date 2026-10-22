@@ -99,14 +99,20 @@ export function formatNumberToIndianWords(amount: number): string {
 }
 
 /**
- * Title-cases an Indian city name (e.g. 'new delhi' -> 'New Delhi', 'jaipur' -> 'Jaipur').
+ * Title-cases an Indian city name (e.g. 'new delhi' -> 'New Delhi', 'jaipur' -> 'Jaipur', 'hubli-dharwad' -> 'Hubli-Dharwad').
  */
 export function capitalizeCity(city: string): string {
   if (!city) return "";
   return city
     .trim()
-    .split(/\s+/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .replace(/\s+/g, " ")
+    .split(" ")
+    .map((word) =>
+      word
+        .split("-")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .join("-")
+    )
     .join(" ");
 }
 

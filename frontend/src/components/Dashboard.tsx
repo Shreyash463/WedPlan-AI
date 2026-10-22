@@ -8,6 +8,7 @@ import {
   TimelineTask,
 } from "../types";
 import {
+  capitalizeCity,
   formatCurrencyINR,
   formatDateReadable,
   formatPercentage,
@@ -167,7 +168,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       `=====================================================`,
       `Event: ${plan.overview.couple_name || "Indian Wedding Celebration"}`,
       `Date: ${formatDateReadable(plan.overview.wedding_date)} (${plan.overview.days_remaining} days remaining)`,
-      `Location: ${plan.overview.city} (${plan.overview.city_tier})`,
+      `Location: ${capitalizeCity(plan.overview.city)} (${plan.overview.city_tier})`,
       `Guests: ${plan.overview.guest_count} | Total Budget: ${formatCurrencyINR(plan.budget.total_budget)}`,
       `Per-Guest Spend: ${formatCurrencyINR(plan.budget.cost_per_guest)} | Health: ${plan.budget.health_status}`,
       ``,
@@ -279,7 +280,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="dashboard-subtitle">
               <span>{formatDateReadable(plan.overview.wedding_date)}</span>
               <span>&bull;</span>
-              <span>{plan.overview.city} ({plan.overview.city_tier})</span>
+              <span>{capitalizeCity(plan.overview.city)} ({plan.overview.city_tier})</span>
               <span>&bull;</span>
               <span>{plan.overview.guest_count} Guests</span>
               <span>&bull;</span>
@@ -479,7 +480,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="print-meta-line">
                 <span><strong>Date:</strong> {formatDateReadable(plan.overview.wedding_date)} ({plan.overview.days_remaining} days away)</span>
                 <span> &bull; </span>
-                <span><strong>City:</strong> {plan.overview.city} ({plan.overview.city_tier})</span>
+                <span><strong>City:</strong> {capitalizeCity(plan.overview.city)} ({plan.overview.city_tier})</span>
                 <span> &bull; </span>
                 <span><strong>Vibe:</strong> {formData.style}</span>
               </div>

@@ -199,18 +199,64 @@
   outline-offset: 2px;
 }
 
-/* Notice Box */
+/* Notice Box with High WCAG Contrast */
 .notice-box {
-  background-color: var(--color-tight-bg);
-  border: 1px solid #F59E0B;
-  color: #78350F;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
   padding: var(--space-md);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-lg);
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-sm);
   font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.notice-box.notice-warning {
+  background-color: var(--alert-warning-bg);
+  color: var(--alert-warning-text);
+  border: 1px solid var(--alert-warning-border);
+  border-left: 4px solid var(--alert-warning-border);
+}
+
+.notice-box.notice-error {
+  background-color: var(--alert-critical-bg);
+  color: var(--alert-critical-text);
+  border: 1px solid var(--alert-critical-border);
+  border-left: 4px solid var(--alert-critical-border);
+}
+
+.notice-box.notice-info {
+  background-color: var(--alert-info-bg);
+  color: var(--alert-info-text);
+  border: 1px solid var(--alert-info-border);
+  border-left: 4px solid var(--alert-info-border);
+}
+
+.notice-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notice-severity-label {
+  font-size: 0.725rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid currentColor;
+}
+
+.notice-content {
+  flex: 1;
+}
+
+.notice-title {
+  font-weight: 700;
+  margin-bottom: 3px;
 }
 
 /* Form Actions */

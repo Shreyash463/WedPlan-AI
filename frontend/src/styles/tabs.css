@@ -158,21 +158,53 @@
 .alert-item {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 12px;
   font-size: 0.875rem;
-  line-height: 1.45;
-  padding: 6px 10px;
+  line-height: 1.5;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
+  margin-bottom: 8px;
 }
 
 .alert-item.warning {
-  background: var(--color-tight-bg);
-  color: #78350F;
+  background: var(--alert-warning-bg);
+  color: var(--alert-warning-text);
+  border-left: 4px solid var(--alert-warning-border);
 }
 
+.alert-item.critical {
+  background: var(--alert-critical-bg);
+  color: var(--alert-critical-text);
+  border-left: 4px solid var(--alert-critical-border);
+}
+
+.alert-item.tip,
 .alert-item.suggestion {
-  background: var(--color-surface-subtle);
-  color: var(--color-text-main);
+  background: var(--alert-tip-bg);
+  color: var(--alert-tip-text);
+  border-left: 4px solid var(--alert-tip-border);
+}
+
+.alert-badge-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.alert-severity-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+}
+
+.alert-text {
+  flex: 1;
 }
 
 /* Next 3 Immediate Actions */

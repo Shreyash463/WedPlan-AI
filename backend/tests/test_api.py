@@ -191,3 +191,35 @@ def test_ideas_cache_avoids_repeated_calls():
     r2 = client.post("/api/plan", json=payload)
     assert r2.status_code == 200
     assert r2.json()["ideas"]["overview_summary"] == r1.json()["ideas"]["overview_summary"]
+
+
+def test_city_name_casing_normalization():
+    """Verify city name inputs like 'pune', 'NAGPUR', 'navi mumbai' are normalized to Title Case."""
+    wedding_date = (date.today() + timedelta(days=90)).isoformat()
+    test_cities = [
+        ("pune", "Pune"),
+        ("NAGPUR", "Nagpur"),
+        ("navi mumbai", "Navi Mumbai"),
+        ("hubli-dharwad", "Hubli-Dharwad"),
+    ]
+    for input_city, expected_city in test_cities:
+        payload = {
+            "wedding_date": wedding_date,
+            "city": input_city,
+            "city_tier": "Tier-2",
+            "total_budget": 1_500_000,
+            "guest_count": 200,
+            "functions": ["Wedding"],
+            "style": "Traditional",
+            "priorities": [],
+        }
+        res = client.post("/api/plan", json=payload)
+        assert res.status_code == 200
+        plan = res.json()
+        assert plan["overview"]["city"] == expected_city
+        assert expected_city in plan["overview"]["summary"]
+        assert expected_city in plan["ideas"]["overview_summary"]
+        # Ensure raw lowercase string does not appear in overview summary
+        if input_city != expected_city:
+            assert f" {input_city} " not in f" {plan['overview']['summary']} "
+

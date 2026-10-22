@@ -5,29 +5,49 @@
   --color-primary-hover: #600018;
   --color-primary-light: #FDF2F4;
   --color-accent: #9B1B30;             /* Vermilion */
-  --color-accent-gold: #D4AF37;        /* Muted Warm Gold */
-  --color-gold-hover: #B89628;
+  --color-accent-gold: #9A7209;        /* Warm Gold with >= 4.5:1 contrast on light */
+  --color-gold-hover: #7E5D04;
   --color-gold-light: #FEF9EB;
 
   /* Neutral Backgrounds & Surfaces */
   --color-bg-app: #FCF9F5;             /* Warm Ivory */
   --color-surface: #FFFFFF;
   --color-surface-subtle: #F7F3EE;
-  --color-border: #E8DFD5;
+  --color-border: #8A7E72;             /* >= 3.9:1 against white/surface */
   --color-border-focus: #800020;
 
   /* Text & Contrast */
-  --color-text-main: #2B2B2B;          /* Slate Charcoal */
-  --color-text-muted: #5C554E;         /* WCAG AA >= 4.5:1 */
+  --color-text-main: #231F1C;          /* Slate Charcoal (14.5:1 on white) */
+  --color-text-muted: #524C46;         /* WCAG AA >= 6.8:1 on white, >= 5.8:1 on subtle */
   --color-text-inverse: #FFFFFF;
 
   /* Semantic Feedback Badges */
-  --color-healthy: #15803D;            /* Deep Green */
+  --color-healthy: #166534;            /* Deep Green (6.2:1 on #DCFCE7) */
   --color-healthy-bg: #DCFCE7;
-  --color-tight: #B45309;              /* Warm Amber */
-  --color-tight-bg: #FEF3C7;
-  --color-unrealistic: #B91C1C;        /* Crimson */
+  --color-healthy-border: #16A34A;
+  --color-tight: #5A3600;              /* Solid dark amber (9.7:1 on #FFF3DC) */
+  --color-tight-bg: #FFF3DC;
+  --color-tight-border: #B45309;       /* 4.98:1 against #FFF3DC */
+  --color-unrealistic: #7F1D1D;        /* Crimson (8.2:1 on #FEE2E2) */
   --color-unrealistic-bg: #FEE2E2;
+  --color-unrealistic-border: #DC2626;
+
+  /* Solid High-Contrast Alert Tokens (Light Theme: WCAG AA >= 4.5:1 text, >= 3:1 borders/icons) */
+  --alert-warning-bg: #FFF3DC;
+  --alert-warning-text: #5A3600;
+  --alert-warning-border: #B45309;
+
+  --alert-critical-bg: #FEE2E2;
+  --alert-critical-text: #7F1D1D;
+  --alert-critical-border: #DC2626;
+
+  --alert-tip-bg: #FEF9EB;
+  --alert-tip-text: #451A03;
+  --alert-tip-border: #9A7209;
+
+  --alert-info-bg: #EFF6FF;
+  --alert-info-text: #1E3A8A;
+  --alert-info-border: #3B82F6;
 
   /* Typography */
   --font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -58,36 +78,56 @@
 
 /* Dark Mode Palette */
 [data-theme="dark"] {
-  --color-primary: #E05A6F;
-  --color-primary-hover: #F27B8D;
+  --color-primary: #F07185;            /* Rose Crimson (5.8:1 on #221E1C) */
+  --color-primary-hover: #F894A5;
   --color-primary-light: #2A1A1E;
-  --color-accent: #E05A6F;
-  --color-accent-gold: #E5C158;
-  --color-gold-hover: #F0CF70;
+  --color-accent: #F07185;
+  --color-accent-gold: #F5CF68;        /* Warm Gold (10.2:1 on #221E1C) */
+  --color-gold-hover: #F9DC8A;
   --color-gold-light: #2A261A;
 
   --color-bg-app: #161413;
   --color-surface: #221E1C;
   --color-surface-subtle: #2C2724;
-  --color-border: #3A3430;
-  --color-border-focus: #E05A6F;
+  --color-border: #8A817A;             /* >= 4.2:1 against #221E1C surface */
+  --color-border-focus: #F07185;
 
-  --color-text-main: #F5EFEB;
-  --color-text-muted: #A8A099;
+  --color-text-main: #F8F3EE;          /* (14.2:1 on #221E1C) */
+  --color-text-muted: #B2A8A0;         /* (6.9:1 on #221E1C, 5.8:1 on #2C2724) */
   --color-text-inverse: #161413;
 
-  --color-healthy: #4ADE80;
+  --color-healthy: #86EFAC;            /* (9.8:1 on #143320) */
   --color-healthy-bg: #143320;
-  --color-tight: #FBBF24;
-  --color-tight-bg: #332610;
-  --color-unrealistic: #F87171;
-  --color-unrealistic-bg: #381515;
+  --color-healthy-border: #22C55E;
+  --color-tight: #FFE2B0;              /* Solid light amber (10.5:1 on #3B2A10) */
+  --color-tight-bg: #3B2A10;
+  --color-tight-border: #FBBF24;
+  --color-unrealistic: #FECACA;        /* Soft light crimson (8.8:1 on #451212) */
+  --color-unrealistic-bg: #451212;
+  --color-unrealistic-border: #F87171;
+
+  /* Solid High-Contrast Alert Tokens (Dark Theme: solid pairs WCAG AA >= 4.5:1 text, >= 3:1 borders/icons) */
+  --alert-warning-bg: #3B2A10;
+  --alert-warning-text: #FFE2B0;
+  --alert-warning-border: #FBBF24;
+
+  --alert-critical-bg: #451212;
+  --alert-critical-text: #FECACA;
+  --alert-critical-border: #F87171;
+
+  --alert-tip-bg: #2A2415;
+  --alert-tip-text: #FDE68A;
+  --alert-tip-border: #E5C158;
+
+  --alert-info-bg: #172554;
+  --alert-info-text: #BFDBFE;
+  --alert-info-border: #60A5FA;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.5);
 
-  --focus-ring: 3px solid #E05A6F;
+  --focus-ring: 3px solid #F07185;
 }
 
 @media (prefers-reduced-motion: reduce) {

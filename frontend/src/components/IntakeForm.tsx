@@ -251,7 +251,7 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
           `Form has ${Object.keys(errors).length} validation errors.`}
       </div>
 
-      <form onSubmit={handleSubmit} noValidate>
+      <form id="intake-form" onSubmit={handleSubmit} noValidate>
         {/* SECTION 1: BASICS */}
         <fieldset className="form-section-fieldset">
           <legend className="section-legend">

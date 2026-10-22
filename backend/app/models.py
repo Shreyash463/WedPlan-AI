@@ -123,7 +123,8 @@ class PlanRequest(StrictBaseModel):
     @field_validator("city")
     @classmethod
     def sanitize_city(cls, v: str) -> str:
-        cleaned = " ".join(v.split())
+        from backend.app.engine.formatters import title_case_city
+        cleaned = title_case_city(v)
         if not cleaned:
             raise ValueError("City cannot be empty.")
         return cleaned
@@ -149,6 +150,15 @@ class RecalculateRequest(StrictBaseModel):
     style: WeddingStyleEnum
     priorities: list[PriorityEnum] = Field(default_factory=list, max_length=3)
 
+    @field_validator("city")
+    @classmethod
+    def sanitize_city(cls, v: str) -> str:
+        from backend.app.engine.formatters import title_case_city
+        cleaned = title_case_city(v)
+        if not cleaned:
+            raise ValueError("City cannot be empty.")
+        return cleaned
+
     @field_validator("wedding_date")
     @classmethod
     def validate_future_date(cls, v: date) -> date:
@@ -168,6 +178,15 @@ class IdeasRequest(StrictBaseModel):
     style: WeddingStyleEnum
     priorities: list[PriorityEnum] = Field(default_factory=list, max_length=3)
     special_requests: str | None = Field(default=None, max_length=300)
+
+    @field_validator("city")
+    @classmethod
+    def sanitize_city(cls, v: str) -> str:
+        from backend.app.engine.formatters import title_case_city
+        cleaned = title_case_city(v)
+        if not cleaned:
+            raise ValueError("City cannot be empty.")
+        return cleaned
 
 
 class CategoryAllocation(StrictBaseModel):
@@ -234,6 +253,8 @@ class IdeasPlan(StrictBaseModel):
     guest_experience_ideas: list[str]
     money_saving_hacks: list[str]
     ideas_source: str = "gemini"  # "gemini" or "fallback"
+    budget_band: str | None = None
+    budget_band_note: str | None = None
 
 
 class OverviewData(StrictBaseModel):

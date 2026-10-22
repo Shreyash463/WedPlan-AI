@@ -38,6 +38,10 @@ describe("Frontend Formatters Utility", () => {
     expect(capitalizeCity("new delhi")).toBe("New Delhi");
     expect(capitalizeCity("jaipur")).toBe("Jaipur");
     expect(capitalizeCity("mumbai")).toBe("Mumbai");
+    expect(capitalizeCity("pune")).toBe("Pune");
+    expect(capitalizeCity("NAGPUR")).toBe("Nagpur");
+    expect(capitalizeCity("navi mumbai")).toBe("Navi Mumbai");
+    expect(capitalizeCity("hubli-dharwad")).toBe("Hubli-Dharwad");
     expect(capitalizeCity("")).toBe("");
   });
 

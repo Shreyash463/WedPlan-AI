@@ -120,6 +120,8 @@ export interface IdeasPlan {
   guest_experience_ideas: string[];
   money_saving_hacks: string[];
   ideas_source: "gemini" | "fallback";
+  budget_band?: string;
+  budget_band_note?: string;
 }
 
 export interface OverviewData {

@@ -6,6 +6,7 @@ import {
   WeddingFunction,
 } from "../../types";
 import {
+  capitalizeCity,
   formatCurrencyCompactINR,
   formatCurrencyINR,
   formatDateReadable,
@@ -135,7 +136,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
               <span key={fn} className="mini-chip">{fn}</span>
             ))}
           </div>
-          <span className="stat-subtext">For {overview.guest_count} invited guests in {overview.city}</span>
+          <span className="stat-subtext">For {overview.guest_count} invited guests in {capitalizeCity(overview.city)}</span>
         </div>
 
         {/* Stat 4: Countdown & Progress */}
@@ -182,8 +183,11 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                   <ul className="alerts-list">
                     {overview.key_warnings.map((warn, idx) => (
                       <li key={idx} className="alert-item warning">
-                        <AlertTriangleIcon size={16} color="#B45309" />
-                        <span>{warn}</span>
+                        <div className="alert-badge-group">
+                          <AlertTriangleIcon size={16} color="currentColor" />
+                          <span className="alert-severity-tag">Warning</span>
+                        </div>
+                        <span className="alert-text">{warn}</span>
                       </li>
                     ))}
                   </ul>
@@ -194,9 +198,12 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                   <h3 className="alerts-subheading">Actionable Optimization Tips</h3>
                   <ul className="alerts-list">
                     {budget.suggestions.map((sug, idx) => (
-                      <li key={idx} className="alert-item suggestion">
-                        <InfoIcon size={16} color="var(--color-primary)" />
-                        <span>{sug}</span>
+                      <li key={idx} className="alert-item tip">
+                        <div className="alert-badge-group">
+                          <InfoIcon size={16} color="currentColor" />
+                          <span className="alert-severity-tag">Tip</span>
+                        </div>
+                        <span className="alert-text">{sug}</span>
                       </li>
                     ))}
                   </ul>

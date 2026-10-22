@@ -1,4 +1,5 @@
 import React from "react";
+import { AlertTriangleIcon, InfoIcon } from "./Icons";
 
 interface NoticeProps {
   type?: "info" | "warning" | "error";
@@ -7,38 +8,29 @@ interface NoticeProps {
 }
 
 export const Notice: React.FC<NoticeProps> = ({ type = "warning", title, children }) => {
+  const severityLabel = type === "error" ? "Critical" : type === "info" ? "Tip" : "Warning";
+  const icon =
+    type === "error" ? (
+      <AlertTriangleIcon size={18} color="currentColor" />
+    ) : type === "info" ? (
+      <InfoIcon size={18} color="currentColor" />
+    ) : (
+      <AlertTriangleIcon size={18} color="currentColor" />
+    );
+
   return (
     <div
-      className="notice-box"
+      className={`notice-box notice-${type}`}
       role={type === "error" ? "alert" : "status"}
       aria-live="polite"
-      style={{
-        backgroundColor:
-          type === "error"
-            ? "var(--color-unrealistic-bg)"
-            : type === "info"
-            ? "#EFF6FF"
-            : "var(--color-tight-bg)",
-        borderColor:
-          type === "error"
-            ? "var(--color-unrealistic)"
-            : type === "info"
-            ? "#60A5FA"
-            : "#F59E0B",
-        color:
-          type === "error"
-            ? "var(--color-unrealistic)"
-            : type === "info"
-            ? "#1E40AF"
-            : "#78350F",
-      }}
     >
-      <span aria-hidden="true" style={{ fontSize: "1.2rem", lineHeight: 1 }}>
-        {type === "error" ? "⚠" : type === "info" ? "ℹ" : "⚡"}
-      </span>
-      <div>
-        {title && <div style={{ fontWeight: 700, marginBottom: "2px" }}>{title}</div>}
-        <div>{children}</div>
+      <div className="notice-icon-badge">
+        {icon}
+        <span className="notice-severity-label">{severityLabel}</span>
+      </div>
+      <div className="notice-content">
+        {title && <div className="notice-title">{title}</div>}
+        <div className="notice-body">{children}</div>
       </div>
     </div>
   );

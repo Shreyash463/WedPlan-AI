@@ -52,8 +52,22 @@ def format_inr_compact(amount: int | float) -> str:
 
 
 def title_case_city(city: str) -> str:
-    """Capitalize city names cleanly (e.g. 'new delhi' -> 'New Delhi', 'jaipur' -> 'Jaipur')."""
+    """Capitalize city names cleanly to Title Case.
+
+    Handles:
+    - Multiple and leading/trailing spaces (e.g. '   navi   mumbai   ' -> 'Navi Mumbai')
+    - All-caps inputs (e.g. 'NAGPUR' -> 'Nagpur', 'PUNE' -> 'Pune')
+    - Hyphenated compound names (e.g. 'hubli-dharwad' -> 'Hubli-Dharwad')
+    """
     if not city:
         return ""
     words = city.strip().split()
-    return " ".join(word.capitalize() for word in words)
+    formatted_words = []
+    for word in words:
+        # Split by hyphen if any
+        subparts = word.split("-")
+        formatted_subparts = [
+            sub.capitalize() for sub in subparts
+        ]
+        formatted_words.append("-".join(formatted_subparts))
+    return " ".join(formatted_words)
