@@ -365,7 +365,7 @@ Under **Environment Variables**, add the following:
 | Variable | Recommended Value | Description |
 | :--- | :--- | :--- |
 | `GEMINI_API_KEY` | `AIzaSy...` *(Your Google AI Studio Key)* | *(Optional)* If omitted or invalid, app automatically serves authentic rule-based plans without error. |
-| `GEMINI_MODEL` | `gemini-3.6-flash` | Fast, accurate recommended Gemini model. |
+| `GEMINI_MODEL` | `gemini-3.5-flash-lite` | Fast, accurate recommended Gemini model. |
 | `ALLOWED_ORIGINS` | `*` or `https://<your-project>.vercel.app` | Allowed CORS origins for browser fetch calls. |
 
 #### Step 5: Click Deploy
