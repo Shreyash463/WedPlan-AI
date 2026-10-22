@@ -20,7 +20,7 @@ class Settings:
 
     def __init__(self) -> None:
         self.gemini_api_key: str = os.getenv("GEMINI_API_KEY", "").strip()
-        self.gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-3.6-flash").strip() or "gemini-3.6-flash"
+        self.gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip() or "gemini-3.5-flash-lite"
         self.environment: str = os.getenv("ENVIRONMENT", "development").strip()
         self.host: str = os.getenv("HOST", "0.0.0.0").strip()
         self.port: int = int(os.getenv("PORT", "8000"))

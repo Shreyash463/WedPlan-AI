@@ -18,7 +18,8 @@ client = TestClient(app)
 def clean_cache_and_limits():
     """Ensure clean test environment before each test."""
     ideas_cache.clear()
-    yield
+    with patch("backend.app.config.settings.gemini_api_key", ""):
+        yield
     ideas_cache.clear()
 
 

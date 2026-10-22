@@ -105,8 +105,8 @@ class TaggedIdea:
 def determine_budget_band(
     total_budget: int,
     guest_count: int,
-    city_tier: CityTierEnum,
-    style: WeddingStyleEnum,
+    city_tier: CityTierEnum | str,
+    style: WeddingStyleEnum | str,
 ) -> tuple[str, int, str]:
     """Calculate per-guest spend and evaluate the strict budget band (Tight, Comfortable, Premium).
 
@@ -116,12 +116,14 @@ def determine_budget_band(
     - Comfortable: spend is between healthy_min and healthy_min * 1.8
     """
     cost_per_guest = total_budget // max(guest_count, 1)
+    tier_key = city_tier.value if hasattr(city_tier, "value") else str(city_tier)
+    style_key = style.value if hasattr(style, "value") else str(style)
     tier_info = CITY_TIER_BENCHMARKS.get(
-        city_tier.value, CITY_TIER_BENCHMARKS["Tier-2"]
+        tier_key, CITY_TIER_BENCHMARKS["Tier-2"]
     )
     healthy_min = tier_info["healthy_min"]
 
-    if style == WeddingStyleEnum.BUDGET_SMART or cost_per_guest < healthy_min:
+    if style_key == WeddingStyleEnum.BUDGET_SMART.value or cost_per_guest < healthy_min:
         band = "Tight"
     elif cost_per_guest >= int(healthy_min * 1.8):
         band = "Premium"
@@ -130,7 +132,7 @@ def determine_budget_band(
 
     note = (
         f"Ideas are matched to your {format_inr(cost_per_guest)} per-guest budget ({band}) "
-        f"and your {style.value} vibe."
+        f"and your {style_key} vibe."
     )
     return band, cost_per_guest, note
 
@@ -386,10 +388,10 @@ def build_idea_pool(city: str) -> list[TaggedIdea]:
 
 def build_fallback_ideas(
     city: str,
-    city_tier: CityTierEnum,
-    style: WeddingStyleEnum,
-    functions: list[WeddingFunctionEnum],
-    priorities: list[PriorityEnum],
+    city_tier: CityTierEnum | str,
+    style: WeddingStyleEnum | str,
+    functions: list[WeddingFunctionEnum | str],
+    priorities: list[PriorityEnum | str],
     special_requests: str | None = None,
     total_budget: int = 1500000,
     guest_count: int = 200,
@@ -402,9 +404,10 @@ def build_fallback_ideas(
     - Premium: all allowed.
     """
     clean_city = title_case_city(city)
-    style_val = style.value
-    func_names = [f.value for f in functions]
-    priority_names = [p.value for p in priorities]
+    style_val = style.value if hasattr(style, "value") else str(style)
+    tier_val = city_tier.value if hasattr(city_tier, "value") else str(city_tier)
+    func_names = [f.value if hasattr(f, "value") else str(f) for f in functions]
+    priority_names = [p.value if hasattr(p, "value") else str(p) for p in priorities]
     sanitized_special = sanitize_input_text(special_requests, max_length=120)
     recognized_themes = extract_recognized_special_themes(sanitized_special)
 
@@ -584,7 +587,7 @@ def build_fallback_ideas(
             a.activity = _clean_str(a.activity)
 
     overview_summary = (
-        f"A customized {style_val.lower()} celebration curated for {clean_city} ({city_tier.value}). "
+        f"A customized {style_val.lower()} celebration curated for {clean_city} ({tier_val}). "
         f"Harmonizing traditional cultural rituals across {len(func_names)} ceremonies with practical hospitality."
     )
     if recognized_themes:
@@ -605,19 +608,21 @@ def build_fallback_ideas(
 
 async def generate_wedding_ideas(
     city: str,
-    city_tier: CityTierEnum,
+    city_tier: CityTierEnum | str,
     total_budget: int,
     guest_count: int,
-    functions: list[WeddingFunctionEnum],
-    style: WeddingStyleEnum,
-    priorities: list[PriorityEnum],
+    functions: list[WeddingFunctionEnum | str],
+    style: WeddingStyleEnum | str,
+    priorities: list[PriorityEnum | str],
     special_requests: str | None = None,
 ) -> IdeasPlan:
     """Generate personalized ideas using Gemini with caching, sanitization, and graceful fallback."""
     clean_city = title_case_city(sanitize_input_text(city, max_length=60))
     clean_special = sanitize_input_text(special_requests, max_length=300)
-    func_str_list = [f.value for f in functions]
-    priority_str_list = [p.value for p in priorities]
+    func_str_list = [f.value if hasattr(f, "value") else str(f) for f in functions]
+    priority_str_list = [p.value if hasattr(p, "value") else str(p) for p in priorities]
+    tier_val = city_tier.value if hasattr(city_tier, "value") else str(city_tier)
+    style_val = style.value if hasattr(style, "value") else str(style)
 
     budget_band, cost_per_guest, budget_band_note = determine_budget_band(
         total_budget, guest_count, city_tier, style
@@ -626,8 +631,8 @@ async def generate_wedding_ideas(
     # 1. Check in-memory cache
     cache_payload = {
         "city": clean_city.lower(),
-        "tier": city_tier.value,
-        "style": style.value,
+        "tier": tier_val,
+        "style": style_val,
         "funcs": sorted(func_str_list),
         "priorities": sorted(priority_str_list),
         "special": (clean_special or "").lower(),
@@ -669,11 +674,11 @@ async def generate_wedding_ideas(
 
     prompt_context = (
         f"<user_context>\n"
-        f"City: {clean_city} ({city_tier.value})\n"
+        f"City: {clean_city} ({tier_val})\n"
         f"Total Budget: INR {total_budget:,}\n"
         f"Guest Count: {guest_count}\n"
         f"Spend Per Guest: INR {cost_per_guest:,} ({budget_band} budget band)\n"
-        f"Wedding Vibe: {style.value}\n"
+        f"Wedding Vibe: {style_val}\n"
         f"Celebrated Functions: {', '.join(func_str_list)}\n"
         f"Top Priorities: {', '.join(priority_str_list) if priority_str_list else 'Balanced'}\n"
         f"Special Requests: {special_prompt_line}\n"
@@ -715,7 +720,7 @@ async def generate_wedding_ideas(
     candidate_models: list[str] = []
     if settings.gemini_model:
         candidate_models.append(settings.gemini_model)
-    for fallback_m in ["gemini-3.6-flash", "gemini-flash-latest"]:
+    for fallback_m in ["gemini-3.5-flash-lite", "gemini-3.6-flash", "gemini-3.8-flash", "gemini-flash-latest"]:
         if fallback_m not in candidate_models:
             candidate_models.append(fallback_m)
 
