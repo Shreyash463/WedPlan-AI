@@ -17,21 +17,23 @@ for candidate in [str(REPO_ROOT), str(CURRENT_DIR), os.getcwd()]:
     if candidate and candidate not in sys.path:
         sys.path.insert(0, candidate)
 
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+
+# Top-level module variable for Vercel static AST detection
+app: FastAPI = FastAPI(title="WedPlan AI API")
+
 try:
-    from backend.app.main import app
+    from backend.app.main import app as backend_app
+    app = backend_app
     handler = app
 except Exception as exc:
     # Print full traceback to stderr so it is visible in Vercel runtime logs
     traceback.print_exc(file=sys.stderr)
 
-    from fastapi import FastAPI
-    from fastapi.responses import JSONResponse
-
     err_class = type(exc).__name__
     err_msg = str(exc)
     diagnostic_summary = f"{err_class}: {err_msg}"
-
-    app = FastAPI(title="WedPlan AI Fallback Diagnostics")
 
     @app.get("/api/health")
     async def diagnostic_health():
