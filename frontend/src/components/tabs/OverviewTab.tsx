@@ -3,6 +3,7 @@ import {
   BudgetPlan,
   OverviewData,
   TimelinePlan,
+  VendorPlan,
   WeddingFunction,
 } from "../../types";
 import {
@@ -29,6 +30,9 @@ interface OverviewTabProps {
   budget: BudgetPlan;
   timeline: TimelinePlan;
   functions: WeddingFunction[];
+  vendors?: VendorPlan;
+  weddingDate?: string;
+  today?: Date | string;
   completedTaskIds: string[];
   onToggleTask: (taskId: string) => void;
   disclaimer: string;
@@ -52,6 +56,9 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   budget,
   timeline,
   functions,
+  vendors,
+  weddingDate,
+  today,
   completedTaskIds,
   onToggleTask,
   disclaimer,
@@ -64,6 +71,35 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   const totalTasks = timeline.tasks.length;
   const completedCount = completedTaskIds.length;
   const completionPct = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
+
+  // Check for overdue vendors
+  const effectiveWeddingDate = weddingDate || overview.wedding_date;
+  const overdueVendors = (vendors?.categories || []).filter((v) => {
+    if (!effectiveWeddingDate) return false;
+    try {
+      const parts = effectiveWeddingDate.split("-");
+      if (parts.length === 3) {
+        const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        d.setDate(d.getDate() - v.lead_time_weeks * 7);
+        const refToday = today ? new Date(today) : new Date();
+        refToday.setHours(0, 0, 0, 0);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime() < refToday.getTime();
+      }
+    } catch {
+      return false;
+    }
+    return false;
+  });
+
+  const effectiveWarnings = [...overview.key_warnings];
+  if (overdueVendors.length > 0) {
+    const overdueWarningText = `Book these vendors immediately: ${overdueVendors.map((v) => v.name).join(", ")}.`;
+    const alreadyPresent = effectiveWarnings.some((w) => w.startsWith("Book these vendors immediately:"));
+    if (!alreadyPresent) {
+      effectiveWarnings.unshift(overdueWarningText);
+    }
+  }
 
   // Donut chart math
   const radius = 70;
@@ -169,7 +205,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           </section>
 
           {/* Smart Alerts & Suggestions */}
-          {(overview.key_warnings.length > 0 || budget.suggestions.length > 0) && (
+          {(effectiveWarnings.length > 0 || budget.suggestions.length > 0) && (
             <section className="dashboard-card alerts-card" aria-labelledby="smart-alerts-heading">
               <div className="card-header-row">
                 <h2 id="smart-alerts-heading" className="card-heading">
@@ -177,11 +213,11 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                   Smart Planner Alerts & Guidance
                 </h2>
               </div>
-              {overview.key_warnings.length > 0 && (
+              {effectiveWarnings.length > 0 && (
                 <div className="alerts-group">
                   <h3 className="alerts-subheading">Important Considerations</h3>
                   <ul className="alerts-list">
-                    {overview.key_warnings.map((warn, idx) => (
+                    {effectiveWarnings.map((warn, idx) => (
                       <li key={idx} className="alert-item warning">
                         <div className="alert-badge-group">
                           <AlertTriangleIcon size={16} color="currentColor" />

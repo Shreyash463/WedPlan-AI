@@ -108,4 +108,31 @@ describe("IdeasTab Component", () => {
 
     expect(screen.getByText(/Navi Mumbai/i)).toBeInTheDocument();
   });
+
+  it("renders consistent bullets and bold labels across idea groups and activities", () => {
+    const { container } = render(
+      <IdeasTab
+        ideasPlan={mockFallbackIdeas}
+        city="Pune"
+        cityTier="Tier-2"
+        totalBudget={1500000}
+        guestCount={200}
+        functions={["Wedding"]}
+        style="Royal/Palace"
+        priorities={["Food"]}
+        onIdeasUpdated={vi.fn()}
+      />
+    );
+
+    // All idea cards must have bullet points
+    const bullets = container.querySelectorAll(".bullet-point");
+    expect(bullets.length).toBeGreaterThanOrEqual(5);
+
+    // Bold labels should exist for items with colons
+    const strongLabels = container.querySelectorAll(".idea-item strong");
+    expect(strongLabels.length).toBeGreaterThanOrEqual(3);
+
+    // Activity should have Wedding: in bold followed by activity text
+    expect(screen.getByText(/Wedding:/i)).toBeInTheDocument();
+  });
 });

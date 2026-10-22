@@ -7,9 +7,10 @@ import { AlertTriangleIcon, CheckIcon, ClockIcon, UsersIcon } from "../common/Ic
 interface VendorsTabProps {
   vendorPlan: VendorPlan;
   weddingDate?: string;
+  today?: Date | string;
 }
 
-export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan, weddingDate }) => {
+export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan, weddingDate, today }) => {
   // Persist vendor booking status per category ID
   const [vendorStatuses, setVendorStatuses] = useLocalStorage<Record<string, VendorStatus>>(
     "wedplan_vendor_statuses",
@@ -29,9 +30,11 @@ export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan, weddingDate 
     return "status-chip-not-started";
   };
 
-  // Helper to compute book-by date
-  const computeBookByDate = (leadTimeWeeks: number): string | null => {
-    if (!weddingDate) return null;
+  // Helper to compute book-by date and urgency
+  const getVendorUrgency = (
+    leadTimeWeeks: number
+  ): { bookByIso: string | null; urgency: "overdue" | "soon" | "normal" } => {
+    if (!weddingDate) return { bookByIso: null, urgency: "normal" };
     try {
       const parts = weddingDate.split("-");
       if (parts.length === 3) {
@@ -40,12 +43,29 @@ export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan, weddingDate 
         const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, "0");
         const day = String(d.getDate()).padStart(2, "0");
-        return `${y}-${m}-${day}`;
+        const bookByIso = `${y}-${m}-${day}`;
+
+        const refToday = today ? new Date(today) : new Date();
+        refToday.setHours(0, 0, 0, 0);
+
+        const targetDate = new Date(d);
+        targetDate.setHours(0, 0, 0, 0);
+
+        const diffTime = targetDate.getTime() - refToday.getTime();
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+          return { bookByIso, urgency: "overdue" };
+        } else if (diffDays <= 14) {
+          return { bookByIso, urgency: "soon" };
+        } else {
+          return { bookByIso, urgency: "normal" };
+        }
       }
     } catch {
-      return null;
+      return { bookByIso: null, urgency: "normal" };
     }
-    return null;
+    return { bookByIso: null, urgency: "normal" };
   };
 
   return (
@@ -65,8 +85,7 @@ export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan, weddingDate 
         {vendorPlan.categories.map((vendor) => {
           const currentStatus: VendorStatus =
             vendorStatuses[vendor.id] || vendor.default_status || "Not started";
-          const bookByIso = computeBookByDate(vendor.lead_time_weeks);
-          const isHighPriority = vendor.lead_time_weeks >= 16;
+          const { bookByIso, urgency } = getVendorUrgency(vendor.lead_time_weeks);
 
           return (
             <article key={vendor.id} className="vendor-card">
@@ -74,9 +93,22 @@ export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan, weddingDate 
                 <div>
                   <div className="vendor-title-row">
                     <h3 className="vendor-title">{vendor.name}</h3>
-                    {isHighPriority && (
-                      <span className="book-soon-badge">
-                        <AlertTriangleIcon size={12} /> Book Soon
+                    {urgency === "overdue" && (
+                      <span
+                        className="vendor-badge-overdue"
+                        role="status"
+                        aria-label={`Overdue: book now for ${vendor.name}`}
+                      >
+                        <AlertTriangleIcon size={12} color="currentColor" /> Overdue: book now
+                      </span>
+                    )}
+                    {urgency === "soon" && (
+                      <span
+                        className="vendor-badge-soon"
+                        role="status"
+                        aria-label={`Book soon for ${vendor.name}`}
+                      >
+                        <AlertTriangleIcon size={12} color="currentColor" /> Book soon
                       </span>
                     )}
                   </div>

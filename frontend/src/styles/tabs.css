@@ -1130,6 +1130,7 @@
 .vendor-title-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 4px;
 }
@@ -1142,16 +1143,33 @@
   margin: 0;
 }
 
+.vendor-badge-overdue {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--alert-critical-bg);
+  color: var(--alert-critical-text);
+  border: 1px solid var(--alert-critical-border);
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.vendor-badge-soon,
 .book-soon-badge {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  background: var(--color-tight-bg);
-  color: var(--color-tight);
+  gap: 4px;
+  background: var(--alert-warning-bg);
+  color: var(--alert-warning-text);
+  border: 1px solid var(--alert-warning-border);
   font-size: 0.725rem;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: var(--radius-sm);
+  white-space: nowrap;
 }
 
 .vendor-lead-info {
@@ -1418,6 +1436,11 @@
   font-size: 0.875rem;
   line-height: 1.5;
   color: var(--color-text-main);
+}
+
+.idea-item strong {
+  color: var(--color-text-main);
+  font-weight: 700;
 }
 
 .bullet-point {

@@ -248,3 +248,55 @@ def test_number_specific_saving_tips():
 
     assert any(str(guest_count) in tip for tip in ideas.money_saving_hacks)
     assert any("clubbing daytime" in tip.lower() or "haldi and mehendi" in tip.lower() for tip in ideas.money_saving_hacks)
+
+
+def test_special_requests_echo_omits_gibberish():
+    """Verify that gibberish in special requests is never repeated and no Tailored line is added."""
+    from backend.app.ai.ideas import extract_recognized_special_themes
+
+    gibberish_inputs = ["mkmkmkmk", "123456", "asdfasdf", "qwertyuiop!@#$", "xyzabc"]
+    for gib in gibberish_inputs:
+        recognized = extract_recognized_special_themes(gib)
+        assert recognized == [], f"Expected empty list for gibberish '{gib}', got {recognized}"
+
+        ideas = build_fallback_ideas(
+            city="Pune",
+            city_tier=CityTierEnum.TIER_2,
+            style=WeddingStyleEnum.TRADITIONAL,
+            functions=[WeddingFunctionEnum.WEDDING],
+            priorities=[],
+            special_requests=gib,
+            total_budget=1500000,
+            guest_count=200,
+        )
+        assert gib not in ideas.overview_summary, f"Raw gibberish '{gib}' was repeated in overview_summary"
+        assert "Tailored for:" not in ideas.overview_summary, (
+            f"Tailored for: was unexpectedly included for gibberish '{gib}'"
+        )
+
+
+def test_special_requests_echo_recognized_themes():
+    """Verify recognized cultural/dietary themes are extracted and formatted cleanly."""
+    from backend.app.ai.ideas import extract_recognized_special_themes
+
+    req_text = "Need 100% pure Jain catering and sunset outdoor pheras"
+    recognized = extract_recognized_special_themes(req_text)
+    assert "pure Jain" in recognized
+    assert "sunset outdoor" in recognized
+
+    ideas = build_fallback_ideas(
+        city="Jaipur",
+        city_tier=CityTierEnum.TIER_2,
+        style=WeddingStyleEnum.ROYAL_PALACE,
+        functions=[WeddingFunctionEnum.WEDDING],
+        priorities=[],
+        special_requests=req_text,
+        total_budget=2000000,
+        guest_count=200,
+    )
+    # The summary must contain 'Tailored for: pure Jain, sunset outdoor' (or similar recognized labels)
+    assert "Tailored for:" in ideas.overview_summary
+    assert "pure Jain" in ideas.overview_summary
+    assert "sunset outdoor" in ideas.overview_summary
+    # Raw uncurated request sentence is NOT blindly repeated
+    assert "Need 100% pure Jain catering and sunset outdoor pheras" not in ideas.overview_summary

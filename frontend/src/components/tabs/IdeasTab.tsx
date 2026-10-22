@@ -46,6 +46,20 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
   const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const renderIdeaContent = (text: string) => {
+    const colonIndex = text.indexOf(":");
+    if (colonIndex > 0 && colonIndex <= 50) {
+      const label = text.slice(0, colonIndex).trim();
+      const content = text.slice(colonIndex + 1).trim();
+      return (
+        <span>
+          <strong>{label}:</strong> {content}
+        </span>
+      );
+    }
+    return <span>{text}</span>;
+  };
+
   const cleanCity = capitalizeCity(city);
   const perGuest = Math.floor(totalBudget / Math.max(guestCount, 1));
   const healthyMin = cityTier === "Metro" ? 2500 : cityTier === "Tier-2" ? 1800 : 1200;
@@ -144,8 +158,8 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
           <ul className="idea-items-list">
             {ideasPlan.themes_and_decor.map((item, idx) => (
               <li key={idx} className="idea-item">
-                <span className="bullet-point">•</span>
-                <span>{item}</span>
+                <span className="bullet-point" aria-hidden="true">•</span>
+                {renderIdeaContent(item)}
               </li>
             ))}
           </ul>
@@ -160,8 +174,8 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
           <ul className="idea-items-list">
             {ideasPlan.catering_and_menu.map((item, idx) => (
               <li key={idx} className="idea-item">
-                <span className="bullet-point">•</span>
-                <span>{item}</span>
+                <span className="bullet-point" aria-hidden="true">•</span>
+                {renderIdeaContent(item)}
               </li>
             ))}
           </ul>
@@ -175,9 +189,11 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
           </div>
           <ul className="idea-items-list">
             {ideasPlan.function_activities.map((item, idx) => (
-              <li key={idx} className="idea-item activity-item">
-                <span className="activity-badge">{item.function}</span>
-                <span>{item.activity}</span>
+              <li key={idx} className="idea-item">
+                <span className="bullet-point" aria-hidden="true">•</span>
+                <span>
+                  <strong>{item.function}:</strong> {item.activity}
+                </span>
               </li>
             ))}
           </ul>
@@ -192,8 +208,8 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
           <ul className="idea-items-list">
             {ideasPlan.guest_experience_ideas.map((item, idx) => (
               <li key={idx} className="idea-item">
-                <span className="bullet-point">•</span>
-                <span>{item}</span>
+                <span className="bullet-point" aria-hidden="true">•</span>
+                {renderIdeaContent(item)}
               </li>
             ))}
           </ul>
@@ -207,9 +223,9 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
           </div>
           <ul className="idea-items-list">
             {ideasPlan.money_saving_hacks.map((item, idx) => (
-              <li key={idx} className="idea-item hack-item">
-                <span className="hack-icon">₹</span>
-                <span>{item}</span>
+              <li key={idx} className="idea-item">
+                <span className="bullet-point" aria-hidden="true">•</span>
+                {renderIdeaContent(item)}
               </li>
             ))}
           </ul>

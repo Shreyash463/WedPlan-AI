@@ -1,7 +1,7 @@
 """Orchestrator for assembling deterministic engine outputs and wedding plans."""
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 
 from backend.app.constants import CITY_TIER_BENCHMARKS, ESTIMATE_DISCLAIMER
 from backend.app.engine.budget import generate_budget_plan
@@ -15,6 +15,7 @@ from backend.app.models import (
     PlanResponse,
     RecalculateRequest,
     RecalculateResponse,
+    VendorPlan,
 )
 
 
@@ -22,8 +23,11 @@ def build_overview_summary(
     plan_request: PlanRequest,
     budget_plan,
     timeline_plan,
+    vendor_plan: VendorPlan | None = None,
+    today: date | None = None,
 ) -> OverviewData:
     """Build high-level overview metrics and natural executive summary."""
+    ref_today = today or date.today()
     city_name = title_case_city(plan_request.city)
     func_count = len(plan_request.functions)
     couple_prefix = f"{plan_request.couple_name}'s " if plan_request.couple_name else "A "
@@ -62,6 +66,18 @@ def build_overview_summary(
         plan_request.city_tier.value, CITY_TIER_BENCHMARKS["Tier-2"]
     )
 
+    key_warnings = list(budget_plan.warnings)
+    if vendor_plan is not None:
+        overdue_vendors: list[str] = []
+        for cat in vendor_plan.categories:
+            book_by = plan_request.wedding_date - timedelta(weeks=cat.lead_time_weeks)
+            if book_by < ref_today:
+                overdue_vendors.append(cat.name)
+        if overdue_vendors:
+            key_warnings.append(
+                f"Book these vendors immediately: {', '.join(overdue_vendors)}."
+            )
+
     return OverviewData(
         couple_name=plan_request.couple_name,
         wedding_date=plan_request.wedding_date.isoformat(),
@@ -74,7 +90,7 @@ def build_overview_summary(
         is_tight_timeline=timeline_plan.is_tight_timeline,
         health_status=budget_plan.health_status,
         summary=summary,
-        key_warnings=budget_plan.warnings,
+        key_warnings=key_warnings,
         tier_min_healthy=tier_info["healthy_min"],
         tier_min_tight=tier_info["tight_min"],
     )
@@ -82,6 +98,7 @@ def build_overview_summary(
 
 def orchestrate_engine(
     request: PlanRequest | RecalculateRequest,
+    today: date | None = None,
 ):
     """Run pure deterministic calculations across budget, timeline, and vendors."""
     budget_plan = generate_budget_plan(
@@ -97,6 +114,7 @@ def orchestrate_engine(
         wedding_date=request.wedding_date,
         functions=request.functions,
         style=request.style,
+        current_date=today,
     )
 
     vendor_plan = generate_vendor_plan(
@@ -110,10 +128,13 @@ def orchestrate_engine(
 def generate_full_plan(
     request: PlanRequest,
     ideas_plan: IdeasPlan,
+    today: date | None = None,
 ) -> PlanResponse:
     """Assemble the complete full wedding plan with all 5 sections."""
-    budget_plan, timeline_plan, vendor_plan = orchestrate_engine(request)
-    overview = build_overview_summary(request, budget_plan, timeline_plan)
+    budget_plan, timeline_plan, vendor_plan = orchestrate_engine(request, today=today)
+    overview = build_overview_summary(
+        request, budget_plan, timeline_plan, vendor_plan=vendor_plan, today=today
+    )
 
     return PlanResponse(
         overview=overview,
@@ -126,9 +147,12 @@ def generate_full_plan(
     )
 
 
-def generate_recalculation(request: RecalculateRequest) -> RecalculateResponse:
+def generate_recalculation(
+    request: RecalculateRequest,
+    today: date | None = None,
+) -> RecalculateResponse:
     """Fast, zero-AI recalculation for what-if budget and guest adjustments."""
-    budget_plan, timeline_plan, vendor_plan = orchestrate_engine(request)
+    budget_plan, timeline_plan, vendor_plan = orchestrate_engine(request, today=today)
 
     return RecalculateResponse(
         budget=budget_plan,
