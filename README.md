@@ -321,7 +321,10 @@ Open `http://localhost:5173`.
 
 #### Run Test Suites
 ```bash
-# Backend pytest suite with coverage (37 tests, 92% coverage)
+# Install dev & testing dependencies into virtual environment
+pip install -r backend/requirements-dev.txt
+
+# Backend pytest suite with coverage (38 tests, 91% coverage)
 python -m pytest backend/tests/ -v --cov=backend.app
 
 # Backend linter

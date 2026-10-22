@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import logging
+import sys
+import traceback
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request, status
@@ -141,7 +143,8 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
-    """Global catch-all preventing any stack trace or internals from leaking."""
+    """Global catch-all preventing any stack trace or internals from leaking while logging traceback to stderr."""
+    traceback.print_exc(file=sys.stderr)
     logger.critical("Unhandled server exception: %s", type(exc).__name__, exc_info=True)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

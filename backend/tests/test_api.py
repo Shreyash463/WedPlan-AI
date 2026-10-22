@@ -24,10 +24,39 @@ def clean_cache_and_limits():
 
 
 def test_health_endpoint():
-    """Verify /api/health returns ok status."""
+    """Verify /api/health returns ok status and diagnostic information."""
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    data = response.json()
+    assert data["status"] == "ok"
+    assert "gemini_configured" in data
+    assert "model" in data
+    assert "python" in data
+
+
+def test_plan_resilience_on_gemini_exception():
+    """Verify /api/plan never returns 500 when Gemini raises an unexpected exception."""
+    with patch(
+        "backend.app.routes.plan.generate_wedding_ideas",
+        side_effect=RuntimeError("Simulated Gemini API network drop"),
+    ):
+        wedding_date = (date.today() + timedelta(days=90)).isoformat()
+        payload = {
+            "couple_name": "Aarav & Simran",
+            "wedding_date": wedding_date,
+            "city": "Jaipur",
+            "city_tier": "Tier-2",
+            "total_budget": 2_500_000,
+            "guest_count": 350,
+            "functions": ["Wedding"],
+            "style": "Royal/Palace",
+            "priorities": ["Food"],
+        }
+        response = client.post("/api/plan", json=payload)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["ideas"]["ideas_source"] == "fallback"
+        assert len(data["ideas"]["themes_and_decor"]) > 0
 
 
 def test_security_headers_present():

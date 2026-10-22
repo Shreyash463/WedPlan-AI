@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import logging
+import sys
+import traceback
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from backend.app.ai.ideas import generate_wedding_ideas
+from backend.app.ai.ideas import build_fallback_ideas, generate_wedding_ideas
 from backend.app.config import settings
 from backend.app.engine.planner import generate_full_plan, generate_recalculation
 from backend.app.models import (
@@ -55,8 +57,13 @@ def enforce_rate_limit(bucket: str):
 
 @router.get("/health", summary="Health Check")
 async def health_check():
-    """Liveness health check endpoint."""
-    return {"status": "ok"}
+    """Liveness health check endpoint with diagnostics."""
+    return {
+        "status": "ok",
+        "gemini_configured": bool(settings.gemini_api_key),
+        "model": settings.gemini_model,
+        "python": sys.version.split()[0],
+    }
 
 
 @router.post(
@@ -85,12 +92,29 @@ async def create_plan(request: PlanRequest) -> PlanResponse:
             priorities=request.priorities,
             special_requests=request.special_requests,
         )
+    except Exception as exc:
+        logger.warning(
+            "Gemini generation or validation encountered an issue (%s: %s). Falling back gracefully to deterministic ideas engine.",
+            type(exc).__name__,
+            exc,
+        )
+        ideas = build_fallback_ideas(
+            city=request.city,
+            city_tier=request.city_tier,
+            style=request.style,
+            functions=request.functions,
+            priorities=request.priorities,
+            special_requests=request.special_requests,
+            total_budget=request.total_budget,
+            guest_count=request.guest_count,
+        )
 
+    try:
         plan = generate_full_plan(request, ideas)
         return plan
-
     except Exception as exc:
-        logger.error("Error generating plan: %s", type(exc).__name__)
+        logger.error("Error compiling plan: %s", type(exc).__name__)
+        traceback.print_exc(file=sys.stderr)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while compiling your wedding plan. Please retry.",
@@ -137,8 +161,18 @@ async def regenerate_ideas(request: IdeasRequest) -> IdeasPlan:
         )
         return ideas
     except Exception as exc:
-        logger.error("Error regenerating ideas: %s", type(exc).__name__)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to regenerate personalized ideas.",
+        logger.warning(
+            "Regenerating ideas encountered issue (%s: %s). Falling back gracefully.",
+            type(exc).__name__,
+            exc,
+        )
+        return build_fallback_ideas(
+            city=request.city,
+            city_tier=request.city_tier,
+            style=request.style,
+            functions=request.functions,
+            priorities=request.priorities,
+            special_requests=request.special_requests,
+            total_budget=request.total_budget,
+            guest_count=request.guest_count,
         )
