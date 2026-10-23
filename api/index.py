@@ -4,6 +4,7 @@ Exposes the FastAPI application from backend.app.main with diagnostic fallback.
 """
 from __future__ import annotations
 
+import json
 import os
 import sys
 import traceback
@@ -17,11 +18,9 @@ for candidate in [str(REPO_ROOT), str(CURRENT_DIR), os.getcwd()]:
     if candidate and candidate not in sys.path:
         sys.path.insert(0, candidate)
 
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-
-# Top-level module variable for Vercel static AST detection
-app: FastAPI = FastAPI(title="WedPlan AI API")
+# Top-level variables for Vercel static AST detection and runtime export
+app = None
+handler = None
 
 try:
     from backend.app.main import app as backend_app
@@ -35,28 +34,59 @@ except Exception as exc:
     err_msg = str(exc)
     diagnostic_summary = f"{err_class}: {err_msg}"
 
-    @app.get("/api/health")
-    async def diagnostic_health():
-        return JSONResponse(
-            status_code=200,
-            content={
-                "status": "error",
-                "stage": "import",
-                "error": diagnostic_summary,
-            },
-        )
+    try:
+        from fastapi import FastAPI
+        from fastapi.responses import JSONResponse
 
-    @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
-    async def diagnostic_catchall(path: str):
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error": {
-                    "code": "IMPORT_ERROR",
+        app = FastAPI(title="WedPlan AI Fallback Diagnostics")
+
+        @app.get("/api/health")
+        async def diagnostic_health():
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "status": "error",
                     "stage": "import",
-                    "message": diagnostic_summary,
-                }
-            },
-        )
+                    "error": diagnostic_summary,
+                },
+            )
 
-    handler = app
+        @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+        async def diagnostic_catchall(path: str):
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "error": {
+                        "code": "IMPORT_ERROR",
+                        "stage": "import",
+                        "message": diagnostic_summary,
+                    }
+                },
+            )
+
+        handler = app
+
+    except Exception:
+        # Ultimate standard library ASGI fallback if fastapi itself fails to import
+        async def app(scope, receive, send):
+            if scope["type"] == "http":
+                body = json.dumps(
+                    {
+                        "status": "error",
+                        "stage": "import",
+                        "error": diagnostic_summary,
+                    }
+                ).encode("utf-8")
+                await send(
+                    {
+                        "type": "http.response.start",
+                        "status": 200,
+                        "headers": [
+                            [b"content-type", b"application/json"],
+                            [b"content-length", str(len(body)).encode("utf-8")],
+                        ],
+                    }
+                )
+                await send({"type": "http.response.body", "body": body})
+
+        handler = app

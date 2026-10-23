@@ -342,7 +342,7 @@ npm --prefix frontend run build
 
 ### B. Deploy to Vercel (Step-by-Step)
 
-WedPlan AI is pre-configured for one-click Vercel deployment combining a static Vite React 18 SPA with a Python 3.11 serverless FastAPI backend via [`vercel.json`](file:///c:/Users/Shreyash/OneDrive/Documents/WedPlan%20AI/vercel.json) and [`api/index.py`](file:///c:/Users/Shreyash/OneDrive/Documents/WedPlan%20AI/api/index.py).
+WedPlan AI is pre-configured for one-click Vercel deployment combining a static Vite React 18 SPA with a Python 3.12 serverless FastAPI backend via [`vercel.json`](file:///c:/Users/Shreyash/OneDrive/Documents/WedPlan%20AI/vercel.json) and [`api/index.py`](file:///c:/Users/Shreyash/OneDrive/Documents/WedPlan%20AI/api/index.py).
 
 #### Step 1: Push to GitHub
 Ensure all code is committed and pushed to your GitHub repository on `main`:
