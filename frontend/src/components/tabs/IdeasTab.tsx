@@ -229,6 +229,7 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
               </li>
             ))}
           </ul>
+          <p className="savings-estimate-note">Savings are rough estimates.</p>
         </section>
       </div>
     </div>

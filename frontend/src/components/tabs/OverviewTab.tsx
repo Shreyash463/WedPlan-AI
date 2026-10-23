@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   BudgetPlan,
   OverviewData,
@@ -72,6 +72,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   const completedCount = completedTaskIds.length;
   const completionPct = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
 
+  const [isOverdueExpanded, setIsOverdueExpanded] = useState<boolean>(false);
+
   // Check for overdue vendors
   const effectiveWeddingDate = weddingDate || overview.wedding_date;
   const overdueVendors = (vendors?.categories || []).filter((v) => {
@@ -92,13 +94,59 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     return false;
   });
 
-  const effectiveWarnings = [...overview.key_warnings];
-  if (overdueVendors.length > 0) {
-    const overdueWarningText = `Book these vendors immediately: ${overdueVendors.map((v) => v.name).join(", ")}.`;
-    const alreadyPresent = effectiveWarnings.some((w) => w.startsWith("Book these vendors immediately:"));
-    if (!alreadyPresent) {
-      effectiveWarnings.unshift(overdueWarningText);
-    }
+  const getVendorImpactRank = (name: string): number => {
+    const n = name.toLowerCase();
+    if (n.includes("venue")) return 1;
+    if (n.includes("cater") || n.includes("dining") || n.includes("food")) return 2;
+    if (n.includes("photo") || n.includes("cinema")) return 3;
+    if (n.includes("decor") || n.includes("floral") || n.includes("mandap")) return 4;
+    if (n.includes("attire") || n.includes("lehenga")) return 5;
+    if (n.includes("makeup") || n.includes("mehendi")) return 6;
+    if (n.includes("music") || n.includes("entertainment") || n.includes("dj")) return 7;
+    if (n.includes("pandit") || n.includes("priest")) return 8;
+    if (n.includes("invitation")) return 9;
+    return 10;
+  };
+
+  const shortVendorName = (name: string): string => {
+    const n = name.toLowerCase();
+    if (n.includes("venue")) return "Venue";
+    if (n.includes("cater")) return "Caterer";
+    if (n.includes("photo")) return "Photographer";
+    if (n.includes("decor")) return "Decorator";
+    if (n.includes("attire")) return "Attire";
+    if (n.includes("makeup")) return "Makeup & Hair";
+    if (n.includes("mehendi")) return "Mehendi Artist";
+    if (n.includes("music")) return "DJ & Music";
+    if (n.includes("pandit")) return "Pandit";
+    if (n.includes("invitation")) return "Invitations";
+    return name;
+  };
+
+  const sortedOverdueVendors = [...overdueVendors].sort(
+    (a, b) => getVendorImpactRank(a.name) - getVendorImpactRank(b.name)
+  );
+
+  const totalVendorsCount = vendors?.categories?.length || overdueVendors.length;
+  const topThreeNames = sortedOverdueVendors
+    .slice(0, 3)
+    .map((v) => shortVendorName(v.name))
+    .join(", ");
+
+  const compactOverdueWarningText = `${overdueVendors.length} of ${totalVendorsCount} vendors are past their standard booking window. Book these first: ${topThreeNames}.`;
+
+  // Build effective warnings list: replace legacy wall-of-text warning with compact warning
+  const effectiveWarnings = overview.key_warnings
+    .map((w) =>
+      w.startsWith("Book these vendors immediately:") ? compactOverdueWarningText : w
+    )
+    .filter(Boolean);
+
+  if (
+    overdueVendors.length > 0 &&
+    !effectiveWarnings.some((w) => w.includes("past their standard booking window"))
+  ) {
+    effectiveWarnings.unshift(compactOverdueWarningText);
   }
 
   // Donut chart math
@@ -217,15 +265,52 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                 <div className="alerts-group">
                   <h3 className="alerts-subheading">Important Considerations</h3>
                   <ul className="alerts-list">
-                    {effectiveWarnings.map((warn, idx) => (
-                      <li key={idx} className="alert-item warning">
-                        <div className="alert-badge-group">
-                          <AlertTriangleIcon size={16} color="currentColor" />
-                          <span className="alert-severity-tag">Warning</span>
-                        </div>
-                        <span className="alert-text">{warn}</span>
-                      </li>
-                    ))}
+                    {effectiveWarnings.map((warn, idx) => {
+                      const isOverdueWarn =
+                        warn.includes("past their standard booking window") ||
+                        warn.startsWith("Book these vendors immediately:");
+
+                      return (
+                        <li key={idx} className="alert-item warning">
+                          <div className="alert-badge-group">
+                            <AlertTriangleIcon size={16} color="currentColor" />
+                            <span className="alert-severity-tag">Warning</span>
+                          </div>
+                          <div className="alert-content-group">
+                            <span className="alert-text">{warn}</span>
+                            {isOverdueWarn && sortedOverdueVendors.length > 0 && (
+                              <div className="overdue-collapsible-wrapper">
+                                <button
+                                  type="button"
+                                  className="btn-collapsible-overdue"
+                                  aria-expanded={isOverdueExpanded}
+                                  onClick={() => setIsOverdueExpanded((prev) => !prev)}
+                                >
+                                  {isOverdueExpanded
+                                    ? "Hide overdue vendors list"
+                                    : `Show all ${sortedOverdueVendors.length} overdue vendors`}
+                                </button>
+                                {isOverdueExpanded && (
+                                  <ul
+                                    className="overdue-vendors-sublist"
+                                    aria-label="All overdue vendors"
+                                  >
+                                    {sortedOverdueVendors.map((v) => (
+                                      <li key={v.id} className="overdue-vendor-chip">
+                                        <span className="overdue-chip-name">{v.name}</span>
+                                        <span className="overdue-chip-weeks">
+                                          ({v.lead_time_weeks}w lead time)
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}

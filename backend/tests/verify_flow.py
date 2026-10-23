@@ -1,4 +1,5 @@
 """End-to-end integration verification script."""
+
 from __future__ import annotations
 
 import contextlib
@@ -22,6 +23,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 from backend.app.main import app  # noqa: E402
 
 client = TestClient(app)
+
 
 def main():
     print("--- TESTING FULL END-TO-END FLOW ---")
@@ -104,6 +106,7 @@ def main():
     print("\n=======================================================")
     print("ALL END-TO-END FLOW CHECKS PASSED WITH 100% SUCCESS!")
     print("=======================================================")
+
 
 if __name__ == "__main__":
     main()

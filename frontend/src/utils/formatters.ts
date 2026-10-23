@@ -37,7 +37,7 @@ export function formatCurrencyPlainINR(amount: number): string {
 /**
  * Helper to produce 3-2-2 grouping for string numbers.
  */
-function formatIndianGrouping(numStr: string): string {
+export function formatIndianGrouping(numStr: string): string {
   const isNeg = numStr.startsWith("-");
   const s = isNeg ? numStr.slice(1) : numStr;
   if (s.length <= 3) return (isNeg ? "-" : "") + s;
@@ -52,6 +52,43 @@ function formatIndianGrouping(numStr: string): string {
     groups.unshift(rem);
   }
   return (isNeg ? "-" : "") + groups.join(",") + "," + lastThree;
+}
+
+/**
+ * Keeps digits only from user input. Strips commas, spaces, currency symbols (₹, Rs, INR), and letters.
+ * Strips leading zeros unless the string is exactly "0".
+ * Caps length at maxDigits (default 10).
+ */
+export function sanitizeDigitsOnly(val: string, maxDigits = 10): string {
+  if (!val) return "";
+  // Keep only 0-9
+  let digits = val.replace(/\D/g, "");
+  // Strip leading zeros if followed by other digits (e.g. "08515" -> "8515")
+  digits = digits.replace(/^0+(?=\d)/, "");
+  if (digits.length > maxDigits) {
+    digits = digits.slice(0, maxDigits);
+  }
+  return digits;
+}
+
+/**
+ * Formats a raw digit string into Indian grouping (e.g. "2500000" -> "25,00,000").
+ */
+export function formatDigitsIndianGrouping(digits: string): string {
+  if (!digits) return "";
+  const cleaned = digits.replace(/\D/g, "");
+  if (!cleaned) return "";
+  return formatIndianGrouping(cleaned);
+}
+
+/**
+ * Parses numeric value from a formatted or raw string, or returns null if empty/invalid.
+ */
+export function parseNumericDigits(val: string): number | null {
+  const digits = val.replace(/\D/g, "");
+  if (!digits) return null;
+  const num = parseInt(digits, 10);
+  return isNaN(num) ? null : num;
 }
 
 /**
@@ -96,6 +133,72 @@ export function formatNumberToIndianWords(amount: number): string {
     return `${val} Thousand`;
   }
   return `${amt}`;
+}
+
+const LOWERCASE_NAME_CONNECTORS = new Set(["and", "weds", "with"]);
+const KNOWN_ACRONYMS = new Set(["dj", "mc", "nri", "usa", "uk", "uae"]);
+
+function formatNameToken(token: string): string {
+  if (!token) return "";
+  if (token === "&") return "&";
+
+  // Handle punctuation wrappers like (NRI), [DJ], "Priya"
+  const wrapMatch = token.match(/^([([{"']*)(.*?)([)\]}"']*)$/);
+  if (wrapMatch && (wrapMatch[1] || wrapMatch[3])) {
+    const [, pre, core, post] = wrapMatch;
+    if (core) {
+      return pre + formatNameToken(core) + post;
+    }
+  }
+
+  if (token.includes("-")) {
+    return token.split("-").map(formatNameToken).join("-");
+  }
+
+  if (token.includes("'")) {
+    const parts = token.split("'");
+    if (parts.length === 2 && parts[1].toLowerCase() === "s") {
+      return `${formatNameToken(parts[0])}'s`;
+    }
+    return parts.map(formatNameToken).join("'");
+  }
+
+  const lower = token.toLowerCase();
+  if (
+    KNOWN_ACRONYMS.has(lower) ||
+    (token === token.toUpperCase() && token.length >= 2 && token.length <= 4 && /^[A-Za-z]+$/.test(token))
+  ) {
+    return token.toUpperCase();
+  }
+
+  return token.charAt(0).toUpperCase() + token.slice(1).toLowerCase();
+}
+
+/**
+ * Normalizes couple/event names to Title Case.
+ * e.g. "namrata and chetan" -> "Namrata and Chetan"
+ * e.g. "priya & rohan" -> "Priya & Rohan"
+ */
+export function formatCoupleName(name?: string | null): string {
+  if (!name) return "";
+  const cleaned = name.trim().replace(/\s+/g, " ");
+  if (!cleaned) return "";
+
+  const words = cleaned.split(" ");
+  const total = words.length;
+
+  return words
+    .map((word, idx) => {
+      const lower = word.toLowerCase();
+      if (LOWERCASE_NAME_CONNECTORS.has(lower) && idx > 0 && idx < total - 1) {
+        return lower;
+      }
+      if (word === "&") {
+        return "&";
+      }
+      return formatNameToken(word);
+    })
+    .join(" ");
 }
 
 /**

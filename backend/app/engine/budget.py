@@ -1,4 +1,5 @@
 """Pure deterministic engine functions for Indian wedding budget allocation."""
+
 from __future__ import annotations
 
 import math
@@ -99,9 +100,7 @@ def compute_adjusted_weights(
             excess = current_total - 100.0
             # Identify categories strictly above their floor
             flexible = {
-                c: weights[c] - CATEGORY_FLOORS.get(c, 0.0)
-                for c in weights
-                if weights[c] > CATEGORY_FLOORS.get(c, 0.0)
+                c: weights[c] - CATEGORY_FLOORS.get(c, 0.0) for c in weights if weights[c] > CATEGORY_FLOORS.get(c, 0.0)
             }
             flex_sum = sum(flexible.values())
             if flex_sum > 0:
@@ -119,9 +118,7 @@ def compute_adjusted_weights(
     return weights
 
 
-def allocate_amounts_largest_remainder(
-    total_budget: int, weights: dict[str, float]
-) -> list[tuple[str, int, float]]:
+def allocate_amounts_largest_remainder(total_budget: int, weights: dict[str, float]) -> list[tuple[str, int, float]]:
     """Convert percentage weights to exact integer INR amounts using the Largest Remainder Method (Hamilton/Hare).
 
     Guarantees that sum(amounts) == total_budget without losing a single rupee.
@@ -156,9 +153,7 @@ def evaluate_budget_health(
 ) -> tuple[BudgetHealthEnum, str, list[str], list[str]]:
     """Determine budget health status, warnings, and concrete suggestions based on city benchmarks."""
     cost_per_guest = total_budget // max(guest_count, 1)
-    tier_info = CITY_TIER_BENCHMARKS.get(
-        city_tier.value, CITY_TIER_BENCHMARKS["Tier-2"]
-    )
+    tier_info = CITY_TIER_BENCHMARKS.get(city_tier.value, CITY_TIER_BENCHMARKS["Tier-2"])
     healthy_min = tier_info["healthy_min"]
     tight_min = tier_info["tight_min"]
 

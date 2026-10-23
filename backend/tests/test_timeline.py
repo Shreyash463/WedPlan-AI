@@ -1,4 +1,5 @@
 """Unit tests for the timeline roadmap and compression engine."""
+
 from __future__ import annotations
 
 from datetime import date, timedelta
@@ -147,8 +148,7 @@ def test_due_dates_strictly_non_decreasing():
             curr_idx = CANONICAL_PHASES.index(plan.phases[i])
             next_idx = CANONICAL_PHASES.index(plan.phases[i + 1])
             assert curr_idx < next_idx, (
-                f"Horizon {days}d: phase {plan.phases[i]} appears before {plan.phases[i + 1]} "
-                f"violating canonical order"
+                f"Horizon {days}d: phase {plan.phases[i]} appears before {plan.phases[i + 1]} violating canonical order"
             )
 
         # 3. For short-notice (10 days), venue booking must be marked as overdue standard
@@ -156,4 +156,3 @@ def test_due_dates_strictly_non_decreasing():
             venue_task = next(t for t in plan.tasks if t.id == "task_venue_booking")
             assert venue_task.is_overdue_standard is True
             assert venue_task.priority == TaskPriorityEnum.URGENT
-

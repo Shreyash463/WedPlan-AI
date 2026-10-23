@@ -1,4 +1,5 @@
 """Security utilities, input sanitation, and response headers."""
+
 from __future__ import annotations
 
 import hashlib

@@ -1,4 +1,4 @@
-import React, { useState, useRef, Suspense, lazy } from "react";
+import React, { useState, useEffect, useRef, Suspense, lazy } from "react";
 import {
   BudgetPlan,
   CANONICAL_PHASES,
@@ -9,11 +9,17 @@ import {
 } from "../types";
 import {
   capitalizeCity,
+  formatCoupleName,
   formatCurrencyINR,
   formatDateReadable,
   formatPercentage,
 } from "../utils/formatters";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import {
+  cleanupLegacyKeys,
+  computePlanFingerprint,
+  getStoredTasks,
+  saveStoredTasks,
+} from "../utils/planStorage";
 import {
   CalendarIcon,
   ChartPieIcon,
@@ -73,11 +79,34 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [plan, setPlan] = useState<PlanResponse>(initialPlan);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Synchronized completed tasks state
-  const [completedTasks, setCompletedTasks] = useLocalStorage<string[]>(
-    "wedplan_completed_tasks",
-    []
-  );
+  // Deterministic plan fingerprint from input parameters
+  const planHash = computePlanFingerprint(formData);
+
+  // Synchronized completed tasks state scoped strictly to this plan
+  const [completedTasks, setCompletedTasks] = useState<string[]>(() => {
+    cleanupLegacyKeys();
+    return getStoredTasks(planHash);
+  });
+
+  // Whenever completedTasks changes, persist under planHash
+  useEffect(() => {
+    saveStoredTasks(planHash, completedTasks);
+  }, [planHash, completedTasks]);
+
+  // Re-sync tasks if planHash changes
+  useEffect(() => {
+    setCompletedTasks(getStoredTasks(planHash));
+  }, [planHash]);
+
+  // Dynamic document title matching couple name
+  useEffect(() => {
+    const formatted = formatCoupleName(plan.overview.couple_name);
+    if (formatted) {
+      document.title = `${formatted}'s Wedding Plan - WedPlan AI`;
+    } else {
+      document.title = "WedPlan AI - Indian Wedding Planner";
+    }
+  }, [plan.overview.couple_name]);
 
   const toggleTask = (taskId: string) => {
     setCompletedTasks((prev) =>
@@ -437,6 +466,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <VendorsTab
                 vendorPlan={plan.vendors}
                 weddingDate={formData.wedding_date}
+                planHash={planHash}
               />
             )}
           </div>

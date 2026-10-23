@@ -1,4 +1,5 @@
 """Timeline countdown roadmap engine with intelligent short-notice compression."""
+
 from __future__ import annotations
 
 from datetime import date, timedelta
@@ -203,13 +204,20 @@ def generate_timeline_plan(
     functions: list[WeddingFunctionEnum],
     style: WeddingStyleEnum,
     current_date: date | None = None,
+    budget_band: str = "Comfortable",
 ) -> TimelinePlan:
-    """Generate dynamic timeline tasks with chronological ordering and overdue tracking."""
+    """Generate dynamic timeline tasks with chronological ordering, overdue tracking, and budget-band wording."""
     today = current_date or date.today()
     days_remaining = (wedding_date - today).days
     is_tight_timeline = days_remaining <= 14
 
     selected_func_names = [f.value for f in functions]
+    is_royal_or_destination = style in (
+        WeddingStyleEnum.ROYAL_PALACE,
+        WeddingStyleEnum.DESTINATION,
+        "Royal/Palace",
+        "Destination",
+    )
     tasks: list[TimelineTask] = []
 
     for tmpl in TASK_TEMPLATES:
@@ -240,9 +248,40 @@ def generate_timeline_plan(
 
         desc = tmpl["description"]
         title = tmpl["title"]
-        if style == WeddingStyleEnum.BUDGET_SMART and tmpl["id"] == "task_soundcheck":
-            title = "Soundcheck & Power Generator Rehearsal"
-            desc = "Verify on-site silent DG generator backup, audio clarity for ceremonies, and ambient lighting."
+
+        # Context-aware wording variants based on budget band & style
+        if tmpl["id"] == "task_photo_booking":
+            if budget_band == "Tight":
+                title = "Book Photography & Videography Team"
+                desc = "Confirm essential candid and traditional photographers, schedule family portrait shots."
+            elif budget_band == "Premium" and is_royal_or_destination:
+                title = "Book Cinematic Photo & Drone Filmmaking Crew"
+                desc = "Confirm master candid photographers, 4K cinematographers, licensed drone pilots, and pre-wedding shoot dates."
+            else:
+                title = "Book Photography & Cinematography Crew"
+                desc = "Confirm candid photographers, traditional videographers, and pre-wedding shoot dates."
+
+        elif tmpl["id"] == "task_decor_mandap":
+            if budget_band == "Tight":
+                title = "Finalize Mandap, Floral & Lighting Designs"
+                desc = "Approve stage layout, seasonal floral colour palette (marigold/jasmine), entrance arch, and pathway fairy lights."
+            elif budget_band == "Premium":
+                title = "Finalize 3D Stage Renders, Floral & Architectural Lighting"
+                desc = "Approve 3D stage renders, premium floral installations, entrance arch, and architectural spotlighting."
+            else:
+                title = "Finalize Mandap, Floral & Lighting Designs"
+                desc = "Approve stage mood boards, floral colour palette (marigold/roses), entrance arch, and ambient warm fairy lights."
+
+        elif tmpl["id"] == "task_soundcheck":
+            if budget_band == "Tight" or style == WeddingStyleEnum.BUDGET_SMART:
+                title = "Soundcheck, Generator & Ceremony Audio Rehearsal"
+                desc = "Verify on-site generator power backup, mic sound clarity, and wedding ceremony music playlist."
+            elif budget_band == "Premium" and is_royal_or_destination:
+                title = "Soundcheck, Generator & Cold Pyro Rehearsal"
+                desc = "Verify on-site silent DG generator backup, sound clarity, varmala stage hydraulic lift, and cold pyro fire permits."
+            else:
+                title = "Soundcheck, DJ Rehearsal & DG Power Backup"
+                desc = "Verify on-site silent DG generator backup, acoustic sound clarity, and stage ceremony timing."
 
         tasks.append(
             TimelineTask(

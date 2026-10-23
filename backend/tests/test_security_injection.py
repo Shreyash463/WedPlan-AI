@@ -1,4 +1,5 @@
 """Security tests validating defenses against prompt injection and malicious payloads."""
+
 from __future__ import annotations
 
 from datetime import date, timedelta

@@ -1,4 +1,5 @@
 """FastAPI application factory and middleware configuration for WedPlan AI."""
+
 from __future__ import annotations
 
 import logging

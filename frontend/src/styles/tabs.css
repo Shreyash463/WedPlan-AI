@@ -207,6 +207,65 @@
   flex: 1;
 }
 
+.alert-content-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overdue-collapsible-wrapper {
+  margin-top: 4px;
+}
+
+.btn-collapsible-overdue {
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  font-size: 0.775rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  transition: background 0.15s ease;
+}
+
+.btn-collapsible-overdue:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.overdue-vendors-sublist {
+  margin: 6px 0 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.overdue-vendor-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.775rem;
+  font-weight: 600;
+}
+
+.overdue-chip-weeks {
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
 /* Next 3 Immediate Actions */
 .next-actions-list {
   list-style: none;
@@ -603,17 +662,20 @@
 
 .guest-stepper-control {
   display: inline-flex;
+  align-self: flex-start;
+  width: fit-content;
   align-items: center;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
   overflow: hidden;
-  max-width: 220px;
 }
 
 .stepper-action-btn {
+  min-width: 44px;
+  min-height: 44px;
   width: 44px;
-  height: 42px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -636,8 +698,10 @@
 
 .guest-stepper-input {
   width: 80px;
-  height: 42px;
+  height: 44px;
   border: none;
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
   text-align: center;
   font-weight: 700;
   font-size: 1.05rem;
@@ -1487,3 +1551,11 @@
   line-height: 1.45;
   color: var(--color-text-main);
 }
+
+.savings-estimate-note {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+

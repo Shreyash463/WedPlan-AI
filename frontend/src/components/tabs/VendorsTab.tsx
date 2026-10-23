@@ -1,27 +1,47 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { VendorPlan, VendorStatus } from "../../types";
 import { formatCurrencyINR, formatDateReadable } from "../../utils/formatters";
-import { useLocalStorage } from "../../hooks/useLocalStorage";
+import {
+  getStoredVendorStatuses,
+  saveStoredVendorStatuses,
+} from "../../utils/planStorage";
 import { AlertTriangleIcon, CheckIcon, ClockIcon, UsersIcon } from "../common/Icons";
 
 interface VendorsTabProps {
   vendorPlan: VendorPlan;
   weddingDate?: string;
   today?: Date | string;
+  planHash?: string;
 }
 
-export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan, weddingDate, today }) => {
-  // Persist vendor booking status per category ID
-  const [vendorStatuses, setVendorStatuses] = useLocalStorage<Record<string, VendorStatus>>(
-    "wedplan_vendor_statuses",
-    {}
-  );
+export const VendorsTab: React.FC<VendorsTabProps> = ({
+  vendorPlan,
+  weddingDate,
+  today,
+  planHash,
+}) => {
+  // Persist vendor booking status scoped to plan fingerprint
+  const [vendorStatuses, setVendorStatuses] = useState<Record<string, VendorStatus>>(() => {
+    return planHash ? getStoredVendorStatuses(planHash) : {};
+  });
+
+  useEffect(() => {
+    if (planHash) {
+      setVendorStatuses(getStoredVendorStatuses(planHash));
+    }
+  }, [planHash]);
 
   const handleStatusChange = (vendorId: string, status: VendorStatus) => {
-    setVendorStatuses((prev) => ({
-      ...prev,
-      [vendorId]: status,
-    }));
+    setVendorStatuses((prev) => {
+      const updated = {
+        ...prev,
+        [vendorId]: status,
+      };
+      if (planHash) {
+        saveStoredVendorStatuses(planHash, updated);
+      }
+      return updated;
+    });
   };
 
   const getStatusChipClass = (status: VendorStatus) => {

@@ -1,4 +1,5 @@
 """Vendor checklist and contracts engine linked with budget allocations."""
+
 from __future__ import annotations
 
 from backend.app.models import (
@@ -7,6 +8,7 @@ from backend.app.models import (
     VendorPlan,
     VendorStatusEnum,
     WeddingFunctionEnum,
+    WeddingStyleEnum,
 )
 
 MASTER_VENDOR_PROFILES = [
@@ -216,15 +218,21 @@ MASTER_VENDOR_PROFILES = [
 def generate_vendor_plan(
     functions: list[WeddingFunctionEnum],
     budget_plan: BudgetPlan,
+    budget_band: str = "Comfortable",
+    style: WeddingStyleEnum | str = "Traditional",
 ) -> VendorPlan:
-    """Generate curated vendor checklist with linked allocated budgets and actionable contract clauses."""
+    """Generate curated vendor checklist with linked allocated budgets and context-aware guidelines."""
     selected_func_names = [f.value for f in functions]
 
     # Map category budget allocations
-    budget_map: dict[str, int] = {
-        alloc.category: alloc.amount for alloc in budget_plan.allocations
-    }
+    budget_map: dict[str, int] = {alloc.category: alloc.amount for alloc in budget_plan.allocations}
 
+    is_royal_or_destination = style in (
+        WeddingStyleEnum.ROYAL_PALACE,
+        WeddingStyleEnum.DESTINATION,
+        "Royal/Palace",
+        "Destination",
+    )
     categories: list[VendorCategoryItem] = []
 
     for prof in MASTER_VENDOR_PROFILES:
@@ -242,15 +250,69 @@ def generate_vendor_plan(
             elif prof["id"] == "vendor_makeup":
                 allocated_amt = int(allocated_amt * 0.60)
 
+        advance_guidance = prof["advance_guidance"]
+        questions = list(prof["questions_to_ask"])
+        contract_must_haves = list(prof["contract_must_haves"])
+
+        # Context-aware vendor profile wording variants based on budget band
+        if prof["id"] == "vendor_decor":
+            if budget_band == "Tight":
+                advance_guidance = "30% on moodboard approval, 40% on setup day, 30% post-ceremony teardown."
+                contract_must_haves = [
+                    "Approved stage layout and mood board attached as an annexure to the agreement.",
+                    "Penalties for delayed handover (minimum 3 hours prior to guest arrival).",
+                    "Explicit breakdown of flower grades (fresh seasonal local blooms).",
+                    "Teardown and venue handover responsibility clearly assigned to decorator.",
+                ]
+            elif budget_band == "Comfortable":
+                advance_guidance = "30% on design mockup approval, 40% on setup day, 30% post-ceremony teardown."
+                contract_must_haves = [
+                    "Approved design sketches and mood board attached as an annexure to the agreement.",
+                    "Penalties for delayed handover (minimum 3 hours prior to guest arrival).",
+                    "Explicit breakdown of flower grades (fresh A-grade Indian blooms).",
+                    "Teardown and venue handover responsibility clearly assigned to decorator.",
+                ]
+            elif budget_band == "Premium":
+                advance_guidance = "30% on 3D design approval, 40% on setup day, 30% post-ceremony teardown."
+                contract_must_haves = [
+                    "Approved 3D renderings and mood board attached as an annexure to the agreement.",
+                    "Penalties for delayed handover (minimum 3 hours prior to guest arrival).",
+                    "Explicit breakdown of flower grades (fresh A-grade Indian / exotic imported stems).",
+                    "Teardown and venue handover responsibility clearly assigned to decorator.",
+                ]
+
+        elif prof["id"] == "vendor_photo":
+            if budget_band == "Tight":
+                questions = [
+                    "Will the lead photographer personally shoot our main wedding rituals?",
+                    "How many dedicated candid cameras and traditional video operators will be on-site?",
+                    "What is the exact delivery timeline for teaser reels, highlights film, and printed albums?",
+                    "Do you back up raw memory card files on dual hard drives immediately after each event?",
+                ]
+            elif budget_band == "Premium" and is_royal_or_destination:
+                questions = [
+                    "Will the lead photographer personally shoot our main wedding rituals?",
+                    "How many dedicated candid cameras, traditional video rigs, and drone operators will be on-site?",
+                    "What is the exact delivery timeline for teaser reels, 4K wedding film, and printed albums?",
+                    "Do you back up raw memory card files on dual hard drives immediately after each event?",
+                ]
+            else:
+                questions = [
+                    "Will the lead photographer personally shoot our main wedding rituals?",
+                    "How many dedicated candid cameras and traditional video rigs will be on-site?",
+                    "What is the exact delivery timeline for teaser reels, full film, and printed albums?",
+                    "Do you back up raw memory card files on dual hard drives immediately after each event?",
+                ]
+
         categories.append(
             VendorCategoryItem(
                 id=prof["id"],
                 name=prof["name"],
                 allocated_budget=allocated_amt,
                 lead_time_weeks=prof["lead_time_weeks"],
-                advance_payment_guidance=prof["advance_guidance"],
-                questions_to_ask=prof["questions_to_ask"],
-                contract_must_haves=prof["contract_must_haves"],
+                advance_payment_guidance=advance_guidance,
+                questions_to_ask=questions,
+                contract_must_haves=contract_must_haves,
                 default_status=VendorStatusEnum.NOT_STARTED,
             )
         )

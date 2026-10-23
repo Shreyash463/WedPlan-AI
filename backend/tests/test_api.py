@@ -1,4 +1,5 @@
 """Integration tests for FastAPI endpoints, security headers, rate limiting, and fallbacks."""
+
 from __future__ import annotations
 
 from datetime import date, timedelta
@@ -168,9 +169,7 @@ def test_rate_limiting_429():
     """Verify sliding-window rate limit triggers 429 when quota is exceeded."""
     # Temporarily set tight rate limiter
     test_limiter = SlidingWindowRateLimiter(requests_per_minute=2)
-    with patch.dict(
-        "backend.app.routes.plan.rate_limiter.limiters", {"plan": test_limiter}
-    ):
+    with patch.dict("backend.app.routes.plan.rate_limiter.limiters", {"plan": test_limiter}):
         wedding_date = (date.today() + timedelta(days=90)).isoformat()
         payload = {
             "wedding_date": wedding_date,
@@ -252,4 +251,3 @@ def test_city_name_casing_normalization():
         # Ensure raw lowercase string does not appear in overview summary
         if input_city != expected_city:
             assert f" {input_city} " not in f" {plan['overview']['summary']} "
-

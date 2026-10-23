@@ -1,4 +1,5 @@
 """Thread-safe in-memory TTL LRU Cache for AI responses and calculations."""
+
 from __future__ import annotations
 
 import collections

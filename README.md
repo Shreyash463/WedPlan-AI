@@ -3,7 +3,8 @@
 > **Intelligent Indian Wedding Planning Assistant**  
 > *GenAI-powered, culturally attuned, deterministic event budgeting, countdown timeline roadmap, vendor contract checklists, and personalized wedding ideas.*
 
-**Live Demo:** [https://wedplan-ai.vercel.app](https://wedplan-ai.vercel.app) *(Placeholder — replace with your deployed Vercel URL)*
+**Live Application URL:** [https://wed-plan-ai-six.vercel.app](https://wed-plan-ai-six.vercel.app)  
+**License:** [MIT License](LICENSE)
 
 ```text
 ================================================================================

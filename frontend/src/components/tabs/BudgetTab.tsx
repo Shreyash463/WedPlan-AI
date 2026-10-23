@@ -9,7 +9,10 @@ import {
 import {
   formatCurrencyCompactINR,
   formatCurrencyINR,
+  formatDigitsIndianGrouping,
   formatPercentage,
+  parseNumericDigits,
+  sanitizeDigitsOnly,
 } from "../../utils/formatters";
 import { Badge } from "../common/Badge";
 import { recalculatePlan } from "../../api/client";
@@ -70,7 +73,13 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
   onBudgetUpdated,
 }) => {
   const [sliderBudget, setSliderBudget] = useState<number>(budgetPlan.total_budget);
+  const [exactBudgetString, setExactBudgetString] = useState<string>(
+    formatDigitsIndianGrouping(String(budgetPlan.total_budget))
+  );
   const [stepperGuests, setStepperGuests] = useState<number>(budgetPlan.guest_count);
+  const [guestCountString, setGuestCountString] = useState<string>(
+    String(budgetPlan.guest_count)
+  );
   const [selectedPriorities, setSelectedPriorities] = useState<Priority[]>(initialPriorities);
   const [isRecalculating, setIsRecalculating] = useState<boolean>(false);
   const [displayMode, setDisplayMode] = useState<"inr" | "percentage">("inr");
@@ -80,7 +89,9 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
   // Sync state if props change from outside
   useEffect(() => {
     setSliderBudget(budgetPlan.total_budget);
+    setExactBudgetString(formatDigitsIndianGrouping(String(budgetPlan.total_budget)));
     setStepperGuests(budgetPlan.guest_count);
+    setGuestCountString(String(budgetPlan.guest_count));
   }, [budgetPlan.total_budget, budgetPlan.guest_count]);
 
   // Debounced recalculation effect
@@ -153,13 +164,54 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
   };
 
   const handleGuestStep = (delta: number) => {
-    setStepperGuests((prev) => Math.max(10, Math.min(5000, prev + delta)));
+    const nextVal = Math.max(10, Math.min(5000, stepperGuests + delta));
+    setStepperGuests(nextVal);
+    setGuestCountString(String(nextVal));
   };
 
-  const handleExactBudgetInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
-    if (!isNaN(val)) {
-      setSliderBudget(Math.max(MIN_BUDGET, Math.min(MAX_BUDGET, val)));
+  const handleExactBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = sanitizeDigitsOnly(e.target.value, 10);
+    setExactBudgetString(digits);
+    const parsed = parseNumericDigits(digits);
+    if (parsed !== null && parsed >= MIN_BUDGET && parsed <= MAX_BUDGET) {
+      setSliderBudget(parsed);
+    }
+  };
+
+  const handleExactBudgetBlur = () => {
+    const parsed = parseNumericDigits(exactBudgetString);
+    if (parsed === null || parsed < MIN_BUDGET) {
+      setSliderBudget(MIN_BUDGET);
+      setExactBudgetString(formatDigitsIndianGrouping(String(MIN_BUDGET)));
+    } else if (parsed > MAX_BUDGET) {
+      setSliderBudget(MAX_BUDGET);
+      setExactBudgetString(formatDigitsIndianGrouping(String(MAX_BUDGET)));
+    } else {
+      setSliderBudget(parsed);
+      setExactBudgetString(formatDigitsIndianGrouping(String(parsed)));
+    }
+  };
+
+  const handleGuestInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = sanitizeDigitsOnly(e.target.value, 4);
+    setGuestCountString(digits);
+    const parsed = parseNumericDigits(digits);
+    if (parsed !== null && parsed >= 10 && parsed <= 5000) {
+      setStepperGuests(parsed);
+    }
+  };
+
+  const handleGuestInputBlur = () => {
+    const parsed = parseNumericDigits(guestCountString);
+    if (parsed === null || parsed < 10) {
+      setStepperGuests(10);
+      setGuestCountString("10");
+    } else if (parsed > 5000) {
+      setStepperGuests(5000);
+      setGuestCountString("5000");
+    } else {
+      setStepperGuests(parsed);
+      setGuestCountString(String(parsed));
     }
   };
 
@@ -214,7 +266,11 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
                   step={1}
                   className="budget-slider"
                   value={budgetToSlider(sliderBudget)}
-                  onChange={(e) => setSliderBudget(sliderToBudget(Number(e.target.value)))}
+                  onChange={(e) => {
+                    const b = sliderToBudget(Number(e.target.value));
+                    setSliderBudget(b);
+                    setExactBudgetString(formatDigitsIndianGrouping(String(b)));
+                  }}
                   aria-label="What-If Total Budget"
                 />
                 <div className="slider-ticks">
@@ -226,18 +282,19 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
               </div>
 
               <div className="exact-input-wrapper">
-                <label htmlFor="exactBudgetInput" className="sr-only">Type exact budget amount</label>
+                <label htmlFor="exactBudgetInput" className="sr-only">Type exact budget amount in INR</label>
                 <div className="rupee-input-prefix">₹</div>
                 <input
                   id="exactBudgetInput"
-                  type="number"
-                  min={MIN_BUDGET}
-                  max={MAX_BUDGET}
-                  step={10000}
-                  value={sliderBudget}
-                  onChange={handleExactBudgetInput}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9,]*"
+                  value={exactBudgetString}
+                  onChange={handleExactBudgetChange}
+                  onBlur={handleExactBudgetBlur}
                   className="exact-budget-input"
                   aria-label="Type exact budget in INR"
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -267,17 +324,15 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
 
               <input
                 id="whatIfGuestInput"
-                type="number"
-                min={10}
-                max={5000}
-                step={1}
-                value={stepperGuests}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value, 10);
-                  if (!isNaN(val)) setStepperGuests(Math.max(10, Math.min(5000, val)));
-                }}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={guestCountString}
+                onChange={handleGuestInputChange}
+                onBlur={handleGuestInputBlur}
                 className="guest-stepper-input"
                 aria-label="Exact guest count"
+                autoComplete="off"
               />
 
               <button

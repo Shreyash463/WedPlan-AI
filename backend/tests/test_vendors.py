@@ -1,4 +1,5 @@
 """Unit tests for vendor checklist and budget linkage."""
+
 from __future__ import annotations
 
 from backend.app.engine.budget import generate_budget_plan
@@ -90,19 +91,16 @@ def test_overdue_vendors_with_mocked_today():
     )
 
     budget_plan, timeline_plan, vendor_plan = orchestrate_engine(req, today=mocked_today)
-    overview = build_overview_summary(
-        req, budget_plan, timeline_plan, vendor_plan=vendor_plan, today=mocked_today
-    )
+    overview = build_overview_summary(req, budget_plan, timeline_plan, vendor_plan=vendor_plan, today=mocked_today)
 
-    # Check that overdue vendor warning was generated
-    overdue_warnings = [
-        w for w in overview.key_warnings if w.startswith("Book these vendors immediately:")
-    ]
+    # Check that compact overdue vendor warning was generated
+    overdue_warnings = [w for w in overview.key_warnings if "past their standard booking window" in w]
     assert len(overdue_warnings) == 1, "Expected overdue vendors warning in overview key_warnings"
     warning_text = overdue_warnings[0]
-    # Venue (26 weeks = 182 days) and Catering (18 weeks = 126 days) must be in overdue list
-    assert "Wedding & Reception Venue" in warning_text
-    assert "Catering & Banquet Dining" in warning_text
+    # Venue and Caterer must be in top priority overdue list
+    assert "Book these first:" in warning_text
+    assert "Venue" in warning_text
+    assert "Caterer" in warning_text
 
 
 def test_no_overdue_vendors_when_far_away():
@@ -128,11 +126,7 @@ def test_no_overdue_vendors_when_far_away():
     )
 
     budget_plan, timeline_plan, vendor_plan = orchestrate_engine(req, today=mocked_today)
-    overview = build_overview_summary(
-        req, budget_plan, timeline_plan, vendor_plan=vendor_plan, today=mocked_today
-    )
+    overview = build_overview_summary(req, budget_plan, timeline_plan, vendor_plan=vendor_plan, today=mocked_today)
 
-    overdue_warnings = [
-        w for w in overview.key_warnings if w.startswith("Book these vendors immediately:")
-    ]
+    overdue_warnings = [w for w in overview.key_warnings if w.startswith("Book these vendors immediately:")]
     assert len(overdue_warnings) == 0, f"Expected 0 overdue warnings, got {overdue_warnings}"

@@ -121,4 +121,43 @@ describe("BudgetTab Component", () => {
       { timeout: 1000 }
     );
   });
+
+  it("verifies What-If panel contains exactly 2 numeric inputs and 0 empty inputs", () => {
+    const { container } = render(
+      <BudgetTab
+        budgetPlan={mockBudgetPlan}
+        city="Jaipur"
+        cityTier="Tier-2"
+        weddingDate="2026-11-20"
+        functions={["Wedding"]}
+        style="Royal/Palace"
+        initialPriorities={["Food"]}
+        onBudgetUpdated={vi.fn()}
+      />
+    );
+
+    const simulatorSection = container.querySelector(".what-if-panel");
+    expect(simulatorSection).toBeInTheDocument();
+
+    // Check all inputs inside the simulator
+    const allInputs = simulatorSection?.querySelectorAll("input") || [];
+    // 1 range slider, 2 text/numeric inputs (exactBudgetInput, whatIfGuestInput)
+    expect(allInputs.length).toBe(3);
+
+    const numericTextInputs = simulatorSection?.querySelectorAll(
+      'input[type="text"], input[inputmode="numeric"]'
+    ) || [];
+    expect(numericTextInputs.length).toBe(2);
+
+    const exactBudgetInput = screen.getByLabelText(/type exact budget in inr/i);
+    const guestCountInput = screen.getByLabelText(/exact guest count/i);
+
+    expect(exactBudgetInput).toBeInTheDocument();
+    expect(guestCountInput).toBeInTheDocument();
+
+    // Verify 0 empty inputs
+    allInputs.forEach((input) => {
+      expect((input as HTMLInputElement).value).not.toBe("");
+    });
+  });
 });

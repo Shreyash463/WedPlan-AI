@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
 import { VendorsTab } from "../src/components/tabs/VendorsTab";
 import { OverviewTab } from "../src/components/tabs/OverviewTab";
@@ -126,7 +126,7 @@ describe("VendorsTab - Overdue & Soon Status Badges", () => {
 });
 
 describe("OverviewTab - Overdue Vendors Smart Planner Alert", () => {
-  it("surfaces overdue vendors in Overview 'Important Considerations' warning alert", () => {
+  it("surfaces compact overdue warning with impact ranking and collapsible vendor list", () => {
     render(
       <OverviewTab
         overview={mockOverview}
@@ -142,9 +142,22 @@ describe("OverviewTab - Overdue Vendors Smart Planner Alert", () => {
       />
     );
 
-    // Should render the warning with overdue vendors
+    // Should render the compact warning with impact ranking
     expect(
-      screen.getByText(/Book these vendors immediately: Wedding & Reception Venue/i)
+      screen.getByText(/past their standard booking window/i)
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Book these first: Venue/i)
+    ).toBeInTheDocument();
+
+    // Collapsible accordion button
+    const toggleBtn = screen.getByRole("button", { name: /Show all \d+ overdue vendors/i });
+    expect(toggleBtn).toBeInTheDocument();
+    expect(toggleBtn).toHaveAttribute("aria-expanded", "false");
+
+    // Click to expand all overdue vendors
+    fireEvent.click(toggleBtn);
+    expect(toggleBtn).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Wedding & Reception Venue")).toBeInTheDocument();
   });
 });

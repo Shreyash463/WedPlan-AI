@@ -1,4 +1,5 @@
 """Plan, Recalculate, and Ideas endpoints."""
+
 from __future__ import annotations
 
 import logging

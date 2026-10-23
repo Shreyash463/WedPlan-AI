@@ -1,4 +1,5 @@
 """Pydantic data models with strict validation."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -112,6 +113,13 @@ class PlanRequest(StrictBaseModel):
         description="Optional requests (e.g. Pure Jain catering, eco-friendly mandap)",
     )
 
+    @field_validator("couple_name")
+    @classmethod
+    def sanitize_couple_name(cls, v: str | None) -> str | None:
+        from backend.app.engine.formatters import format_couple_name
+
+        return format_couple_name(v)
+
     @field_validator("wedding_date")
     @classmethod
     def validate_future_date(cls, v: date) -> date:
@@ -124,6 +132,7 @@ class PlanRequest(StrictBaseModel):
     @classmethod
     def sanitize_city(cls, v: str) -> str:
         from backend.app.engine.formatters import title_case_city
+
         cleaned = title_case_city(v)
         if not cleaned:
             raise ValueError("City cannot be empty.")
@@ -154,6 +163,7 @@ class RecalculateRequest(StrictBaseModel):
     @classmethod
     def sanitize_city(cls, v: str) -> str:
         from backend.app.engine.formatters import title_case_city
+
         cleaned = title_case_city(v)
         if not cleaned:
             raise ValueError("City cannot be empty.")
@@ -183,6 +193,7 @@ class IdeasRequest(StrictBaseModel):
     @classmethod
     def sanitize_city(cls, v: str) -> str:
         from backend.app.engine.formatters import title_case_city
+
         cleaned = title_case_city(v)
         if not cleaned:
             raise ValueError("City cannot be empty.")

@@ -7,6 +7,10 @@ import {
   capitalizeCity,
   formatDateReadable,
   formatPercentage,
+  formatCoupleName,
+  sanitizeDigitsOnly,
+  formatDigitsIndianGrouping,
+  parseNumericDigits,
 } from "../src/utils/formatters";
 
 describe("Frontend Formatters Utility", () => {
@@ -49,5 +53,30 @@ describe("Frontend Formatters Utility", () => {
     expect(formatDateReadable("2026-11-20")).toMatch(/20/);
     expect(formatDateReadable("2026-11-20")).toMatch(/Nov/i);
     expect(formatPercentage(18.543)).toBe("18.5%");
+  });
+
+  it("normalizes couple names to Title Case with connector and acronym preservation", () => {
+    expect(formatCoupleName("priya & rohan")).toBe("Priya & Rohan");
+    expect(formatCoupleName("priya and rohan")).toBe("Priya and Rohan");
+    expect(formatCoupleName("priya weds rohan")).toBe("Priya weds Rohan");
+    expect(formatCoupleName("priya with rohan")).toBe("Priya with Rohan");
+    expect(formatCoupleName("PRIYA & ROHAN")).toBe("Priya & Rohan");
+    expect(formatCoupleName("  priya   and   rohan  ")).toBe("Priya and Rohan");
+    expect(formatCoupleName("DJ rohan & ananya")).toBe("DJ Rohan & Ananya");
+    expect(formatCoupleName("ananya & rohan (NRI)")).toBe("Ananya & Rohan (NRI)");
+    expect(formatCoupleName("o'connor and mary-jane")).toBe("O'Connor and Mary-Jane");
+    expect(formatCoupleName("")).toBe("");
+  });
+
+  it("sanitizes digits and formats with Indian grouping", () => {
+    expect(sanitizeDigitsOnly("Rs 25,00,000")).toBe("2500000");
+    expect(sanitizeDigitsOnly("₹ 50,000")).toBe("50000");
+    expect(sanitizeDigitsOnly("008515")).toBe("8515");
+    expect(sanitizeDigitsOnly("abc")).toBe("");
+    expect(formatDigitsIndianGrouping("2500000")).toBe("25,00,000");
+    expect(formatDigitsIndianGrouping("50000")).toBe("50,000");
+    expect(formatDigitsIndianGrouping("10000000")).toBe("1,00,00,000");
+    expect(parseNumericDigits("25,00,000")).toBe(2500000);
+    expect(parseNumericDigits("")).toBeNull();
   });
 });

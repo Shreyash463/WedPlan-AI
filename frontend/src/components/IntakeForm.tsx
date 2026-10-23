@@ -7,8 +7,12 @@ import {
   WeddingStyle,
 } from "../types";
 import {
+  formatCoupleName,
   formatCurrencyINR,
+  formatDigitsIndianGrouping,
   formatNumberToIndianWords,
+  parseNumericDigits,
+  sanitizeDigitsOnly,
 } from "../utils/formatters";
 import { Notice } from "./common/Notice";
 import {
@@ -70,11 +74,13 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
   const [cityTier, setCityTier] = useState<CityTier>(
     initialValues?.city_tier || "Tier-2"
   );
-  const [totalBudget, setTotalBudget] = useState<number>(
-    initialValues?.total_budget || 2500000
+  const [budgetString, setBudgetString] = useState<string>(
+    initialValues?.total_budget
+      ? formatDigitsIndianGrouping(String(initialValues.total_budget))
+      : "25,00,000"
   );
-  const [guestCount, setGuestCount] = useState<number>(
-    initialValues?.guest_count || 350
+  const [guestsString, setGuestsString] = useState<string>(
+    initialValues?.guest_count ? String(initialValues.guest_count) : "350"
   );
   const [functions, setFunctions] = useState<WeddingFunction[]>(
     initialValues?.functions || ["Haldi", "Mehendi", "Sangeet", "Wedding"]
@@ -136,7 +142,10 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
     }
 
     if (field === "totalBudget" || !field) {
-      if (!totalBudget || totalBudget < 50000 || totalBudget > 100000000) {
+      const bNum = parseNumericDigits(budgetString);
+      if (bNum === null) {
+        newErrors.totalBudget = "Total budget is required.";
+      } else if (bNum < 50000 || bNum > 100000000) {
         newErrors.totalBudget =
           "Budget must be between ₹50,000 and ₹10,00,00,000 (10 Cr).";
       } else {
@@ -145,7 +154,10 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
     }
 
     if (field === "guestCount" || !field) {
-      if (!guestCount || guestCount < 10 || guestCount > 5000) {
+      const gNum = parseNumericDigits(guestsString);
+      if (gNum === null) {
+        newErrors.guestCount = "Guest count is required.";
+      } else if (gNum < 10 || gNum > 5000) {
         newErrors.guestCount = "Guest count must be between 10 and 5,000.";
       } else {
         delete newErrors.guestCount;
@@ -162,6 +174,57 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = sanitizeDigitsOnly(e.target.value, 10);
+    setBudgetString(digits);
+    if (touched.totalBudget) {
+      const bNum = parseNumericDigits(digits);
+      setErrors((prev) => {
+        const next = { ...prev };
+        if (bNum === null) {
+          next.totalBudget = "Total budget is required.";
+        } else if (bNum < 50000 || bNum > 100000000) {
+          next.totalBudget = "Budget must be between ₹50,000 and ₹10,00,00,000 (10 Cr).";
+        } else {
+          delete next.totalBudget;
+        }
+        return next;
+      });
+    }
+  };
+
+  const handleBudgetBlur = () => {
+    setTouched((prev) => ({ ...prev, totalBudget: true }));
+    if (budgetString.trim()) {
+      setBudgetString(formatDigitsIndianGrouping(budgetString));
+    }
+    validateField("totalBudget");
+  };
+
+  const handleGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = sanitizeDigitsOnly(e.target.value, 5);
+    setGuestsString(digits);
+    if (touched.guestCount) {
+      const gNum = parseNumericDigits(digits);
+      setErrors((prev) => {
+        const next = { ...prev };
+        if (gNum === null) {
+          next.guestCount = "Guest count is required.";
+        } else if (gNum < 10 || gNum > 5000) {
+          next.guestCount = "Guest count must be between 10 and 5,000.";
+        } else {
+          delete next.guestCount;
+        }
+        return next;
+      });
+    }
+  };
+
+  const handleGuestsBlur = () => {
+    setTouched((prev) => ({ ...prev, guestCount: true }));
+    validateField("guestCount");
   };
 
   const toggleFunction = (fn: WeddingFunction) => {
@@ -209,15 +272,18 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
     });
 
     const isValid = validateField("");
-    if (!isValid) return;
+    const numericBudget = parseNumericDigits(budgetString);
+    const numericGuests = parseNumericDigits(guestsString);
+
+    if (!isValid || numericBudget === null || numericGuests === null) return;
 
     onSubmit({
-      couple_name: coupleName.trim() || undefined,
+      couple_name: formatCoupleName(coupleName) || undefined,
       wedding_date: weddingDate,
       city: city.trim(),
       city_tier: cityTier,
-      total_budget: Number(totalBudget),
-      guest_count: Number(guestCount),
+      total_budget: numericBudget,
+      guest_count: numericGuests,
       functions,
       style,
       priorities,
@@ -226,8 +292,13 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
   };
 
   // Live per-guest calculation
-  const livePerGuest = guestCount > 0 ? Math.round(totalBudget / guestCount) : 0;
-  const inWords = formatNumberToIndianWords(totalBudget);
+  const numericBudget = parseNumericDigits(budgetString);
+  const numericGuests = parseNumericDigits(guestsString);
+  const livePerGuest =
+    numericBudget !== null && numericGuests !== null && numericGuests > 0
+      ? Math.round(numericBudget / numericGuests)
+      : null;
+  const inWords = numericBudget !== null && numericBudget > 0 ? formatNumberToIndianWords(numericBudget) : null;
 
   return (
     <section aria-labelledby="form-heading" className="form-card">
@@ -381,33 +452,31 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
                 <label htmlFor="totalBudget" className="form-label">
                   Total Budget (INR) <span className="required-indicator">*</span>
                 </label>
-                {inWords && (
-                  <span className="live-words-pill">
-                    {formatCurrencyINR(totalBudget)} ({inWords})
-                  </span>
-                )}
+                <span className="live-words-pill" aria-live="polite">
+                  {numericBudget !== null && inWords
+                    ? `${formatCurrencyINR(numericBudget)} (${inWords})`
+                    : "—"}
+                </span>
               </div>
               <input
                 id="totalBudget"
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9,]*"
                 required
-                min={50000}
-                max={100000000}
-                step={25000}
                 className="form-input"
-                value={totalBudget}
-                onChange={(e) => {
-                  setTotalBudget(Number(e.target.value));
-                  if (touched.totalBudget) validateField("totalBudget");
-                }}
-                onBlur={() => handleBlur("totalBudget")}
+                value={budgetString}
+                onChange={handleBudgetChange}
+                onBlur={handleBudgetBlur}
+                placeholder="e.g. 25,00,000"
                 aria-invalid={!!(touched.totalBudget && errors.totalBudget)}
                 aria-describedby={
                   errors.totalBudget ? "totalBudget-error" : "totalBudget-help"
                 }
+                autoComplete="off"
               />
               {touched.totalBudget && errors.totalBudget ? (
-                <span id="totalBudget-error" className="field-error" role="alert">
+                <span id="totalBudget-error" className="field-error" role="alert" aria-live="polite">
                   {errors.totalBudget}
                 </span>
               ) : (
@@ -423,31 +492,31 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
                 <label htmlFor="guestCount" className="form-label">
                   Guest Count <span className="required-indicator">*</span>
                 </label>
-                <span className="live-words-pill">
-                  Est. {formatCurrencyINR(livePerGuest)} / guest
+                <span className="live-words-pill" aria-live="polite">
+                  {livePerGuest !== null
+                    ? `Est. ${formatCurrencyINR(livePerGuest)} / guest`
+                    : "—"}
                 </span>
               </div>
               <input
                 id="guestCount"
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 required
-                min={10}
-                max={5000}
-                step={10}
                 className="form-input"
-                value={guestCount}
-                onChange={(e) => {
-                  setGuestCount(Number(e.target.value));
-                  if (touched.guestCount) validateField("guestCount");
-                }}
-                onBlur={() => handleBlur("guestCount")}
+                value={guestsString}
+                onChange={handleGuestsChange}
+                onBlur={handleGuestsBlur}
+                placeholder="e.g. 350"
                 aria-invalid={!!(touched.guestCount && errors.guestCount)}
                 aria-describedby={
                   errors.guestCount ? "guestCount-error" : "guestCount-help"
                 }
+                autoComplete="off"
               />
               {touched.guestCount && errors.guestCount ? (
-                <span id="guestCount-error" className="field-error" role="alert">
+                <span id="guestCount-error" className="field-error" role="alert" aria-live="polite">
                   {errors.guestCount}
                 </span>
               ) : (

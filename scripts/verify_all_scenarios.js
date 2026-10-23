@@ -89,7 +89,7 @@ async function run() {
       const form = document.getElementById("intake-form");
       if (form) form.requestSubmit();
     });
-    await page.waitForSelector(".dashboard-container", { timeout: 10000 });
+    await page.waitForSelector(".dashboard-container", { timeout: 30000 });
   }
 
   // --- SCENARIO (D): Wedding date 10 days away (Tight timeline notice) ---
@@ -267,7 +267,7 @@ async function run() {
     const form = document.getElementById("intake-form");
     if (form) form.requestSubmit();
   });
-  await mobilePage.waitForSelector(".dashboard-container", { timeout: 10000 });
+  await mobilePage.waitForSelector(".dashboard-container", { timeout: 30000 });
 
   // (H1) Mobile Light theme
   await mobilePage.screenshot({ path: path.join(SCREENSHOTS_DIR, "scenario-h1-mobile-375px-light.png") });

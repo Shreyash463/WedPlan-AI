@@ -78,4 +78,77 @@ describe("IntakeForm Component", () => {
       })
     );
   });
+
+  it("handles empty fields without coercing to 0 and formats on blur", () => {
+    render(<IntakeForm onSubmit={vi.fn()} isLoading={false} />);
+
+    const budgetInput = screen.getByLabelText(/total budget/i);
+    // Clear the field
+    fireEvent.change(budgetInput, { target: { value: "" } });
+    expect(budgetInput).toHaveValue("");
+
+    // Type 8515 - must not have leading zero
+    fireEvent.change(budgetInput, { target: { value: "8515" } });
+    expect(budgetInput).toHaveValue("8515");
+
+    // Paste formatted Indian currency string
+    fireEvent.change(budgetInput, { target: { value: "Rs 25,00,000" } });
+    expect(budgetInput).toHaveValue("2500000");
+
+    // On blur, format to Indian grouping
+    fireEvent.blur(budgetInput);
+    expect(budgetInput).toHaveValue("25,00,000");
+  });
+
+  it("validates budget range and links error via aria-describedby", () => {
+    render(<IntakeForm onSubmit={vi.fn()} isLoading={false} />);
+
+    const budgetInput = screen.getByLabelText(/total budget/i);
+
+    // Enter budget below min (₹50,000)
+    fireEvent.change(budgetInput, { target: { value: "10000" } });
+    fireEvent.blur(budgetInput);
+
+    expect(screen.getByText(/budget must be between ₹50,000 and ₹10,00,00,000/i)).toBeInTheDocument();
+    expect(budgetInput).toHaveAttribute("aria-invalid", "true");
+
+    // Correct to valid budget
+    fireEvent.change(budgetInput, { target: { value: "1500000" } });
+    fireEvent.blur(budgetInput);
+    expect(screen.queryByText(/budget must be between ₹50,000 and ₹10,00,00,000/i)).not.toBeInTheDocument();
+    expect(budgetInput).toHaveAttribute("aria-invalid", "false");
+  });
+
+  it("validates guest count range", () => {
+    render(<IntakeForm onSubmit={vi.fn()} isLoading={false} />);
+
+    const guestInput = screen.getByLabelText(/guest count/i);
+
+    // Enter guests below min (10)
+    fireEvent.change(guestInput, { target: { value: "5" } });
+    fireEvent.blur(guestInput);
+
+    expect(screen.getByText(/guest count must be between 10 and 5,000/i)).toBeInTheDocument();
+    expect(guestInput).toHaveAttribute("aria-invalid", "true");
+
+    // Correct to valid guest count
+    fireEvent.change(guestInput, { target: { value: "150" } });
+    fireEvent.blur(guestInput);
+    expect(screen.queryByText(/guest count must be between 10 and 5,000/i)).not.toBeInTheDocument();
+    expect(guestInput).toHaveAttribute("aria-invalid", "false");
+  });
+
+  it("blocks submission if required budget or guest count is empty or invalid", () => {
+    const handleSubmit = vi.fn();
+    render(<IntakeForm onSubmit={handleSubmit} isLoading={false} />);
+
+    const budgetInput = screen.getByLabelText(/total budget/i);
+    fireEvent.change(budgetInput, { target: { value: "" } });
+
+    const submitBtn = screen.getByRole("button", { name: /generate wedding plan/i });
+    fireEvent.click(submitBtn);
+
+    expect(handleSubmit).not.toHaveBeenCalled();
+    expect(screen.getByText(/budget is required/i)).toBeInTheDocument();
+  });
 });

@@ -1,4 +1,5 @@
 """In-memory sliding window rate limiter per client IP."""
+
 from __future__ import annotations
 
 import collections
@@ -15,9 +16,7 @@ class SlidingWindowRateLimiter:
     def __init__(self, requests_per_minute: int = 30) -> None:
         self.rpm = requests_per_minute
         self.window = 60.0  # seconds
-        self._history: dict[str, collections.deque[float]] = collections.defaultdict(
-            collections.deque
-        )
+        self._history: dict[str, collections.deque[float]] = collections.defaultdict(collections.deque)
         self._lock = threading.Lock()
 
     def is_allowed(self, client_ip: str) -> tuple[bool, int]:

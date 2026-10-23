@@ -1,4 +1,5 @@
 """Application configuration settings."""
+
 from __future__ import annotations
 
 import os
@@ -28,9 +29,7 @@ class Settings:
         # CORS: Default to "*" in cloud/serverless if ALLOWED_ORIGINS not explicitly defined
         raw_origins = os.getenv("ALLOWED_ORIGINS", "").strip()
         if raw_origins:
-            self.allowed_origins: list[str] = [
-                origin.strip() for origin in raw_origins.split(",") if origin.strip()
-            ]
+            self.allowed_origins: list[str] = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
         else:
             self.allowed_origins = [
                 "http://localhost:5173",

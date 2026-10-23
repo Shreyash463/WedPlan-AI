@@ -1,4 +1,5 @@
 """Constants, benchmarks, and default weight distributions for Indian Weddings."""
+
 from __future__ import annotations
 
 # Base percentage allocation for an Indian wedding (Sums to exactly 100.0)
@@ -33,18 +34,18 @@ CATEGORY_FLOORS: dict[str, float] = {
 # Used to determine whether a planned budget is Healthy, Tight, or Unrealistic
 CITY_TIER_BENCHMARKS: dict[str, dict[str, int]] = {
     "Metro": {
-        "healthy_min": 2500,     # >= 2500 INR/guest is healthy
-        "tight_min": 1500,       # 1500-2499 INR/guest is tight
+        "healthy_min": 2500,  # >= 2500 INR/guest is healthy
+        "tight_min": 1500,  # 1500-2499 INR/guest is tight
         # < 1500 INR/guest is unrealistic for Metros (Mumbai, Delhi NCR, Bangalore, etc.)
     },
     "Tier-2": {
-        "healthy_min": 1800,     # >= 1800 INR/guest is healthy
-        "tight_min": 1100,       # 1100-1799 INR/guest is tight
+        "healthy_min": 1800,  # >= 1800 INR/guest is healthy
+        "tight_min": 1100,  # 1100-1799 INR/guest is tight
         # < 1100 INR/guest is unrealistic (Jaipur, Pune, Ahmedabad, Lucknow, etc.)
     },
     "Tier-3": {
-        "healthy_min": 1200,     # >= 1200 INR/guest is healthy
-        "tight_min": 800,        # 800-1199 INR/guest is tight
+        "healthy_min": 1200,  # >= 1200 INR/guest is healthy
+        "tight_min": 800,  # 800-1199 INR/guest is tight
         # < 800 INR/guest is unrealistic
     },
 }

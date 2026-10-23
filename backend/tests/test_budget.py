@@ -1,4 +1,5 @@
 """Unit tests for the budget calculation engine."""
+
 from __future__ import annotations
 
 import random
@@ -64,9 +65,7 @@ def test_largest_remainder_exact_budget_sum():
     for budget in test_budgets:
         results = allocate_amounts_largest_remainder(budget, weights)
         total_allocated = sum(amt for _, amt, _ in results)
-        assert total_allocated == budget, (
-            f"Allocated sum {total_allocated} != requested budget {budget}"
-        )
+        assert total_allocated == budget, f"Allocated sum {total_allocated} != requested budget {budget}"
 
 
 def test_vibe_adjustments():
@@ -104,9 +103,7 @@ def test_function_adjustments():
     weights_with_mehendi = compute_adjusted_weights(
         [WeddingFunctionEnum.MEHENDI, WeddingFunctionEnum.WEDDING], style, []
     )
-    weights_without_mehendi = compute_adjusted_weights(
-        [WeddingFunctionEnum.WEDDING], style, []
-    )
+    weights_without_mehendi = compute_adjusted_weights([WeddingFunctionEnum.WEDDING], style, [])
 
     assert weights_with_mehendi["Makeup & Mehendi"] > weights_without_mehendi["Makeup & Mehendi"]
 
