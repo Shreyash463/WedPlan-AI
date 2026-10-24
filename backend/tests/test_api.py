@@ -233,14 +233,9 @@ def test_city_name_casing_normalization():
     ]
     for input_city, expected_city in test_cities:
         payload = {
-            "wedding_date": wedding_date,
-            "city": input_city,
-            "city_tier": "Tier-2",
-            "total_budget": 1_500_000,
-            "guest_count": 200,
-            "functions": ["Wedding"],
-            "style": "Traditional",
-            "priorities": [],
+            "wedding_date": wedding_date, "city": input_city, "city_tier": "Tier-2",
+            "total_budget": 1_500_000, "guest_count": 200, "functions": ["Wedding"],
+            "style": "Traditional", "priorities": [],
         }
         res = client.post("/api/plan", json=payload)
         assert res.status_code == 200
