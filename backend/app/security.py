@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -39,7 +40,7 @@ def compute_plan_hash(data: dict[str, Any]) -> str:
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Enforce strict security headers across all HTTP responses."""
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         response: Response = await call_next(request)
 
         # Content-Security-Policy

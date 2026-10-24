@@ -1,16 +1,15 @@
-"""Plan, Recalculate, and Ideas endpoints."""
+"""Thin HTTP routing layer delegating wedding planning use cases to PlanService."""
 
 from __future__ import annotations
 
 import logging
 import sys
-import traceback
+from collections.abc import Callable
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from backend.app.ai.ideas import build_fallback_ideas, generate_wedding_ideas
-from backend.app.config import settings
-from backend.app.engine.planner import generate_full_plan, generate_recalculation
+from backend.app.ai.ideas import generate_wedding_ideas
+from backend.app.config import Settings, get_settings
 from backend.app.models import (
     IdeasPlan,
     IdeasRequest,
@@ -20,15 +19,17 @@ from backend.app.models import (
     RecalculateResponse,
 )
 from backend.app.rate_limit import RateLimitMiddleware, SlidingWindowRateLimiter
+from backend.app.services.plan_service import PlanService, get_plan_service
 
 logger = logging.getLogger("wedplan.routes")
 
 router = APIRouter(prefix="/api", tags=["Wedding Planning"])
 
-# Initialize rate limiters
-plan_limiter = SlidingWindowRateLimiter(requests_per_minute=settings.rate_limit_plan)
-ideas_limiter = SlidingWindowRateLimiter(requests_per_minute=settings.rate_limit_ideas)
-recalc_limiter = SlidingWindowRateLimiter(requests_per_minute=settings.rate_limit_recalculate)
+# Initialize sliding-window rate limiters
+_settings = get_settings()
+plan_limiter = SlidingWindowRateLimiter(requests_per_minute=_settings.rate_limit_plan)
+ideas_limiter = SlidingWindowRateLimiter(requests_per_minute=_settings.rate_limit_ideas)
+recalc_limiter = SlidingWindowRateLimiter(requests_per_minute=_settings.rate_limit_recalculate)
 
 rate_limiter = RateLimitMiddleware(
     {
@@ -39,13 +40,12 @@ rate_limiter = RateLimitMiddleware(
 )
 
 
-def enforce_rate_limit(bucket: str):
-    """Dependency for checking sliding-window rate limits per IP."""
+def enforce_rate_limit(bucket: str) -> Callable[[Request], bool]:
+    """FastAPI dependency factory enforcing per-endpoint rate limits."""
 
-    def _check(request: Request):
+    def _check(request: Request) -> bool:
         violation = rate_limiter.check(request, bucket)
         if violation is not None:
-            # Raise exception so standard FastAPI exception handlers can catch or return directly
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Rate limit exceeded for this endpoint. Please wait before retrying.",
@@ -57,12 +57,12 @@ def enforce_rate_limit(bucket: str):
 
 
 @router.get("/health", summary="Health Check")
-async def health_check():
+async def health_check(cfg: Settings = Depends(get_settings)) -> dict[str, str | bool]:
     """Liveness health check endpoint with diagnostics."""
     return {
         "status": "ok",
-        "gemini_configured": bool(settings.gemini_api_key),
-        "model": settings.gemini_model,
+        "gemini_configured": bool(cfg.gemini_api_key),
+        "model": cfg.gemini_model,
         "python": sys.version.split()[0],
     }
 
@@ -73,53 +73,15 @@ async def health_check():
     summary="Generate Full Wedding Plan",
     dependencies=[Depends(enforce_rate_limit("plan"))],
 )
-async def create_plan(request: PlanRequest) -> PlanResponse:
-    """Generate complete wedding plan including budget split, timeline roadmap, vendor checklist, and personalized ideas."""
+async def create_plan(
+    request: PlanRequest,
+    service: PlanService = Depends(get_plan_service),
+) -> PlanResponse:
+    """Generate complete wedding plan including budget, timeline, vendors, and ideas."""
     logger.info(
-        "Received plan request for city=%s, budget=%s, guests=%s",
-        request.city,
-        request.total_budget,
-        request.guest_count,
+        "Received plan request: city=%s, budget=%s, guests=%s", request.city, request.total_budget, request.guest_count
     )
-
-    try:
-        ideas = await generate_wedding_ideas(
-            city=request.city,
-            city_tier=request.city_tier,
-            total_budget=request.total_budget,
-            guest_count=request.guest_count,
-            functions=request.functions,
-            style=request.style,
-            priorities=request.priorities,
-            special_requests=request.special_requests,
-        )
-    except Exception as exc:
-        logger.warning(
-            "Gemini generation or validation encountered an issue (%s: %s). Falling back gracefully to deterministic ideas engine.",
-            type(exc).__name__,
-            exc,
-        )
-        ideas = build_fallback_ideas(
-            city=request.city,
-            city_tier=request.city_tier,
-            style=request.style,
-            functions=request.functions,
-            priorities=request.priorities,
-            special_requests=request.special_requests,
-            total_budget=request.total_budget,
-            guest_count=request.guest_count,
-        )
-
-    try:
-        plan = generate_full_plan(request, ideas)
-        return plan
-    except Exception as exc:
-        logger.error("Error compiling plan: %s", type(exc).__name__)
-        traceback.print_exc(file=sys.stderr)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while compiling your wedding plan. Please retry.",
-        )
+    return await service.generate_full_plan(request, ideas_generator=generate_wedding_ideas)
 
 
 @router.post(
@@ -128,17 +90,12 @@ async def create_plan(request: PlanRequest) -> PlanResponse:
     summary="Instant What-If Recalculation",
     dependencies=[Depends(enforce_rate_limit("recalculate"))],
 )
-async def recalculate(request: RecalculateRequest) -> RecalculateResponse:
-    """Instant deterministic recalculation for what-if budget and guest adjustments with NO external AI call."""
-    try:
-        result = generate_recalculation(request)
-        return result
-    except Exception as exc:
-        logger.error("Error recalculating plan: %s", type(exc).__name__)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to recalculate budget and timeline metrics.",
-        )
+async def recalculate(
+    request: RecalculateRequest,
+    service: PlanService = Depends(get_plan_service),
+) -> RecalculateResponse:
+    """Instant deterministic recalculation with zero AI latency."""
+    return service.recalculate_plan(request)
 
 
 @router.post(
@@ -147,33 +104,9 @@ async def recalculate(request: RecalculateRequest) -> RecalculateResponse:
     summary="Regenerate Personalized Ideas",
     dependencies=[Depends(enforce_rate_limit("ideas"))],
 )
-async def regenerate_ideas(request: IdeasRequest) -> IdeasPlan:
-    """Regenerate personalized Indian wedding ideas with stricter rate limiting."""
-    try:
-        ideas = await generate_wedding_ideas(
-            city=request.city,
-            city_tier=request.city_tier,
-            total_budget=request.total_budget,
-            guest_count=request.guest_count,
-            functions=request.functions,
-            style=request.style,
-            priorities=request.priorities,
-            special_requests=request.special_requests,
-        )
-        return ideas
-    except Exception as exc:
-        logger.warning(
-            "Regenerating ideas encountered issue (%s: %s). Falling back gracefully.",
-            type(exc).__name__,
-            exc,
-        )
-        return build_fallback_ideas(
-            city=request.city,
-            city_tier=request.city_tier,
-            style=request.style,
-            functions=request.functions,
-            priorities=request.priorities,
-            special_requests=request.special_requests,
-            total_budget=request.total_budget,
-            guest_count=request.guest_count,
-        )
+async def regenerate_ideas(
+    request: IdeasRequest,
+    service: PlanService = Depends(get_plan_service),
+) -> IdeasPlan:
+    """Regenerate personalized Indian wedding ideas."""
+    return await service.generate_ideas_standalone(request)

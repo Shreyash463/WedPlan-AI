@@ -5,16 +5,19 @@ from __future__ import annotations
 import logging
 import sys
 import traceback
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from backend.app.config import settings
+from backend.app.config import get_settings
+from backend.app.exceptions import PlanningError
 from backend.app.routes.plan import router as plan_router
 from backend.app.security import SecurityHeadersMiddleware
 
@@ -31,7 +34,7 @@ MAX_CONTENT_LENGTH = 1_048_576  # 1 MB maximum request body size
 class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
     """Reject payloads exceeding MAX_CONTENT_LENGTH to guard against memory exhaustion."""
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         content_length = request.headers.get("content-length")
         if content_length:
             try:
@@ -51,12 +54,15 @@ class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application startup and shutdown events."""
+    settings = get_settings()
     logger.info("WedPlan AI backend initialized. Environment: %s", settings.environment)
     yield
     logger.info("WedPlan AI backend shutting down.")
 
+
+settings = get_settings()
 
 app = FastAPI(
     title="WedPlan AI API",
@@ -91,11 +97,25 @@ app.add_middleware(
 app.include_router(plan_router)
 
 
-# 6. Consistent Error Handling
+# 6. Exception Handlers
+@app.exception_handler(PlanningError)
+async def planning_error_handler(request: Request, exc: PlanningError) -> JSONResponse:
+    """Map domain PlanningError to standardized response envelope."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": exc.code,
+                "message": exc.message,
+            }
+        },
+    )
+
+
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     """Format Pydantic schema validation errors with clean message and details."""
-    formatted_errors = []
+    formatted_errors: list[dict[str, Any]] = []
     for err in exc.errors():
         field_path = ".".join(str(loc) for loc in err.get("loc", []))
         formatted_errors.append(
@@ -119,7 +139,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """Ensure HTTP exceptions follow standardized error envelope."""
     headers = getattr(exc, "headers", None) or {}
     code_map = {
@@ -143,8 +163,8 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 
 @app.exception_handler(Exception)
-async def generic_exception_handler(request: Request, exc: Exception):
-    """Global catch-all preventing any stack trace or internals from leaking while logging traceback to stderr."""
+async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Global catch-all preventing stack trace leakage while logging to stderr."""
     traceback.print_exc(file=sys.stderr)
     logger.critical("Unhandled server exception: %s", type(exc).__name__, exc_info=True)
     return JSONResponse(

@@ -19,7 +19,7 @@ def format_inr(amount: int | float, include_symbol: bool = True) -> str:
         last_three = s[-3:]
         remaining = s[:-3]
         # Group remaining digits in pairs from right to left
-        groups = []
+        groups: list[str] = []
         while len(remaining) > 2:
             groups.insert(0, remaining[-2:])
             remaining = remaining[:-2]
@@ -93,15 +93,15 @@ def normalize_currency_in_text(text: str) -> str:
 
     pattern = re.compile(r"(?i)\b(?:INR|Rs\.?)\s*([0-9][0-9,]*)|₹\s*([0-9][0-9,]*)")
 
-    def _replace(m: re.Match) -> str:
+    def _replace(m: re.Match[str]) -> str:
         raw_num = (m.group(1) or m.group(2) or "").replace(",", "")
         if not raw_num:
-            return m.group(0)
+            return str(m.group(0))
         try:
             val = int(raw_num)
             return format_inr(val, include_symbol=True)
         except ValueError:
-            return m.group(0)
+            return str(m.group(0))
 
     return pattern.sub(_replace, text)
 
@@ -114,6 +114,14 @@ def _format_name_token(token: str) -> str:
     # Preserve ampersand as-is
     if token == "&":
         return "&"
+
+    import re
+
+    wrap_match = re.match(r"^([([{\"'`]*)(.*?)([)\]}\"'`]*)$", token)
+    if wrap_match and (wrap_match.group(1) or wrap_match.group(3)):
+        pre, core, post = wrap_match.groups()
+        if core:
+            return f"{pre}{_format_name_token(core)}{post}"
 
     # Handle hyphenated parts (e.g. Mary-Jane, Kapoor-Singh)
     if "-" in token:

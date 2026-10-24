@@ -10,70 +10,81 @@ from backend.app.engine.formatters import format_inr, title_case_city
 from backend.app.engine.timeline import generate_timeline_plan
 from backend.app.engine.vendors import generate_vendor_plan
 from backend.app.models import (
+    BudgetPlan,
     IdeasPlan,
     OverviewData,
     PlanRequest,
     PlanResponse,
     RecalculateRequest,
     RecalculateResponse,
+    TimelinePlan,
+    VendorCategoryItem,
     VendorPlan,
+)
+
+VENDOR_IMPACT_PRIORITY: tuple[str, ...] = (
+    "venue",
+    "cater",
+    "photo",
+    "decor",
+    "attire",
+    "makeup",
+    "mehendi",
+    "music",
+    "pandit",
+    "invitation",
 )
 
 
 def _vendor_impact_rank(name: str) -> int:
     """Return an impact rank (1 is highest priority) for booking urgency."""
     n = name.lower()
-    if "venue" in n:
-        return 1
-    if "cater" in n or "dining" in n or "food" in n:
-        return 2
-    if "photo" in n or "cinema" in n:
-        return 3
-    if "decor" in n or "floral" in n or "mandap" in n:
-        return 4
-    if "attire" in n or "lehenga" in n:
-        return 5
-    if "makeup" in n or "mehendi" in n:
-        return 6
-    if "music" in n or "entertainment" in n or "dj" in n:
-        return 7
-    if "pandit" in n or "priest" in n:
-        return 8
-    if "invitation" in n:
-        return 9
-    return 10
+    for idx, token in enumerate(VENDOR_IMPACT_PRIORITY):
+        if token in n:
+            return idx + 1
+    return len(VENDOR_IMPACT_PRIORITY) + 1
 
 
 def _short_vendor_name(name: str) -> str:
     """Produce concise name for summary alert."""
     n = name.lower()
-    if "venue" in n:
-        return "Venue"
-    if "cater" in n:
-        return "Caterer"
-    if "photo" in n:
-        return "Photographer"
-    if "decor" in n:
-        return "Decorator"
-    if "attire" in n:
-        return "Attire"
-    if "makeup" in n:
-        return "Makeup & Hair"
-    if "mehendi" in n:
-        return "Mehendi Artist"
-    if "music" in n:
-        return "DJ & Music"
-    if "pandit" in n:
-        return "Pandit"
-    if "invitation" in n:
-        return "Invitations"
+    mapping = (
+        ("venue", "Venue"),
+        ("cater", "Caterer"),
+        ("photo", "Photographer"),
+        ("decor", "Decorator"),
+        ("attire", "Attire"),
+        ("makeup", "Makeup & Hair"),
+        ("mehendi", "Mehendi Artist"),
+        ("music", "DJ & Music"),
+        ("pandit", "Pandit"),
+        ("invitation", "Invitations"),
+    )
+    for token, label in mapping:
+        if token in n:
+            return label
     return name
+
+
+def _calculate_overdue_warning(
+    categories: list[VendorCategoryItem],
+    wedding_date: date,
+    today: date,
+) -> str | None:
+    """Calculate compact overdue vendor alert."""
+    overdue = [c for c in categories if (wedding_date - timedelta(weeks=c.lead_time_weeks)) < today]
+    if not overdue:
+        return None
+
+    overdue_sorted = sorted(overdue, key=lambda c: _vendor_impact_rank(c.name))
+    top_names = [_short_vendor_name(c.name) for c in overdue_sorted[:3]]
+    return f"{len(overdue)} of {len(categories)} vendors are past their standard booking window. Book these first: {', '.join(top_names)}."
 
 
 def build_overview_summary(
     plan_request: PlanRequest,
-    budget_plan,
-    timeline_plan,
+    budget_plan: BudgetPlan,
+    timeline_plan: TimelinePlan,
     vendor_plan: VendorPlan | None = None,
     today: date | None = None,
 ) -> OverviewData:
@@ -86,14 +97,8 @@ def build_overview_summary(
         f" prioritizing {', '.join(p.value for p in plan_request.priorities)}" if plan_request.priorities else ""
     )
 
-    venue_pct = next(
-        (a.percentage for a in budget_plan.allocations if a.category == "Venue"),
-        18.0,
-    )
-    catering_pct = next(
-        (a.percentage for a in budget_plan.allocations if a.category == "Catering"),
-        30.0,
-    )
+    venue_pct = next((a.percentage for a in budget_plan.allocations if a.category == "Venue"), 18.0)
+    catering_pct = next((a.percentage for a in budget_plan.allocations if a.category == "Catering"), 30.0)
     hospitality_pct = round(venue_pct + catering_pct)
 
     days_str = (
@@ -112,26 +117,12 @@ def build_overview_summary(
     )
 
     tier_info = CITY_TIER_BENCHMARKS.get(plan_request.city_tier.value, CITY_TIER_BENCHMARKS["Tier-2"])
-
     key_warnings = list(budget_plan.warnings)
-    if vendor_plan is not None:
-        overdue_categories = []
-        for cat in vendor_plan.categories:
-            book_by = plan_request.wedding_date - timedelta(weeks=cat.lead_time_weeks)
-            if book_by < ref_today:
-                overdue_categories.append(cat)
-        if overdue_categories:
-            overdue_sorted = sorted(overdue_categories, key=lambda c: _vendor_impact_rank(c.name))
-            top_urgent = overdue_sorted[:3]
-            top_names = [_short_vendor_name(c.name) for c in top_urgent]
-            total_vendors = len(vendor_plan.categories)
-            overdue_count = len(overdue_categories)
 
-            compact_warning = (
-                f"{overdue_count} of {total_vendors} vendors are past their standard booking window. "
-                f"Book these first: {', '.join(top_names)}."
-            )
-            key_warnings.append(compact_warning)
+    if vendor_plan is not None:
+        warning = _calculate_overdue_warning(vendor_plan.categories, plan_request.wedding_date, ref_today)
+        if warning:
+            key_warnings.append(warning)
 
     return OverviewData(
         couple_name=plan_request.couple_name,
@@ -154,7 +145,7 @@ def build_overview_summary(
 def orchestrate_engine(
     request: PlanRequest | RecalculateRequest,
     today: date | None = None,
-):
+) -> tuple[BudgetPlan, TimelinePlan, VendorPlan]:
     """Run pure deterministic calculations across budget, timeline, and vendors."""
     budget_plan = generate_budget_plan(
         total_budget=request.total_budget,

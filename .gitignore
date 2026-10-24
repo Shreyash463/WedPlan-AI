@@ -26,6 +26,9 @@ wheels/
 
 # Testing & Coverage
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+frontend/coverage/
 .coverage
 htmlcov/
 .coverage.*

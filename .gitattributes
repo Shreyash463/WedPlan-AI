@@ -1,0 +1,7 @@
+# Git attributes for WedPlan AI
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.pdf binary

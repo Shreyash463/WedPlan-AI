@@ -9,7 +9,8 @@ from pathlib import Path
 # Enable UTF-8 console output on Windows
 if sys.stdout.encoding != "utf-8":
     with contextlib.suppress(Exception):
-        sys.stdout.reconfigure(encoding="utf-8")
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")
 
 # Ensure root dir in path
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
