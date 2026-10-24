@@ -16,9 +16,9 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
   vendors,
   weddingDate,
   today,
-  completedTaskIds,
-  onToggleTask,
-  disclaimer,
+  completedTaskIds = [],
+  onToggleTask = () => {},
+  disclaimer = "",
 }) => {
   const pendingTasks = timeline.tasks.filter((t) => !completedTaskIds.includes(t.id));
   const nextThreeActions = pendingTasks.slice(0, 3);
