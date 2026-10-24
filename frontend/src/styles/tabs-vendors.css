@@ -1,0 +1,221 @@
+/* =====================================================
+   VENDORS TAB - CHECKLIST & CONTRACTS
+   ===================================================== */
+
+.vendors-tab-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.vendors-header-banner {
+  margin-bottom: var(--space-xs);
+}
+
+.vendors-section-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px 0;
+}
+
+.vendors-section-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.vendors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-lg);
+}
+
+.vendor-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.vendor-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.vendor-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.vendor-title {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.vendor-badge-overdue {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--alert-critical-bg);
+  color: var(--alert-critical-text);
+  border: 1px solid var(--alert-critical-border);
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.vendor-badge-soon,
+.book-soon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--alert-warning-bg);
+  color: var(--alert-warning-text);
+  border: 1px solid var(--alert-warning-border);
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.vendor-lead-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.825rem;
+  color: var(--color-text-muted);
+}
+
+.book-by-highlight {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.vendor-budget-badge {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.vendor-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.status-pills-group {
+  display: flex;
+  gap: 6px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.775rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: all 0.15s ease;
+}
+
+.status-pill.status-chip-not-started.active {
+  background: var(--color-surface-subtle);
+  border-color: var(--color-text-muted);
+  color: var(--color-text-main);
+  font-weight: 700;
+}
+
+.status-pill.status-chip-contacted.active {
+  background: var(--color-tight-bg);
+  border-color: var(--color-tight);
+  color: var(--color-tight);
+  font-weight: 700;
+}
+
+.status-pill.status-chip-booked.active {
+  background: var(--color-healthy-bg);
+  border-color: var(--color-healthy);
+  color: var(--color-healthy);
+  font-weight: 700;
+}
+
+.vendor-payment-guidance {
+  background: var(--color-surface-subtle);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.825rem;
+  color: var(--color-text-main);
+}
+
+.vendor-accordion {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin-top: 6px;
+}
+
+.vendor-accordion summary {
+  padding: 8px 12px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-surface-subtle);
+  user-select: none;
+}
+
+.accordion-content-list {
+  padding: 8px 12px;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.accordion-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.825rem;
+  color: var(--color-text-main);
+  line-height: 1.4;
+}
+
+.bullet-indicator {
+  color: var(--color-primary);
+  font-weight: bold;
+}

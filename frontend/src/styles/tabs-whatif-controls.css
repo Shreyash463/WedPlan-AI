@@ -1,0 +1,105 @@
+/* =====================================================
+   BUDGET TAB - WHAT-IF CONTROLS (GUEST STEPPER & CHIPS)
+   ===================================================== */
+
+.guest-stepper-control {
+  display: inline-flex;
+  align-self: flex-start;
+  width: fit-content;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.stepper-action-btn {
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--color-surface-subtle);
+  color: var(--color-text-main);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.stepper-action-btn:hover:not(:disabled) {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.stepper-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.guest-stepper-input {
+  width: 80px;
+  height: 44px;
+  border: none;
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-text-main);
+  background: transparent;
+}
+
+.guest-stepper-input:focus {
+  outline: none;
+  background: var(--color-primary-light);
+}
+
+.stepper-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.per-guest-calc {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.priorities-simulator-group {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: var(--space-xs);
+}
+
+.priority-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.priority-chip {
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.priority-chip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.priority-chip.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #FFFFFF;
+}

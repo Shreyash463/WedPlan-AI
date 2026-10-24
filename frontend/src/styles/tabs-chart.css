@@ -1,0 +1,131 @@
+/* =====================================================
+   OVERVIEW TAB - CHARTS (DONUT & PROGRESS RING)
+   ===================================================== */
+
+/* Donut Chart Component */
+.donut-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+}
+
+.donut-svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.04));
+}
+
+.donut-segment {
+  transition: stroke-width 0.2s ease;
+  cursor: pointer;
+}
+
+.donut-segment:hover {
+  stroke-width: 32;
+}
+
+.donut-center-total {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  fill: var(--color-text-main);
+}
+
+.donut-center-sub {
+  font-size: 0.75rem;
+  font-weight: 600;
+  fill: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.donut-legend {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+}
+
+@media (max-width: 480px) {
+  .donut-legend {
+    grid-template-columns: 1fr;
+  }
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.825rem;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-category {
+  flex: 1;
+  color: var(--color-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legend-pct {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.legend-amount {
+  font-weight: 700;
+  color: var(--color-text-main);
+  min-width: 50px;
+  text-align: right;
+}
+
+/* Progress Ring Card */
+.progress-ring-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-top: var(--space-sm);
+}
+
+.progress-ring-svg {
+  flex-shrink: 0;
+}
+
+.ring-percentage {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  fill: var(--color-primary);
+}
+
+.ring-subtext {
+  font-size: 0.7rem;
+  font-weight: 600;
+  fill: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.progress-ring-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.progress-count {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.progress-hint {
+  font-size: 0.825rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin: 0;
+}

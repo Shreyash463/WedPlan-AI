@@ -1,0 +1,149 @@
+/* =====================================================
+   OVERVIEW TAB - ALERTS & NEXT ACTIONS
+   ===================================================== */
+
+.alerts-card {
+  border-left: 4px solid var(--color-accent-gold);
+}
+
+.alerts-subheading {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.alerts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.alert-item.warning {
+  background: var(--alert-warning-bg);
+  color: var(--alert-warning-text);
+  border-left: 4px solid var(--alert-warning-border);
+}
+
+.alert-item.critical {
+  background: var(--alert-critical-bg);
+  color: var(--alert-critical-text);
+  border-left: 4px solid var(--alert-critical-border);
+}
+
+.alert-item.tip,
+.alert-item.suggestion {
+  background: var(--alert-tip-bg);
+  color: var(--alert-tip-text);
+  border-left: 4px solid var(--alert-tip-border);
+}
+
+.alert-badge-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.alert-severity-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.alert-cat-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.alert-message {
+  flex: 1;
+}
+
+.alerts-empty {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-style: italic;
+  padding: var(--space-sm) 0;
+}
+
+/* Next Actions Card */
+.next-actions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.next-action-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  gap: 12px;
+}
+
+.next-action-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.next-action-due {
+  font-size: 0.775rem;
+  color: var(--color-text-muted);
+}
+
+/* Overdue Alert Chips */
+.overdue-alert-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.overdue-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  color: var(--color-text-main);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.775rem;
+  font-weight: 600;
+}
+
+.overdue-chip-weeks {
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  font-weight: 400;
+}

@@ -1,60 +1,38 @@
-import React, { useState } from "react";
-import { PlanFormInput, PlanResponse } from "./types";
-import { createPlan, ApiClientError } from "./api/client";
-import { useLocalStorage } from "./hooks/useLocalStorage";
+import React from "react";
+import { PlanFormInput } from "./types";
 import { SkipLink } from "./components/SkipLink";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { IntakeForm } from "./components/IntakeForm";
 import { Dashboard } from "./components/Dashboard";
 import { Notice } from "./components/common/Notice";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { usePlan } from "./hooks/usePlan";
 
 export const App: React.FC = () => {
-  const [currentPlan, setCurrentPlan] = useLocalStorage<PlanResponse | null>(
-    "wedplan_active_plan",
-    null
-  );
-  const [activeFormData, setActiveFormData] = useLocalStorage<PlanFormInput | null>(
-    "wedplan_form_data",
-    null
-  );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const {
+    currentPlan,
+    formData,
+    isLoading,
+    apiError,
+    submitPlan,
+    editDetails,
+  } = usePlan();
 
-  const handleFormSubmit = async (formData: PlanFormInput) => {
-    setIsLoading(true);
-    setApiError(null);
+  const handleFormSubmit = async (input: PlanFormInput) => {
     try {
-      const response = await createPlan(formData);
-      setCurrentPlan(response);
-      setActiveFormData(formData);
-      // Scroll to top of main content
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err: unknown) {
-      if (err instanceof ApiClientError) {
-        setApiError(err.message);
-      } else {
-        setApiError(
-          "An unexpected error occurred while compiling your wedding plan. Please check your connection and retry."
-        );
-      }
-    } finally {
-      setIsLoading(false);
+      await submitPlan(input);
+    } catch {
+      // Error is stored in apiError state
     }
   };
 
-  const handleEditDetails = () => {
-    setCurrentPlan(null);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   return (
-    <>
+    <ErrorBoundary>
       <SkipLink />
       <Header />
 
       <main id="main-content" className="main-content" role="main">
-        {/* Screen Reader Live Announcement */}
         <div className="sr-only" aria-live="polite">
           {isLoading && "Creating your personalized wedding plan..."}
           {currentPlan &&
@@ -73,19 +51,19 @@ export const App: React.FC = () => {
           <IntakeForm
             onSubmit={handleFormSubmit}
             isLoading={isLoading}
-            initialValues={activeFormData || undefined}
+            initialValues={formData || undefined}
           />
         ) : (
           <Dashboard
             initialPlan={currentPlan}
-            formData={activeFormData!}
-            onEditDetails={handleEditDetails}
+            formData={formData!}
+            onEditDetails={editDetails}
           />
         )}
       </main>
 
       <Footer />
-    </>
+    </ErrorBoundary>
   );
 };
 
