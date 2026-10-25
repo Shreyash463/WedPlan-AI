@@ -7,10 +7,7 @@ interface PriorityChipsProps {
   setSelectedPriorities: React.Dispatch<React.SetStateAction<Priority[]>>;
 }
 
-export const PriorityChips: React.FC<PriorityChipsProps> = ({
-  selectedPriorities,
-  setSelectedPriorities,
-}) => {
+export const PriorityChips: React.FC<PriorityChipsProps> = ({ selectedPriorities, setSelectedPriorities }) => {
   const handlePriorityToggle = (p: Priority) => {
     setSelectedPriorities((prev) => {
       if (prev.includes(p)) return prev.filter((item) => item !== p);

@@ -9,14 +9,7 @@ export interface ModalProps {
   id?: string;
 }
 
-export const Modal: React.FC<ModalProps> = ({
-  isOpen,
-  onClose,
-  title,
-  children,
-  footer,
-  id = "modal-dialog",
-}) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer, id = "modal-dialog" }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 
@@ -66,12 +59,7 @@ export const Modal: React.FC<ModalProps> = ({
           <h2 id={`${id}-title`} className="modal-title">
             {title}
           </h2>
-          <button
-            type="button"
-            className="modal-close-btn"
-            onClick={onClose}
-            aria-label="Close dialog"
-          >
+          <button type="button" className="modal-close-btn" onClick={onClose} aria-label="Close dialog">
             ×
           </button>
         </div>

@@ -51,7 +51,7 @@
 
 .toggle-option.active {
   background: var(--color-primary);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .table-responsive {

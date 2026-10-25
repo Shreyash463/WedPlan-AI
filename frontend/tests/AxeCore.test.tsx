@@ -81,9 +81,7 @@ const samplePlan: PlanResponse = {
 
 describe("Axe-Core Automated Accessibility Verification", () => {
   it("IntakeForm has zero critical accessibility violations", async () => {
-    const { container } = render(
-      <IntakeForm onSubmit={() => {}} isLoading={false} />
-    );
+    const { container } = render(<IntakeForm onSubmit={() => {}} isLoading={false} />);
     const results = await axe(container);
     expect(results.violations).toEqual([]);
   });
@@ -124,23 +122,14 @@ describe("Axe-Core Automated Accessibility Verification", () => {
 
   it("TimelineTab has zero accessibility violations", async () => {
     const { container } = render(
-      <TimelineTab
-        timelinePlan={samplePlan.timeline}
-        completedTasks={[]}
-        onToggleTask={() => {}}
-      />
+      <TimelineTab timelinePlan={samplePlan.timeline} completedTasks={[]} onToggleTask={() => {}} />
     );
     const results = await axe(container);
     expect(results.violations).toEqual([]);
   });
 
   it("VendorsTab has zero accessibility violations", async () => {
-    const { container } = render(
-      <VendorsTab
-        vendorPlan={samplePlan.vendors}
-        weddingDate="2026-11-20"
-      />
-    );
+    const { container } = render(<VendorsTab vendorPlan={samplePlan.vendors} weddingDate="2026-11-20" />);
     const results = await axe(container);
     expect(results.violations).toEqual([]);
   });

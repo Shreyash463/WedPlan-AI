@@ -43,9 +43,7 @@ export const BudgetGuestsSection: React.FC<BudgetGuestsSectionProps> = ({
               Total Budget (INR) <span className="required-indicator">*</span>
             </label>
             <span className="live-words-pill" aria-live="polite">
-              {numericBudget !== null && inWords
-                ? `${formatCurrencyINR(numericBudget)} (${inWords})`
-                : "—"}
+              {numericBudget !== null && inWords ? `${formatCurrencyINR(numericBudget)} (${inWords})` : "—"}
             </span>
           </div>
           <input
@@ -60,9 +58,7 @@ export const BudgetGuestsSection: React.FC<BudgetGuestsSectionProps> = ({
             onBlur={onBudgetBlur}
             placeholder="e.g. 25,00,000"
             aria-invalid={!!(touched.totalBudget && errors.totalBudget)}
-            aria-describedby={
-              errors.totalBudget ? "totalBudget-error" : "totalBudget-help"
-            }
+            aria-describedby={errors.totalBudget ? "totalBudget-error" : "totalBudget-help"}
             autoComplete="off"
           />
           {touched.totalBudget && errors.totalBudget ? (
@@ -82,9 +78,7 @@ export const BudgetGuestsSection: React.FC<BudgetGuestsSectionProps> = ({
               Guest Count <span className="required-indicator">*</span>
             </label>
             <span className="live-words-pill" aria-live="polite">
-              {livePerGuest !== null
-                ? `Est. ${formatCurrencyINR(livePerGuest)} / guest`
-                : "—"}
+              {livePerGuest !== null ? `Est. ${formatCurrencyINR(livePerGuest)} / guest` : "—"}
             </span>
           </div>
           <input
@@ -99,9 +93,7 @@ export const BudgetGuestsSection: React.FC<BudgetGuestsSectionProps> = ({
             onBlur={onGuestsBlur}
             placeholder="e.g. 350"
             aria-invalid={!!(touched.guestCount && errors.guestCount)}
-            aria-describedby={
-              errors.guestCount ? "guestCount-error" : "guestCount-help"
-            }
+            aria-describedby={errors.guestCount ? "guestCount-error" : "guestCount-help"}
             autoComplete="off"
           />
           {touched.guestCount && errors.guestCount ? (

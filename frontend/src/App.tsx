@@ -10,14 +10,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { usePlan } from "./hooks/usePlan";
 
 export const App: React.FC = () => {
-  const {
-    currentPlan,
-    formData,
-    isLoading,
-    apiError,
-    submitPlan,
-    editDetails,
-  } = usePlan();
+  const { currentPlan, formData, isLoading, apiError, submitPlan, editDetails } = usePlan();
 
   const handleFormSubmit = async (input: PlanFormInput) => {
     try {
@@ -36,9 +29,7 @@ export const App: React.FC = () => {
         <div className="sr-only" aria-live="polite">
           {isLoading && "Creating your personalized wedding plan..."}
           {currentPlan &&
-            `Wedding plan successfully generated for ${
-              currentPlan.overview.couple_name || "your celebration"
-            }.`}
+            `Wedding plan successfully generated for ${currentPlan.overview.couple_name || "your celebration"}.`}
         </div>
 
         {apiError && (
@@ -48,17 +39,9 @@ export const App: React.FC = () => {
         )}
 
         {!currentPlan ? (
-          <IntakeForm
-            onSubmit={handleFormSubmit}
-            isLoading={isLoading}
-            initialValues={formData || undefined}
-          />
+          <IntakeForm onSubmit={handleFormSubmit} isLoading={isLoading} initialValues={formData || undefined} />
         ) : (
-          <Dashboard
-            initialPlan={currentPlan}
-            formData={formData!}
-            onEditDetails={editDetails}
-          />
+          <Dashboard initialPlan={currentPlan} formData={formData!} onEditDetails={editDetails} />
         )}
       </main>
 

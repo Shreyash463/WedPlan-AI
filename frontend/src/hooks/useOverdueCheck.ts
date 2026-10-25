@@ -9,22 +9,14 @@ export interface VendorUrgencyInfo {
   diffDays: number | null;
 }
 
-export function computeVendorUrgency(
-  leadTimeWeeks: number,
-  weddingDate?: string,
-  today?: string
-): VendorUrgencyInfo {
+export function computeVendorUrgency(leadTimeWeeks: number, weddingDate?: string, today?: string): VendorUrgencyInfo {
   if (!weddingDate) {
     return { bookByIso: null, urgency: "normal", diffDays: null };
   }
   try {
     const parts = weddingDate.split("-");
     if (parts.length === 3) {
-      const d = new Date(
-        parseInt(parts[0], 10),
-        parseInt(parts[1], 10) - 1,
-        parseInt(parts[2], 10)
-      );
+      const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
       d.setDate(d.getDate() - leadTimeWeeks * 7);
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -54,11 +46,7 @@ export function computeVendorUrgency(
   return { bookByIso: null, urgency: "normal", diffDays: null };
 }
 
-export function useOverdueCheck(
-  vendors: VendorCategoryItem[],
-  weddingDate?: string,
-  today?: string
-) {
+export function useOverdueCheck(vendors: VendorCategoryItem[], weddingDate?: string, today?: string) {
   return useMemo(() => {
     const overdueList: Array<VendorCategoryItem & { urgencyInfo: VendorUrgencyInfo }> = [];
     const soonList: Array<VendorCategoryItem & { urgencyInfo: VendorUrgencyInfo }> = [];

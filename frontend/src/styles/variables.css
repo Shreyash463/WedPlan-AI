@@ -1,53 +1,53 @@
 /* Design Tokens: Celebratory Indian Wedding Palette with High WCAG Contrast */
 :root {
   /* Brand Colors */
-  --color-primary: #800020;            /* Royal Maroon */
+  --color-primary: #800020; /* Royal Maroon */
   --color-primary-hover: #600018;
-  --color-primary-light: #FDF2F4;
-  --color-accent: #9B1B30;             /* Vermilion */
-  --color-accent-gold: #9A7209;        /* Warm Gold with >= 4.5:1 contrast on light */
-  --color-gold-hover: #7E5D04;
-  --color-gold-light: #FEF9EB;
+  --color-primary-light: #fdf2f4;
+  --color-accent: #9b1b30; /* Vermilion */
+  --color-accent-gold: #9a7209; /* Warm Gold with >= 4.5:1 contrast on light */
+  --color-gold-hover: #7e5d04;
+  --color-gold-light: #fef9eb;
 
   /* Neutral Backgrounds & Surfaces */
-  --color-bg-app: #FCF9F5;             /* Warm Ivory */
-  --color-surface: #FFFFFF;
-  --color-surface-subtle: #F7F3EE;
-  --color-border: #8A7E72;             /* >= 3.9:1 against white/surface */
+  --color-bg-app: #fcf9f5; /* Warm Ivory */
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f7f3ee;
+  --color-border: #8a7e72; /* >= 3.9:1 against white/surface */
   --color-border-focus: #800020;
 
   /* Text & Contrast */
-  --color-text-main: #231F1C;          /* Slate Charcoal (14.5:1 on white) */
-  --color-text-muted: #524C46;         /* WCAG AA >= 6.8:1 on white, >= 5.8:1 on subtle */
-  --color-text-inverse: #FFFFFF;
+  --color-text-main: #231f1c; /* Slate Charcoal (14.5:1 on white) */
+  --color-text-muted: #524c46; /* WCAG AA >= 6.8:1 on white, >= 5.8:1 on subtle */
+  --color-text-inverse: #ffffff;
 
   /* Semantic Feedback Badges */
-  --color-healthy: #166534;            /* Deep Green (6.2:1 on #DCFCE7) */
-  --color-healthy-bg: #DCFCE7;
-  --color-healthy-border: #16A34A;
-  --color-tight: #5A3600;              /* Solid dark amber (9.7:1 on #FFF3DC) */
-  --color-tight-bg: #FFF3DC;
-  --color-tight-border: #B45309;       /* 4.98:1 against #FFF3DC */
-  --color-unrealistic: #7F1D1D;        /* Crimson (8.2:1 on #FEE2E2) */
-  --color-unrealistic-bg: #FEE2E2;
-  --color-unrealistic-border: #DC2626;
+  --color-healthy: #166534; /* Deep Green (6.2:1 on #DCFCE7) */
+  --color-healthy-bg: #dcfce7;
+  --color-healthy-border: #16a34a;
+  --color-tight: #5a3600; /* Solid dark amber (9.7:1 on #FFF3DC) */
+  --color-tight-bg: #fff3dc;
+  --color-tight-border: #b45309; /* 4.98:1 against #FFF3DC */
+  --color-unrealistic: #7f1d1d; /* Crimson (8.2:1 on #FEE2E2) */
+  --color-unrealistic-bg: #fee2e2;
+  --color-unrealistic-border: #dc2626;
 
   /* Solid High-Contrast Alert Tokens (Light Theme: WCAG AA >= 4.5:1 text, >= 3:1 borders/icons) */
-  --alert-warning-bg: #FFF3DC;
-  --alert-warning-text: #5A3600;
-  --alert-warning-border: #B45309;
+  --alert-warning-bg: #fff3dc;
+  --alert-warning-text: #5a3600;
+  --alert-warning-border: #b45309;
 
-  --alert-critical-bg: #FEE2E2;
-  --alert-critical-text: #7F1D1D;
-  --alert-critical-border: #DC2626;
+  --alert-critical-bg: #fee2e2;
+  --alert-critical-text: #7f1d1d;
+  --alert-critical-border: #dc2626;
 
-  --alert-tip-bg: #FEF9EB;
-  --alert-tip-text: #451A03;
-  --alert-tip-border: #9A7209;
+  --alert-tip-bg: #fef9eb;
+  --alert-tip-text: #451a03;
+  --alert-tip-border: #9a7209;
 
-  --alert-info-bg: #EFF6FF;
-  --alert-info-text: #1E3A8A;
-  --alert-info-border: #3B82F6;
+  --alert-info-bg: #eff6ff;
+  --alert-info-text: #1e3a8a;
+  --alert-info-border: #3b82f6;
 
   /* Typography */
   --font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -78,56 +78,56 @@
 
 /* Dark Mode Palette */
 [data-theme="dark"] {
-  --color-primary: #F07185;            /* Rose Crimson (5.8:1 on #221E1C) */
-  --color-primary-hover: #F894A5;
-  --color-primary-light: #2A1A1E;
-  --color-accent: #F07185;
-  --color-accent-gold: #F5CF68;        /* Warm Gold (10.2:1 on #221E1C) */
-  --color-gold-hover: #F9DC8A;
-  --color-gold-light: #2A261A;
+  --color-primary: #f07185; /* Rose Crimson (5.8:1 on #221E1C) */
+  --color-primary-hover: #f894a5;
+  --color-primary-light: #2a1a1e;
+  --color-accent: #f07185;
+  --color-accent-gold: #f5cf68; /* Warm Gold (10.2:1 on #221E1C) */
+  --color-gold-hover: #f9dc8a;
+  --color-gold-light: #2a261a;
 
   --color-bg-app: #161413;
-  --color-surface: #221E1C;
-  --color-surface-subtle: #2C2724;
-  --color-border: #8A817A;             /* >= 4.2:1 against #221E1C surface */
-  --color-border-focus: #F07185;
+  --color-surface: #221e1c;
+  --color-surface-subtle: #2c2724;
+  --color-border: #8a817a; /* >= 4.2:1 against #221E1C surface */
+  --color-border-focus: #f07185;
 
-  --color-text-main: #F8F3EE;          /* (14.2:1 on #221E1C) */
-  --color-text-muted: #B2A8A0;         /* (6.9:1 on #221E1C, 5.8:1 on #2C2724) */
+  --color-text-main: #f8f3ee; /* (14.2:1 on #221E1C) */
+  --color-text-muted: #b2a8a0; /* (6.9:1 on #221E1C, 5.8:1 on #2C2724) */
   --color-text-inverse: #161413;
 
-  --color-healthy: #86EFAC;            /* (9.8:1 on #143320) */
+  --color-healthy: #86efac; /* (9.8:1 on #143320) */
   --color-healthy-bg: #143320;
-  --color-healthy-border: #22C55E;
-  --color-tight: #FFE2B0;              /* Solid light amber (10.5:1 on #3B2A10) */
-  --color-tight-bg: #3B2A10;
-  --color-tight-border: #FBBF24;
-  --color-unrealistic: #FECACA;        /* Soft light crimson (8.8:1 on #451212) */
+  --color-healthy-border: #22c55e;
+  --color-tight: #ffe2b0; /* Solid light amber (10.5:1 on #3B2A10) */
+  --color-tight-bg: #3b2a10;
+  --color-tight-border: #fbbf24;
+  --color-unrealistic: #fecaca; /* Soft light crimson (8.8:1 on #451212) */
   --color-unrealistic-bg: #451212;
-  --color-unrealistic-border: #F87171;
+  --color-unrealistic-border: #f87171;
 
   /* Solid High-Contrast Alert Tokens (Dark Theme: solid pairs WCAG AA >= 4.5:1 text, >= 3:1 borders/icons) */
-  --alert-warning-bg: #3B2A10;
-  --alert-warning-text: #FFE2B0;
-  --alert-warning-border: #FBBF24;
+  --alert-warning-bg: #3b2a10;
+  --alert-warning-text: #ffe2b0;
+  --alert-warning-border: #fbbf24;
 
   --alert-critical-bg: #451212;
-  --alert-critical-text: #FECACA;
-  --alert-critical-border: #F87171;
+  --alert-critical-text: #fecaca;
+  --alert-critical-border: #f87171;
 
-  --alert-tip-bg: #2A2415;
-  --alert-tip-text: #FDE68A;
-  --alert-tip-border: #E5C158;
+  --alert-tip-bg: #2a2415;
+  --alert-tip-text: #fde68a;
+  --alert-tip-border: #e5c158;
 
   --alert-info-bg: #172554;
-  --alert-info-text: #BFDBFE;
-  --alert-info-border: #60A5FA;
+  --alert-info-text: #bfdbfe;
+  --alert-info-border: #60a5fa;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.5);
 
-  --focus-ring: 3px solid #F07185;
+  --focus-ring: 3px solid #f07185;
 }
 
 @media (prefers-reduced-motion: reduce) {

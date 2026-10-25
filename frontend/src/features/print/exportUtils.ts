@@ -1,15 +1,7 @@
 import { CANONICAL_PHASES, PlanResponse, TimelineTask } from "../../types";
-import {
-  capitalizeCity,
-  formatCurrencyINR,
-  formatDateReadable,
-  formatPercentage,
-} from "../../utils/formatters";
+import { capitalizeCity, formatCurrencyINR, formatDateReadable, formatPercentage } from "../../utils/formatters";
 
-export function buildPlainTextExport(
-  plan: PlanResponse,
-  completedTasks: string[]
-): string {
+export function buildPlainTextExport(plan: PlanResponse, completedTasks: string[]): string {
   const tasksByPhase: Record<string, TimelineTask[]> = {};
   for (const p of CANONICAL_PHASES) tasksByPhase[p] = [];
   for (const t of plan.timeline.tasks) {

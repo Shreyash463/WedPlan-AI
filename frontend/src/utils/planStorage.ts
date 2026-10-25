@@ -125,10 +125,7 @@ export function getStoredVendorStatuses(hash: string): Record<string, VendorStat
 /**
  * Saves vendor status dictionary for a specific plan fingerprint.
  */
-export function saveStoredVendorStatuses(
-  hash: string,
-  statuses: Record<string, VendorStatus>
-): void {
+export function saveStoredVendorStatuses(hash: string, statuses: Record<string, VendorStatus>): void {
   try {
     if (typeof window === "undefined" || !window.localStorage) return;
     registerPlanAccess(hash);

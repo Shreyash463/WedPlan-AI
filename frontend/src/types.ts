@@ -1,28 +1,12 @@
 export type CityTier = "Metro" | "Tier-2" | "Tier-3";
 
 export type WeddingStyle =
-  | "Traditional"
-  | "Royal/Palace"
-  | "Modern Minimal"
-  | "Destination"
-  | "Eco-friendly"
-  | "Budget-smart";
+  "Traditional" | "Royal/Palace" | "Modern Minimal" | "Destination" | "Eco-friendly" | "Budget-smart";
 
-export type WeddingFunction =
-  | "Engagement"
-  | "Haldi"
-  | "Mehendi"
-  | "Sangeet"
-  | "Wedding"
-  | "Reception";
+export type WeddingFunction = "Engagement" | "Haldi" | "Mehendi" | "Sangeet" | "Wedding" | "Reception";
 
 export type Priority =
-  | "Food"
-  | "Venue & Decor"
-  | "Photography"
-  | "Music & Entertainment"
-  | "Attire & Jewellery"
-  | "Guest Experience";
+  "Food" | "Venue & Decor" | "Photography" | "Music & Entertainment" | "Attire & Jewellery" | "Guest Experience";
 
 export type BudgetHealth = "Healthy" | "Tight" | "Unrealistic";
 

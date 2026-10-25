@@ -8,11 +8,7 @@ interface SmartAlertsProps {
   sortedOverdueVendors: VendorCategoryItem[];
 }
 
-export const SmartAlerts: React.FC<SmartAlertsProps> = ({
-  effectiveWarnings,
-  suggestions,
-  sortedOverdueVendors,
-}) => {
+export const SmartAlerts: React.FC<SmartAlertsProps> = ({ effectiveWarnings, suggestions, sortedOverdueVendors }) => {
   const [isOverdueExpanded, setIsOverdueExpanded] = useState<boolean>(false);
 
   if (effectiveWarnings.length === 0 && suggestions.length === 0) {
@@ -62,9 +58,7 @@ export const SmartAlerts: React.FC<SmartAlertsProps> = ({
                             {sortedOverdueVendors.map((v) => (
                               <li key={v.id} className="overdue-vendor-chip">
                                 <span className="overdue-chip-name">{v.name}</span>
-                                <span className="overdue-chip-weeks">
-                                  ({v.lead_time_weeks}w lead time)
-                                </span>
+                                <span className="overdue-chip-weeks">({v.lead_time_weeks}w lead time)</span>
                               </li>
                             ))}
                           </ul>

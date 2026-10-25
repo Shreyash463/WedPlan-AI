@@ -226,18 +226,19 @@ def test_city_name_casing_normalization():
     """Verify city name inputs like 'pune', 'NAGPUR', 'navi mumbai' are normalized to Title Case."""
     wedding_date = (date.today() + timedelta(days=90)).isoformat()
     test_cities = [
-        ("pune", "Pune"),
-        ("NAGPUR", "Nagpur"),
-        ("navi mumbai", "Navi Mumbai"),
-        ("hubli-dharwad", "Hubli-Dharwad"),
+        ("pune", "Pune"), ("NAGPUR", "Nagpur"), ("navi mumbai", "Navi Mumbai"), ("hubli-dharwad", "Hubli-Dharwad")
     ]
+    base_payload = {
+        "wedding_date": wedding_date,
+        "city_tier": "Tier-2",
+        "total_budget": 1_500_000,
+        "guest_count": 200,
+        "functions": ["Wedding"],
+        "style": "Traditional",
+        "priorities": [],
+    }
     for input_city, expected_city in test_cities:
-        payload = {
-            "wedding_date": wedding_date, "city": input_city, "city_tier": "Tier-2",
-            "total_budget": 1_500_000, "guest_count": 200, "functions": ["Wedding"],
-            "style": "Traditional", "priorities": [],
-        }
-        res = client.post("/api/plan", json=payload)
+        res = client.post("/api/plan", json={**base_payload, "city": input_city})
         assert res.status_code == 200
         plan = res.json()
         assert plan["overview"]["city"] == expected_city

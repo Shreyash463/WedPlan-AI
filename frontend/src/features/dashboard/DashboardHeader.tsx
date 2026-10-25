@@ -1,11 +1,6 @@
 import React from "react";
 import { PlanResponse } from "../../types";
-import {
-  capitalizeCity,
-  formatCoupleName,
-  formatCurrencyINR,
-  formatDateReadable,
-} from "../../utils/formatters";
+import { capitalizeCity, formatCoupleName, formatCurrencyINR, formatDateReadable } from "../../utils/formatters";
 import { CopyIcon, EditIcon, PrintIcon } from "../../components/common/Icons";
 
 interface DashboardHeaderProps {
@@ -32,9 +27,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       <div className="dashboard-header-top">
         <div className="title-area">
           <h1 className="plan-title">
-            {coupleNameFormatted
-              ? `${coupleNameFormatted}'s Celebration Plan`
-              : "Your Personalized Wedding Plan"}
+            {coupleNameFormatted ? `${coupleNameFormatted}'s Celebration Plan` : "Your Personalized Wedding Plan"}
           </h1>
           <div className="plan-meta-chips">
             <span className="meta-chip date-chip">
@@ -43,9 +36,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <span className="meta-chip city-chip">
               {capitalizeCity(plan.overview.city)} ({plan.overview.city_tier})
             </span>
-            <span className="meta-chip style-chip">
-              {style} Style
-            </span>
+            <span className="meta-chip style-chip">{style} Style</span>
           </div>
         </div>
 

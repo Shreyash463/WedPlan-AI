@@ -6,12 +6,7 @@ import {
   sanitizeDigitsOnly,
 } from "../../utils/formatters";
 import { RupeeIcon } from "../../components/common/Icons";
-import {
-  MIN_BUDGET,
-  MAX_BUDGET,
-  budgetToSlider,
-  sliderToBudget,
-} from "../../hooks/useWhatIf";
+import { MIN_BUDGET, MAX_BUDGET, budgetToSlider, sliderToBudget } from "../../hooks/useWhatIf";
 
 interface BudgetSliderSyncProps {
   sliderBudget: number;
@@ -85,7 +80,9 @@ export const BudgetSliderSync: React.FC<BudgetSliderSyncProps> = ({
         </div>
 
         <div className="exact-input-wrapper">
-          <label htmlFor="exactBudgetInput" className="sr-only">Type exact budget amount in INR</label>
+          <label htmlFor="exactBudgetInput" className="sr-only">
+            Type exact budget amount in INR
+          </label>
           <div className="rupee-input-prefix">₹</div>
           <input
             id="exactBudgetInput"

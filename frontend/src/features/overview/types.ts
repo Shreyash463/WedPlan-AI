@@ -1,10 +1,4 @@
-import {
-  BudgetPlan,
-  OverviewData,
-  TimelinePlan,
-  VendorPlan,
-  WeddingFunction,
-} from "../../types";
+import { BudgetPlan, OverviewData, TimelinePlan, VendorPlan, WeddingFunction } from "../../types";
 
 export interface OverviewTabProps {
   overview: OverviewData;
@@ -20,8 +14,8 @@ export interface OverviewTabProps {
 }
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  "Venue": "#800020",
-  "Catering": "#C04000",
+  Venue: "#800020",
+  Catering: "#C04000",
   "Decor & Florals": "#D4AF37",
   "Photography & Video": "#2E5B88",
   "Attire & Jewellery": "#8E3B68",
@@ -29,5 +23,5 @@ export const CATEGORY_COLORS: Record<string, string> = {
   "Invitations & Stationery": "#81B29A",
   "Makeup & Mehendi": "#DDA15E",
   "Logistics, Transport & Stay": "#3D405B",
-  "Contingency": "#6C757D",
+  Contingency: "#6C757D",
 };

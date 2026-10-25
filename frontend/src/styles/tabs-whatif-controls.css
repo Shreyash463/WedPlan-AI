@@ -101,5 +101,5 @@
 .priority-chip.selected {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: #FFFFFF;
+  color: #ffffff;
 }

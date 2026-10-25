@@ -6,7 +6,10 @@ import { describe, it, expect } from "vitest";
 function parseHex(hex: string): [number, number, number] {
   let clean = hex.replace("#", "").trim();
   if (clean.length === 3) {
-    clean = clean.split("").map((c) => c + c).join("");
+    clean = clean
+      .split("")
+      .map((c) => c + c)
+      .join("");
   }
   const r = parseInt(clean.substring(0, 2), 16);
   const g = parseInt(clean.substring(2, 4), 16);

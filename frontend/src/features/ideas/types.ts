@@ -1,10 +1,4 @@
-import {
-  CityTier,
-  IdeasPlan,
-  Priority,
-  WeddingFunction,
-  WeddingStyle,
-} from "../../types";
+import { CityTier, IdeasPlan, Priority, WeddingFunction, WeddingStyle } from "../../types";
 
 export interface IdeasTabProps {
   ideasPlan: IdeasPlan;

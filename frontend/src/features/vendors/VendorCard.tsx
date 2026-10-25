@@ -32,20 +32,12 @@ export const VendorCard: React.FC<VendorCardProps> = ({
           <div className="vendor-title-row">
             <h3 className="vendor-title">{vendor.name}</h3>
             {urgency === "overdue" && (
-              <span
-                className="vendor-badge-overdue"
-                role="status"
-                aria-label={`Overdue: book now for ${vendor.name}`}
-              >
+              <span className="vendor-badge-overdue" role="status" aria-label={`Overdue: book now for ${vendor.name}`}>
                 <AlertTriangleIcon size={12} color="currentColor" /> Overdue: book now
               </span>
             )}
             {urgency === "soon" && (
-              <span
-                className="vendor-badge-soon"
-                role="status"
-                aria-label={`Book soon for ${vendor.name}`}
-              >
+              <span className="vendor-badge-soon" role="status" aria-label={`Book soon for ${vendor.name}`}>
                 <AlertTriangleIcon size={12} color="currentColor" /> Book soon
               </span>
             )}
@@ -53,16 +45,10 @@ export const VendorCard: React.FC<VendorCardProps> = ({
           <div className="vendor-lead-info">
             <ClockIcon size={14} color="var(--color-text-muted)" />
             <span>Lead time: {vendor.lead_time_weeks} weeks before</span>
-            {bookByIso && (
-              <span className="book-by-highlight">
-                (Book by {formatDateReadable(bookByIso)})
-              </span>
-            )}
+            {bookByIso && <span className="book-by-highlight">(Book by {formatDateReadable(bookByIso)})</span>}
           </div>
         </div>
-        <div className="vendor-budget-badge">
-          {formatCurrencyINR(vendor.allocated_budget)}
-        </div>
+        <div className="vendor-budget-badge">{formatCurrencyINR(vendor.allocated_budget)}</div>
       </div>
 
       <div className="vendor-status-row">
@@ -93,9 +79,7 @@ export const VendorCard: React.FC<VendorCardProps> = ({
 
       <div className="accordion-section">
         <details className="vendor-accordion">
-          <summary>
-            Questions to Ask During Tasting / Meetings ({vendor.questions_to_ask.length})
-          </summary>
+          <summary>Questions to Ask During Tasting / Meetings ({vendor.questions_to_ask.length})</summary>
           <ul className="accordion-content-list">
             {vendor.questions_to_ask.map((q, idx) => (
               <li key={idx} className="accordion-list-item">
@@ -107,9 +91,7 @@ export const VendorCard: React.FC<VendorCardProps> = ({
         </details>
 
         <details className="vendor-accordion">
-          <summary>
-            Contract Clauses & Must-Haves ({vendor.contract_must_haves.length})
-          </summary>
+          <summary>Contract Clauses & Must-Haves ({vendor.contract_must_haves.length})</summary>
           <ul className="accordion-content-list">
             {vendor.contract_must_haves.map((c, idx) => (
               <li key={idx} className="accordion-list-item">

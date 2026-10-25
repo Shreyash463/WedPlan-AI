@@ -4,14 +4,8 @@ import { createPlan, ApiClientError } from "../api/client";
 import { useLocalStorage } from "./useLocalStorage";
 
 export function usePlan() {
-  const [currentPlan, setCurrentPlan] = useLocalStorage<PlanResponse | null>(
-    "wedplan_active_plan",
-    null
-  );
-  const [formData, setFormData] = useLocalStorage<PlanFormInput | null>(
-    "wedplan_form_data",
-    null
-  );
+  const [currentPlan, setCurrentPlan] = useLocalStorage<PlanResponse | null>("wedplan_active_plan", null);
+  const [formData, setFormData] = useLocalStorage<PlanFormInput | null>("wedplan_form_data", null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string | null>(null);
 

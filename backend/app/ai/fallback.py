@@ -119,20 +119,22 @@ def _build_catering_list(
 
 def _build_activities_list(func_names: Sequence[str], style_val: str, is_tight: bool) -> list[FunctionActivity]:
     """Assemble ceremony activities mapped to selected functions."""
-    activities: list[FunctionActivity] = []
-    if "Haldi" in func_names:
-        act = "Family dholak circle with organic turmeric paste and fragrant yellow marigold petals." if is_tight else "Organic yellow marigold petal shower with traditional brass urlis and dholki folk songs."
-        activities.append(FunctionActivity(function="Haldi", activity=act))
-    if "Mehendi" in func_names:
-        activities.append(FunctionActivity(function="Mehendi", activity="Live bangles counter, customized nail-art, and relaxing organic henna application."))
-    if "Sangeet" in func_names:
-        activities.append(FunctionActivity(function="Sangeet", activity="Interactive family dance face-off, retro Bollywood medley, and live Punjabi dhol players."))
-    if "Wedding" in func_names:
-        act = "Heartfelt varmala ceremony surrounded by close family with fresh rose petal shower." if is_tight else "Auspicious varmala reveal with warm amber lighting and classical shehnai."
-        activities.append(FunctionActivity(function="Wedding", activity=act))
-    if "Reception" in func_names:
-        activities.append(FunctionActivity(function="Reception", activity="Stately couple stage entry with unplugged acoustic music and celebratory cake cutting."))
-    return activities
+    templates = {
+        "Haldi": (
+            "Family dholak circle with organic turmeric paste and fragrant yellow marigold petals."
+            if is_tight
+            else "Organic yellow marigold petal shower with traditional brass urlis and dholki folk songs."
+        ),
+        "Mehendi": "Live bangles counter, customized nail-art, and relaxing organic henna application.",
+        "Sangeet": "Interactive family dance face-off, retro Bollywood medley, and live Punjabi dhol players.",
+        "Wedding": (
+            "Heartfelt varmala ceremony surrounded by close family with fresh rose petal shower."
+            if is_tight
+            else "Auspicious varmala reveal with warm amber lighting and classical shehnai."
+        ),
+        "Reception": "Stately couple stage entry with unplugged acoustic music and celebratory cake cutting.",
+    }
+    return [FunctionActivity(function=fn, activity=templates[fn]) for fn in func_names if fn in templates]
 
 
 def _build_hacks_list(

@@ -73,9 +73,7 @@ export const BasicsSection: React.FC<BasicsSectionProps> = ({
             }}
             onBlur={() => onBlur("weddingDate")}
             aria-invalid={!!(touched.weddingDate && errors.weddingDate)}
-            aria-describedby={
-              errors.weddingDate ? "weddingDate-error" : "weddingDate-help"
-            }
+            aria-describedby={errors.weddingDate ? "weddingDate-error" : "weddingDate-help"}
           />
           {touched.weddingDate && errors.weddingDate ? (
             <span id="weddingDate-error" className="field-error" role="alert">

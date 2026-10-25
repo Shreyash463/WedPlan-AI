@@ -98,13 +98,7 @@ const mockFormData: PlanFormInput = {
 
 describe("Dashboard Component", () => {
   it("renders 5 tabs with ARIA roles and default Overview selected", async () => {
-    render(
-      <Dashboard
-        initialPlan={mockPlan}
-        formData={mockFormData}
-        onEditDetails={vi.fn()}
-      />
-    );
+    render(<Dashboard initialPlan={mockPlan} formData={mockFormData} onEditDetails={vi.fn()} />);
 
     const tablist = screen.getByRole("tablist", { name: /planning sections/i });
     expect(tablist).toBeInTheDocument();
@@ -122,13 +116,7 @@ describe("Dashboard Component", () => {
   });
 
   it("navigates tabs via arrow keys", async () => {
-    render(
-      <Dashboard
-        initialPlan={mockPlan}
-        formData={mockFormData}
-        onEditDetails={vi.fn()}
-      />
-    );
+    render(<Dashboard initialPlan={mockPlan} formData={mockFormData} onEditDetails={vi.fn()} />);
 
     const overviewTab = screen.getByRole("tab", { name: /overview/i });
     overviewTab.focus();
@@ -141,13 +129,7 @@ describe("Dashboard Component", () => {
   });
 
   it("switches to timeline tab and checks task", async () => {
-    render(
-      <Dashboard
-        initialPlan={mockPlan}
-        formData={mockFormData}
-        onEditDetails={vi.fn()}
-      />
-    );
+    render(<Dashboard initialPlan={mockPlan} formData={mockFormData} onEditDetails={vi.fn()} />);
 
     const timelineTab = screen.getByRole("tab", { name: /timeline/i });
     fireEvent.click(timelineTab);
@@ -164,13 +146,7 @@ describe("Dashboard Component", () => {
   });
 
   it("handles copy plan and print buttons", async () => {
-    render(
-      <Dashboard
-        initialPlan={mockPlan}
-        formData={mockFormData}
-        onEditDetails={vi.fn()}
-      />
-    );
+    render(<Dashboard initialPlan={mockPlan} formData={mockFormData} onEditDetails={vi.fn()} />);
 
     const printBtn = screen.getByRole("button", { name: /print or download/i });
     fireEvent.click(printBtn);

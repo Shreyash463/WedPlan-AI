@@ -54,18 +54,11 @@ export const NumericInput: React.FC<NumericInputProps> = ({
 
   const displayValue = isFocused ? value : formatDigitsIndianGrouping(value);
   const numericVal = parseNumericDigits(value);
-  const wordsHelper =
-    showWordsHelper && numericVal && numericVal > 0
-      ? formatNumberToIndianWords(numericVal)
-      : null;
+  const wordsHelper = showWordsHelper && numericVal && numericVal > 0 ? formatNumberToIndianWords(numericVal) : null;
 
   const helperId = `${id}-helper`;
   const errorId = `${id}-error`;
-  const describedBy = [
-    ariaDescribedBy,
-    wordsHelper ? helperId : null,
-    error ? errorId : null,
-  ]
+  const describedBy = [ariaDescribedBy, wordsHelper ? helperId : null, error ? errorId : null]
     .filter(Boolean)
     .join(" ");
 
@@ -98,7 +91,8 @@ export const NumericInput: React.FC<NumericInputProps> = ({
 
       {wordsHelper && (
         <div id={helperId} className="input-words-hint" aria-live="polite">
-          ≈ {prefix ? `${prefix} ` : ""}{wordsHelper}
+          ≈ {prefix ? `${prefix} ` : ""}
+          {wordsHelper}
         </div>
       )}
 

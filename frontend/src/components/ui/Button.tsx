@@ -23,13 +23,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const classNames = [
-      "btn",
-      `btn--${variant}`,
-      `btn--${size}`,
-      isLoading ? "btn--loading" : "",
-      className,
-    ]
+    const classNames = ["btn", `btn--${variant}`, `btn--${size}`, isLoading ? "btn--loading" : "", className]
       .filter(Boolean)
       .join(" ");
 
@@ -42,12 +36,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={isLoading}
         {...props}
       >
-        {isLoading && (
-          <span className="btn-spinner" aria-hidden="true" />
-        )}
-        <span className={isLoading ? "btn-content--hidden" : "btn-content"}>
-          {children}
-        </span>
+        {isLoading && <span className="btn-spinner" aria-hidden="true" />}
+        <span className={isLoading ? "btn-content--hidden" : "btn-content"}>{children}</span>
       </button>
     );
   }

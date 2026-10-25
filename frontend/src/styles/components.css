@@ -15,7 +15,10 @@
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
   text-decoration: none;
 }
 
@@ -25,7 +28,7 @@
 
 .btn-primary {
   background-color: var(--color-primary);
-  color: #FFFFFF;
+  color: #ffffff;
   border-color: var(--color-primary);
 }
 

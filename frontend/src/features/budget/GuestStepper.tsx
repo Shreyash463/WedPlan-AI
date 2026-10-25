@@ -43,9 +43,7 @@ export const GuestStepper: React.FC<GuestStepperProps> = ({
         <label htmlFor="whatIfGuestInput" className="simulator-label">
           <UsersIcon size={16} /> Guest Count: <span className="stepper-val-text">{stepperGuests}</span>
         </label>
-        <span className="per-guest-calc">
-          {formatCurrencyINR(costPerGuest)} / guest
-        </span>
+        <span className="per-guest-calc">{formatCurrencyINR(costPerGuest)} / guest</span>
       </div>
 
       <div className="guest-stepper-control" role="group" aria-label="Guest count stepper">

@@ -22,9 +22,15 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit, isLoading, ini
   const [weddingDate, setWeddingDate] = useState(initialValues?.wedding_date || getDefaultWeddingDate());
   const [city, setCity] = useState(initialValues?.city || "Jaipur");
   const [cityTier, setCityTier] = useState<CityTier>(initialValues?.city_tier || "Tier-2");
-  const [budgetString, setBudgetString] = useState(initialValues?.total_budget ? formatDigitsIndianGrouping(String(initialValues.total_budget)) : "25,00,000");
-  const [guestsString, setGuestsString] = useState(initialValues?.guest_count ? String(initialValues.guest_count) : "350");
-  const [functions, setFunctions] = useState<WeddingFunction[]>(initialValues?.functions || ["Haldi", "Mehendi", "Sangeet", "Wedding"]);
+  const [budgetString, setBudgetString] = useState(
+    initialValues?.total_budget ? formatDigitsIndianGrouping(String(initialValues.total_budget)) : "25,00,000"
+  );
+  const [guestsString, setGuestsString] = useState(
+    initialValues?.guest_count ? String(initialValues.guest_count) : "350"
+  );
+  const [functions, setFunctions] = useState<WeddingFunction[]>(
+    initialValues?.functions || ["Haldi", "Mehendi", "Sangeet", "Wedding"]
+  );
   const [style, setStyle] = useState<WeddingStyle>(initialValues?.style || "Royal/Palace");
   const [priorities, setPriorities] = useState<Priority[]>(initialValues?.priorities || ["Food", "Venue & Decor"]);
   const [specialRequests, setSpecialRequests] = useState(initialValues?.special_requests || "");
@@ -66,26 +72,38 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit, isLoading, ini
   return (
     <section aria-labelledby="form-heading" className="form-card">
       <div className="form-header">
-        <h1 id="form-heading" className="form-title">Plan Your Dream Indian Wedding</h1>
+        <h1 id="form-heading" className="form-title">
+          Plan Your Dream Indian Wedding
+        </h1>
         <p className="form-intro">
-          Enter your celebration details below to generate a tailored budget allocation, vendor procurement checklist, and countdown timeline.
+          Enter your celebration details below to generate a tailored budget allocation, vendor procurement checklist,
+          and countdown timeline.
         </p>
       </div>
 
       {isWithinDays(weddingDate, 14) && (
         <Notice type="warning" title="Very Tight Timeline Notice">
-          Your wedding is within 14 days! WedPlan AI will automatically adapt your preparation timeline and mark vendor bookings as Urgent.
+          Your wedding is within 14 days! WedPlan AI will automatically adapt your preparation timeline and mark vendor
+          bookings as Urgent.
         </Notice>
       )}
 
       <form id="intake-form" onSubmit={handleSubmit} noValidate>
         <BasicsSection
-          coupleName={coupleName} setCoupleName={setCoupleName}
-          weddingDate={weddingDate} setWeddingDate={setWeddingDate}
-          city={city} setCity={setCity}
-          cityTier={cityTier} setCityTier={setCityTier}
-          touched={touched} errors={errors}
-          onBlur={(f) => { setTouched((prev) => ({ ...prev, [f]: true })); runValidation(f); }}
+          coupleName={coupleName}
+          setCoupleName={setCoupleName}
+          weddingDate={weddingDate}
+          setWeddingDate={setWeddingDate}
+          city={city}
+          setCity={setCity}
+          cityTier={cityTier}
+          setCityTier={setCityTier}
+          touched={touched}
+          errors={errors}
+          onBlur={(f) => {
+            setTouched((prev) => ({ ...prev, [f]: true }));
+            runValidation(f);
+          }}
           validateField={(f) => runValidation(f)}
         />
         <BudgetGuestsSection
@@ -108,16 +126,26 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit, isLoading, ini
             setTouched((prev) => ({ ...prev, guestCount: true }));
             runValidation("guestCount");
           }}
-          numericBudget={numB} numericGuests={numG}
-          livePerGuest={livePerGuest} inWords={inWords}
-          touched={touched} errors={errors}
+          numericBudget={numB}
+          numericGuests={numG}
+          livePerGuest={livePerGuest}
+          inWords={inWords}
+          touched={touched}
+          errors={errors}
         />
         <StylePrioritiesSection
-          style={style} setStyle={setStyle}
+          style={style}
+          setStyle={setStyle}
           functions={functions}
-          toggleFunction={(fn) => setFunctions((prev) => prev.includes(fn) ? prev.filter((i) => i !== fn) : [...prev, fn])}
+          toggleFunction={(fn) =>
+            setFunctions((prev) => (prev.includes(fn) ? prev.filter((i) => i !== fn) : [...prev, fn]))
+          }
           priorities={priorities}
-          togglePriority={(p) => setPriorities((prev) => prev.includes(p) ? prev.filter((i) => i !== p) : prev.length < 3 ? [...prev, p] : prev)}
+          togglePriority={(p) =>
+            setPriorities((prev) =>
+              prev.includes(p) ? prev.filter((i) => i !== p) : prev.length < 3 ? [...prev, p] : prev
+            )
+          }
           errors={errors}
         />
         <SpecialRequestsSection specialRequests={specialRequests} setSpecialRequests={setSpecialRequests} />

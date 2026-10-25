@@ -28,10 +28,14 @@
     margin: 1.2cm 1cm;
   }
 
-  body, html {
-    background: #FFFFFF !important;
+  body,
+  html {
+    background: #ffffff !important;
     color: #111111 !important;
-    font-family: system-ui, -apple-system, sans-serif !important;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif !important;
     font-size: 9.5pt !important;
     line-height: 1.35 !important;
   }
@@ -75,7 +79,7 @@
     padding: 2px 6px;
     border: 1px solid #777777;
     border-radius: 4px;
-    background: #F9F9F9;
+    background: #f9f9f9;
   }
 
   /* Section Styling */
@@ -90,7 +94,7 @@
     font-size: 11pt !important;
     font-weight: 700;
     color: #000000 !important;
-    border-bottom: 1px solid #CCCCCC;
+    border-bottom: 1px solid #cccccc;
     padding-bottom: 3px;
     margin: 0 0 6px 0;
     page-break-after: avoid;
@@ -104,7 +108,7 @@
   }
 
   .print-warnings-block {
-    background: #FBFBFB;
+    background: #fbfbfb;
     border-left: 3px solid #666666;
     padding: 6px 10px;
     font-size: 8.5pt;
@@ -127,14 +131,14 @@
 
   .print-table th,
   .print-table td {
-    border: 1px solid #DDDDDD;
+    border: 1px solid #dddddd;
     padding: 4px 6px;
     vertical-align: top;
     text-align: left;
   }
 
   .print-table th {
-    background: #F2F2F2 !important;
+    background: #f2f2f2 !important;
     font-weight: 700;
     color: #000000 !important;
   }
@@ -145,7 +149,7 @@
   }
 
   .print-table tfoot td {
-    background: #F9F9F9 !important;
+    background: #f9f9f9 !important;
     border-top: 2px solid #555555;
   }
 
@@ -182,9 +186,9 @@
   }
 
   .print-idea-box {
-    border: 1px solid #DDDDDD;
+    border: 1px solid #dddddd;
     padding: 6px 8px;
-    background: #FAFAFA;
+    background: #fafafa;
     border-radius: 4px;
     page-break-inside: avoid;
     break-inside: avoid;
@@ -209,7 +213,7 @@
 
   /* Print Footer */
   .print-footer {
-    border-top: 1px solid #CCCCCC;
+    border-top: 1px solid #cccccc;
     padding-top: 6px;
     margin-top: 12px;
     font-size: 8pt;

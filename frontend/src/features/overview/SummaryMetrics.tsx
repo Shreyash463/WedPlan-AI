@@ -35,9 +35,7 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({
           <span className="stat-compact-tag">{formatCurrencyCompactINR(overview.total_budget)}</span>
         </div>
         <span className="stat-value">{formatCurrencyINR(overview.total_budget)}</span>
-        <span className="stat-subtext">
-          Allocated across {allocationsCount} primary wedding categories
-        </span>
+        <span className="stat-subtext">Allocated across {allocationsCount} primary wedding categories</span>
       </div>
 
       <div className="stat-card">
@@ -58,10 +56,14 @@ export const SummaryMetrics: React.FC<SummaryMetricsProps> = ({
         </div>
         <div className="function-chips-preview">
           {functions.map((fn) => (
-            <span key={fn} className="mini-chip">{fn}</span>
+            <span key={fn} className="mini-chip">
+              {fn}
+            </span>
           ))}
         </div>
-        <span className="stat-subtext">For {overview.guest_count} invited guests in {capitalizeCity(overview.city)}</span>
+        <span className="stat-subtext">
+          For {overview.guest_count} invited guests in {capitalizeCity(overview.city)}
+        </span>
       </div>
 
       <div className="stat-card">

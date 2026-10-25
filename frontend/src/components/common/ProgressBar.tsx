@@ -7,12 +7,7 @@ interface ProgressBarProps {
   color?: string;
 }
 
-export const ProgressBar: React.FC<ProgressBarProps> = ({
-  percentage,
-  label,
-  amountText,
-  color,
-}) => {
+export const ProgressBar: React.FC<ProgressBarProps> = ({ percentage, label, amountText, color }) => {
   const clampedPct = Math.min(100, Math.max(0, percentage));
 
   return (
@@ -27,7 +22,11 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
           }}
         >
           {label && <span>{label}</span>}
-          {amountText && <span>{amountText} ({percentage.toFixed(1)}%)</span>}
+          {amountText && (
+            <span>
+              {amountText} ({percentage.toFixed(1)}%)
+            </span>
+          )}
         </div>
       )}
       <div

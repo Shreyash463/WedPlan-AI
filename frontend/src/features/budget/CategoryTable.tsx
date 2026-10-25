@@ -8,10 +8,7 @@ interface CategoryTableProps {
   totalBudget: number;
 }
 
-export const CategoryTable: React.FC<CategoryTableProps> = ({
-  allocations,
-  totalBudget,
-}) => {
+export const CategoryTable: React.FC<CategoryTableProps> = ({ allocations, totalBudget }) => {
   const [displayMode, setDisplayMode] = useState<"inr" | "percentage">("inr");
 
   return (
@@ -22,7 +19,8 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
             Category Allocation Details
           </h3>
           <p className="section-subtitle">
-            Calculated using the Largest Remainder (Hamilton) method. Sums to exactly {formatCurrencyINR(totalBudget)} with 0 rupee rounding errors.
+            Calculated using the Largest Remainder (Hamilton) method. Sums to exactly {formatCurrencyINR(totalBudget)}{" "}
+            with 0 rupee rounding errors.
           </p>
         </div>
         <div className="display-mode-toggle" role="group" aria-label="Display mode toggle">
@@ -47,10 +45,18 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
         <table className="budget-table" aria-label="Wedding budget allocations">
           <thead>
             <tr>
-              <th scope="col" style={{ width: "28%" }}>Category</th>
-              <th scope="col" style={{ width: "32%" }}>Allocation Distribution</th>
-              <th scope="col" style={{ width: "15%", textAlign: "right" }}>Percentage</th>
-              <th scope="col" style={{ width: "25%", textAlign: "right" }}>Amount (INR)</th>
+              <th scope="col" style={{ width: "28%" }}>
+                Category
+              </th>
+              <th scope="col" style={{ width: "32%" }}>
+                Allocation Distribution
+              </th>
+              <th scope="col" style={{ width: "15%", textAlign: "right" }}>
+                Percentage
+              </th>
+              <th scope="col" style={{ width: "25%", textAlign: "right" }}>
+                Amount (INR)
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -103,9 +109,7 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                 <strong>100.0%</strong>
               </td>
               <td style={{ textAlign: "right" }}>
-                <strong style={{ color: "var(--color-primary)" }}>
-                  {formatCurrencyINR(totalBudget)}
-                </strong>
+                <strong style={{ color: "var(--color-primary)" }}>{formatCurrencyINR(totalBudget)}</strong>
               </td>
             </tr>
           </tfoot>

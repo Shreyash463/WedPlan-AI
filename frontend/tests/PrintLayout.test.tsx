@@ -122,13 +122,7 @@ describe("Dashboard Print Layout & Full Plan Copy", () => {
   });
 
   it("renders dedicated #print-root with all 5 sections present in the DOM", () => {
-    const { container } = render(
-      <Dashboard
-        initialPlan={mockPlan}
-        formData={mockFormData}
-        onEditDetails={vi.fn()}
-      />
-    );
+    const { container } = render(<Dashboard initialPlan={mockPlan} formData={mockFormData} onEditDetails={vi.fn()} />);
 
     const printRoot = container.querySelector("#print-root");
     expect(printRoot).toBeInTheDocument();
@@ -160,13 +154,7 @@ describe("Dashboard Print Layout & Full Plan Copy", () => {
   });
 
   it("copies complete full plan plain text covering all sections", async () => {
-    render(
-      <Dashboard
-        initialPlan={mockPlan}
-        formData={mockFormData}
-        onEditDetails={vi.fn()}
-      />
-    );
+    render(<Dashboard initialPlan={mockPlan} formData={mockFormData} onEditDetails={vi.fn()} />);
 
     const copyBtn = screen.getByRole("button", { name: /copy entire wedding plan/i });
     await act(async () => {

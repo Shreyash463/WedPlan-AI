@@ -11,13 +11,7 @@ interface PhaseNodeProps {
   toggleTask: (taskId: string) => void;
 }
 
-export const PhaseNode: React.FC<PhaseNodeProps> = ({
-  phase,
-  pIdx,
-  tasksInPhase,
-  completedTasks,
-  toggleTask,
-}) => {
+export const PhaseNode: React.FC<PhaseNodeProps> = ({ phase, pIdx, tasksInPhase, completedTasks, toggleTask }) => {
   const allPhaseTasksDone = tasksInPhase.every((t) => completedTasks.includes(t.id));
 
   return (
@@ -34,10 +28,7 @@ export const PhaseNode: React.FC<PhaseNodeProps> = ({
         </div>
 
         <div className="phase-title-content">
-          <h3
-            id={`phase-title-${phase.replace(/[^a-zA-Z0-9]/g, "-")}`}
-            className="phase-title-text"
-          >
+          <h3 id={`phase-title-${phase.replace(/[^a-zA-Z0-9]/g, "-")}`} className="phase-title-text">
             {phase}
           </h3>
           <span className="phase-tasks-count">
@@ -48,12 +39,7 @@ export const PhaseNode: React.FC<PhaseNodeProps> = ({
 
       <ul className="phase-task-list">
         {tasksInPhase.map((task) => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            isChecked={completedTasks.includes(task.id)}
-            onToggle={toggleTask}
-          />
+          <TaskItem key={task.id} task={task} isChecked={completedTasks.includes(task.id)} onToggle={toggleTask} />
         ))}
       </ul>
     </section>

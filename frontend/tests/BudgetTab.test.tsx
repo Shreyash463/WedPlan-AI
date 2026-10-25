@@ -144,9 +144,8 @@ describe("BudgetTab Component", () => {
     // 1 range slider, 2 text/numeric inputs (exactBudgetInput, whatIfGuestInput)
     expect(allInputs.length).toBe(3);
 
-    const numericTextInputs = simulatorSection?.querySelectorAll(
-      'input[type="text"], input[inputmode="numeric"]'
-    ) || [];
+    const numericTextInputs =
+      simulatorSection?.querySelectorAll('input[type="text"], input[inputmode="numeric"]') || [];
     expect(numericTextInputs.length).toBe(2);
 
     const exactBudgetInput = screen.getByLabelText(/type exact budget in inr/i);

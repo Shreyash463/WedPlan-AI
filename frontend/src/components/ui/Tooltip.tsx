@@ -6,11 +6,7 @@ export interface TooltipProps {
   id?: string;
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({
-  content,
-  children,
-  id = "tooltip-hint",
-}) => {
+export const Tooltip: React.FC<TooltipProps> = ({ content, children, id = "tooltip-hint" }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   return (

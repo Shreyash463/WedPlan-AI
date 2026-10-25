@@ -1,13 +1,7 @@
 import React, { ReactNode } from "react";
 import { AlertTriangleIcon, CheckIcon, InfoIcon } from "../common/Icons";
 
-export type BadgeVariant =
-  | "neutral"
-  | "warning"
-  | "overdue"
-  | "success"
-  | "info"
-  | "royal";
+export type BadgeVariant = "neutral" | "warning" | "overdue" | "success" | "info" | "royal";
 
 export interface BadgeProps {
   children?: ReactNode;
@@ -19,14 +13,7 @@ export interface BadgeProps {
   value?: string;
 }
 
-export const Badge: React.FC<BadgeProps> = ({
-  children,
-  variant = "neutral",
-  className = "",
-  icon,
-  type,
-  value,
-}) => {
+export const Badge: React.FC<BadgeProps> = ({ children, variant = "neutral", className = "", icon, type, value }) => {
   // Support legacy type/value invocations
   if (type === "health" && value) {
     let badgeClass = "badge-health-healthy";

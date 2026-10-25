@@ -50,9 +50,7 @@ const mockBudget: BudgetPlan = {
   cost_per_guest: 7500,
   health_status: "Healthy",
   health_description: "Comfortable hospitality.",
-  allocations: [
-    { category: "Venue", percentage: 20, amount: 300000, description: "Venue fee" },
-  ],
+  allocations: [{ category: "Venue", percentage: 20, amount: 300000, description: "Venue fee" }],
   warnings: ["Buffer 5% contingency."],
   suggestions: ["Opt for weekday."],
 };
@@ -78,13 +76,7 @@ describe("VendorsTab - Overdue & Soon Status Badges", () => {
     // Wedding is 2026-11-21.
     // Venue lead time is 26 weeks = 182 days before wedding -> Book By is ~May 2026.
     // Today is 2026-10-22, so Book By is in the past!
-    render(
-      <VendorsTab
-        vendorPlan={mockVendorPlan}
-        weddingDate="2026-11-21"
-        today="2026-10-22"
-      />
-    );
+    render(<VendorsTab vendorPlan={mockVendorPlan} weddingDate="2026-11-21" today="2026-10-22" />);
 
     const overdueBadges = screen.getAllByText(/Overdue: book now/i);
     expect(overdueBadges.length).toBeGreaterThanOrEqual(1);
@@ -95,13 +87,7 @@ describe("VendorsTab - Overdue & Soon Status Badges", () => {
     // Wedding is 2026-11-21.
     // Stationery lead time is 8 weeks = 56 days before wedding -> Book By is 2026-09-26.
     // If today is 2026-09-20, diff is 6 days (within 14 days) -> Book soon!
-    render(
-      <VendorsTab
-        vendorPlan={mockVendorPlan}
-        weddingDate="2026-11-21"
-        today="2026-09-20"
-      />
-    );
+    render(<VendorsTab vendorPlan={mockVendorPlan} weddingDate="2026-11-21" today="2026-09-20" />);
 
     const bookSoonBadges = screen.getAllByText(/Book soon/i);
     expect(bookSoonBadges.length).toBeGreaterThanOrEqual(1);
@@ -112,13 +98,7 @@ describe("VendorsTab - Overdue & Soon Status Badges", () => {
     // Wedding is 2027-11-21 (more than 1 year away).
     // Stationery Book by is September 2027.
     // Today is 2026-10-22, so book by date is ~330 days in future!
-    render(
-      <VendorsTab
-        vendorPlan={mockVendorPlan}
-        weddingDate="2027-11-21"
-        today="2026-10-22"
-      />
-    );
+    render(<VendorsTab vendorPlan={mockVendorPlan} weddingDate="2027-11-21" today="2026-10-22" />);
 
     expect(screen.queryByText(/Overdue: book now/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Book soon/i)).not.toBeInTheDocument();
@@ -143,12 +123,8 @@ describe("OverviewTab - Overdue Vendors Smart Planner Alert", () => {
     );
 
     // Should render the compact warning with impact ranking
-    expect(
-      screen.getByText(/past their standard booking window/i)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Book these first: Venue/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/past their standard booking window/i)).toBeInTheDocument();
+    expect(screen.getByText(/Book these first: Venue/i)).toBeInTheDocument();
 
     // Collapsible accordion button
     const toggleBtn = screen.getByRole("button", { name: /Show all \d+ overdue vendors/i });

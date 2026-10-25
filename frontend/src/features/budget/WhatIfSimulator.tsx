@@ -47,7 +47,8 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
             Instant What-If Budget Simulator
           </h2>
           <p className="what-if-subtitle">
-            Adjust budget, guest count, or priorities to immediately test feasibility. Pure instant calculation, zero AI latency.
+            Adjust budget, guest count, or priorities to immediately test feasibility. Pure instant calculation, zero AI
+            latency.
           </p>
         </div>
         <div className="what-if-status-badges">
@@ -73,10 +74,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
           costPerGuest={budgetPlan.cost_per_guest}
         />
 
-        <PriorityChips
-          selectedPriorities={selectedPriorities}
-          setSelectedPriorities={setSelectedPriorities}
-        />
+        <PriorityChips selectedPriorities={selectedPriorities} setSelectedPriorities={setSelectedPriorities} />
       </div>
     </section>
   );

@@ -159,7 +159,9 @@ def test_budget_smart_forbids_premium_terms():
     ).lower()
 
     for forbidden in FORBIDDEN_PREMIUM_TERMS:
-        assert forbidden not in all_text, f"Forbidden premium term '{forbidden}' leaked into Budget-smart ideas: {all_text}"
+        assert forbidden not in all_text, (
+            f"Forbidden premium term '{forbidden}' leaked into Budget-smart ideas: {all_text}"
+        )
 
 
 def test_ideas_respect_special_requests():

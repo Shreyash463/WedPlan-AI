@@ -29,8 +29,8 @@ export const IdeasTab: React.FC<IdeasTabProps> = ({
     (style === "Budget-smart" || perGuest < healthyMin
       ? "Tight"
       : perGuest >= Math.floor(healthyMin * 1.8)
-      ? "Premium"
-      : "Comfortable");
+        ? "Premium"
+        : "Comfortable");
 
   const budgetBandText =
     ideasPlan.budget_band_note ||

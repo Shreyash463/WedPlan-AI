@@ -56,10 +56,7 @@ export const BudgetTab: React.FC<BudgetTabProps> = ({
         isRecalculating={isRecalculating}
       />
 
-      <CategoryTable
-        allocations={budgetPlan.allocations}
-        totalBudget={budgetPlan.total_budget}
-      />
+      <CategoryTable allocations={budgetPlan.allocations} totalBudget={budgetPlan.total_budget} />
     </div>
   );
 };

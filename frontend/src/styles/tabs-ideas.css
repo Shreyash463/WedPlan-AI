@@ -34,9 +34,9 @@
 }
 
 .ideas-source-badge.gemini {
-  background: #EFF6FF;
-  color: #1D4ED8;
-  border: 1px solid #BFDBFE;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
 }
 
 .ideas-source-badge.fallback {
@@ -62,7 +62,9 @@
 }
 
 @keyframes spin {
-  100% { transform: rotate(360deg); }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .ideas-error-banner {
@@ -176,7 +178,7 @@
 
 .hack-number {
   background: var(--color-primary);
-  color: #FFFFFF;
+  color: #ffffff;
   width: 22px;
   height: 22px;
   border-radius: 50%;

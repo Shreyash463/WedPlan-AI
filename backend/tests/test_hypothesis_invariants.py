@@ -87,9 +87,7 @@ def test_timeline_monotonicity_and_bounds(
             assert task_date <= target_date, (
                 f"Task '{task.title}' due date {task_date} exceeds wedding date {target_date}"
             )
-        assert task_date >= today, (
-            f"Task '{task.title}' due date {task_date} is before today {today}"
-        )
+        assert task_date >= today, f"Task '{task.title}' due date {task_date} is before today {today}"
 
 
 @settings(max_examples=30, deadline=None)

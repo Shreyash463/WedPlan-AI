@@ -13,9 +13,7 @@ export const PrintTimelineSection: React.FC<PrintTimelineSectionProps> = ({ task
     if (!tasksByPhase[t.phase]) tasksByPhase[t.phase] = [];
     tasksByPhase[t.phase].push(t);
   }
-  const activePhases = CANONICAL_PHASES.filter(
-    (p) => tasksByPhase[p] && tasksByPhase[p].length > 0
-  );
+  const activePhases = CANONICAL_PHASES.filter((p) => tasksByPhase[p] && tasksByPhase[p].length > 0);
 
   return (
     <section className="print-section">
@@ -36,7 +34,9 @@ export const PrintTimelineSection: React.FC<PrintTimelineSectionProps> = ({ task
               {(tasksByPhase[phase] || []).map((t) => (
                 <tr key={t.id}>
                   <td>{formatDateReadable(t.due_date)}</td>
-                  <td><strong>{t.priority}</strong></td>
+                  <td>
+                    <strong>{t.priority}</strong>
+                  </td>
                   <td>{t.title}</td>
                   <td>{t.description}</td>
                 </tr>

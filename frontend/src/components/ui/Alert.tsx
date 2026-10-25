@@ -8,20 +8,9 @@ export interface AlertProps {
   className?: string;
 }
 
-export const Alert: React.FC<AlertProps> = ({
-  type = "warning",
-  title,
-  children,
-  className = "",
-}) => {
+export const Alert: React.FC<AlertProps> = ({ type = "warning", title, children, className = "" }) => {
   const severityLabel =
-    type === "error"
-      ? "Critical"
-      : type === "info"
-      ? "Tip"
-      : type === "success"
-      ? "Success"
-      : "Warning";
+    type === "error" ? "Critical" : type === "info" ? "Tip" : type === "success" ? "Success" : "Warning";
 
   const icon =
     type === "error" || type === "warning" ? (

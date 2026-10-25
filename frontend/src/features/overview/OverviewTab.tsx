@@ -65,7 +65,10 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 
   const sortedOverdue = [...overdueVendors].sort((a, b) => getRank(a.name) - getRank(b.name));
   const totalVendors = vendors?.categories?.length || overdueVendors.length;
-  const topNames = sortedOverdue.slice(0, 3).map((v) => shortName(v.name)).join(", ");
+  const topNames = sortedOverdue
+    .slice(0, 3)
+    .map((v) => shortName(v.name))
+    .join(", ");
   const compactWarning = `${overdueVendors.length} of ${totalVendors} vendors are past their standard booking window. Book these first: ${topNames}.`;
 
   const effectiveWarnings = overview.key_warnings
@@ -80,7 +83,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     <div className="overview-container">
       {overview.is_tight_timeline && (
         <Notice type="warning" title="Very Tight Timeline In Effect">
-          Your wedding is only {overview.days_remaining} days away. High-priority milestones have been compressed for immediate booking.
+          Your wedding is only {overview.days_remaining} days away. High-priority milestones have been compressed for
+          immediate booking.
         </Notice>
       )}
 
@@ -119,11 +123,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 
         <div className="overview-right-col">
           <BudgetDonutPreview budget={budget} totalBudget={overview.total_budget} />
-          <ReadinessCard
-            completedCount={completedCount}
-            totalTasks={totalTasks}
-            completionPct={completionPct}
-          />
+          <ReadinessCard completedCount={completedCount} totalTasks={totalTasks} completionPct={completionPct} />
         </div>
       </div>
 

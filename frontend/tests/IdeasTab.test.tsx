@@ -10,18 +10,10 @@ const mockFallbackIdeas: IdeasPlan = {
     "Royal look on a budget in Pune: Rented vintage brass urlis with floating local marigolds.",
     "Heritage haveli aesthetic on a budget: Golden velvet shamiana fabric draping.",
   ],
-  catering_and_menu: [
-    "Royal feast on a budget: Signature regional royal thali prepared by local halwais.",
-  ],
-  function_activities: [
-    { function: "Wedding", activity: "Royal look on a budget: Varmala exchange." },
-  ],
-  guest_experience_ideas: [
-    "Welcome hospitality pouch with localized savory snacks.",
-  ],
-  money_saving_hacks: [
-    "Trimming just 30 guests from your current 300 guest list saves approximately ₹28,795.",
-  ],
+  catering_and_menu: ["Royal feast on a budget: Signature regional royal thali prepared by local halwais."],
+  function_activities: [{ function: "Wedding", activity: "Royal look on a budget: Varmala exchange." }],
+  guest_experience_ideas: ["Welcome hospitality pouch with localized savory snacks."],
+  money_saving_hacks: ["Trimming just 30 guests from your current 300 guest list saves approximately ₹28,795."],
   ideas_source: "fallback",
   budget_band: "Tight",
   budget_band_note: "Ideas are matched to your ₹2,133 per-guest budget (Tight) and your Royal/Palace vibe.",
@@ -48,9 +40,7 @@ describe("IdeasTab Component", () => {
       />
     );
 
-    expect(
-      screen.getByText("Smart rule-based ideas (AI unavailable or not configured)")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Smart rule-based ideas (AI unavailable or not configured)")).toBeInTheDocument();
   });
 
   it("renders honest label for Gemini AI-generated ideas", () => {

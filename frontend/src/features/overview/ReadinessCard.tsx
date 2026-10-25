@@ -7,11 +7,7 @@ interface ReadinessCardProps {
   completionPct: number;
 }
 
-export const ReadinessCard: React.FC<ReadinessCardProps> = ({
-  completedCount,
-  totalTasks,
-  completionPct,
-}) => {
+export const ReadinessCard: React.FC<ReadinessCardProps> = ({ completedCount, totalTasks, completionPct }) => {
   return (
     <section className="dashboard-card progress-ring-card" aria-labelledby="readiness-heading">
       <h2 id="readiness-heading" className="card-heading">
@@ -19,7 +15,14 @@ export const ReadinessCard: React.FC<ReadinessCardProps> = ({
         Planning Roadmap Readiness
       </h2>
       <div className="progress-ring-container">
-        <svg width="140" height="140" viewBox="0 0 140 140" className="progress-ring-svg" role="img" aria-label={`Readiness: ${completionPct}%`}>
+        <svg
+          width="140"
+          height="140"
+          viewBox="0 0 140 140"
+          className="progress-ring-svg"
+          role="img"
+          aria-label={`Readiness: ${completionPct}%`}
+        >
           <circle cx="70" cy="70" r="54" fill="transparent" stroke="var(--color-border)" strokeWidth="12" />
           <circle
             cx="70"

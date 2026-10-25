@@ -1,9 +1,4 @@
-import {
-  PlanFormInput,
-  Priority,
-  WeddingFunction,
-  WeddingStyle,
-} from "../../types";
+import { PlanFormInput, Priority, WeddingFunction, WeddingStyle } from "../../types";
 
 export interface IntakeFormProps {
   onSubmit: (formData: PlanFormInput) => void;
@@ -11,14 +6,7 @@ export interface IntakeFormProps {
   initialValues?: PlanFormInput;
 }
 
-export const ALL_FUNCTIONS: WeddingFunction[] = [
-  "Engagement",
-  "Haldi",
-  "Mehendi",
-  "Sangeet",
-  "Wedding",
-  "Reception",
-];
+export const ALL_FUNCTIONS: WeddingFunction[] = ["Engagement", "Haldi", "Mehendi", "Sangeet", "Wedding", "Reception"];
 
 export const ALL_STYLES: WeddingStyle[] = [
   "Traditional",

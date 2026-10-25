@@ -20,7 +20,9 @@ export const IdeaItem: React.FC<IdeaItemProps> = ({ text }) => {
 
   return (
     <li className="idea-item">
-      <span className="bullet-point" aria-hidden="true">•</span>
+      <span className="bullet-point" aria-hidden="true">
+        •
+      </span>
       {content}
     </li>
   );

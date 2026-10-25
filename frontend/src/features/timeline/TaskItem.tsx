@@ -10,11 +10,7 @@ interface TaskItemProps {
   onToggle: (taskId: string) => void;
 }
 
-export const TaskItem: React.FC<TaskItemProps> = ({
-  task,
-  isChecked,
-  onToggle,
-}) => {
+export const TaskItem: React.FC<TaskItemProps> = ({ task, isChecked, onToggle }) => {
   const inputId = `checkbox-${task.id}`;
 
   return (
@@ -27,16 +23,12 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           onChange={() => onToggle(task.id)}
           aria-label={`Mark task completed: ${task.title}`}
         />
-        <span className="task-checkbox-box">
-          {isChecked && <CheckIcon size={12} color="#FFFFFF" />}
-        </span>
+        <span className="task-checkbox-box">{isChecked && <CheckIcon size={12} color="#FFFFFF" />}</span>
       </label>
 
       <div className="task-body">
         <div className="task-headline">
-          <span className={`task-title-text ${isChecked ? "completed-strike" : ""}`}>
-            {task.title}
-          </span>
+          <span className={`task-title-text ${isChecked ? "completed-strike" : ""}`}>{task.title}</span>
           <div className="task-badges">
             {task.is_overdue_standard && (
               <span className="overdue-amber-chip" title="Overdue based on standard Indian wedding booking lead times">

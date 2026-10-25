@@ -10,15 +10,7 @@ export interface FormFieldProps {
   className?: string;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({
-  id,
-  label,
-  required,
-  hint,
-  error,
-  children,
-  className = "",
-}) => {
+export const FormField: React.FC<FormFieldProps> = ({ id, label, required, hint, error, children, className = "" }) => {
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
 
@@ -26,7 +18,12 @@ export const FormField: React.FC<FormFieldProps> = ({
     <div className={`form-group ${error ? "has-error" : ""} ${className}`}>
       <label htmlFor={id} className="form-label">
         <span>{label}</span>
-        {required && <span className="required-indicator" aria-hidden="true"> *</span>}
+        {required && (
+          <span className="required-indicator" aria-hidden="true">
+            {" "}
+            *
+          </span>
+        )}
       </label>
 
       {hint && (

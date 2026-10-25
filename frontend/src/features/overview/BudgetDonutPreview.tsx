@@ -1,10 +1,6 @@
 import React from "react";
 import { BudgetPlan } from "../../types";
-import {
-  formatCurrencyCompactINR,
-  formatCurrencyINR,
-  formatPercentage,
-} from "../../utils/formatters";
+import { formatCurrencyCompactINR, formatCurrencyINR, formatPercentage } from "../../utils/formatters";
 import { RupeeIcon } from "../../components/common/Icons";
 import { CATEGORY_COLORS } from "./types";
 
@@ -13,10 +9,7 @@ interface BudgetDonutPreviewProps {
   totalBudget: number;
 }
 
-export const BudgetDonutPreview: React.FC<BudgetDonutPreviewProps> = ({
-  budget,
-  totalBudget,
-}) => {
+export const BudgetDonutPreview: React.FC<BudgetDonutPreviewProps> = ({ budget, totalBudget }) => {
   const radius = 70;
   const circumference = 2 * Math.PI * radius;
   let accumulatedAngle = 0;
@@ -46,7 +39,14 @@ export const BudgetDonutPreview: React.FC<BudgetDonutPreviewProps> = ({
       </h2>
 
       <div className="donut-wrapper">
-        <svg width="220" height="220" viewBox="0 0 220 220" className="donut-svg" role="img" aria-label="Budget allocation chart">
+        <svg
+          width="220"
+          height="220"
+          viewBox="0 0 220 220"
+          className="donut-svg"
+          role="img"
+          aria-label="Budget allocation chart"
+        >
           <g transform="rotate(-90 110 110)">
             {donutSlices.map((slice) => (
               <circle

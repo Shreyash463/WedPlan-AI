@@ -1,12 +1,6 @@
 import React from "react";
 import { IdeasPlan } from "../../types";
-import {
-  HeartHandshakeIcon,
-  MusicIcon,
-  SparklesIcon,
-  TagIcon,
-  UtensilsIcon,
-} from "../../components/common/Icons";
+import { HeartHandshakeIcon, MusicIcon, SparklesIcon, TagIcon, UtensilsIcon } from "../../components/common/Icons";
 import { IdeaItem } from "./IdeaItem";
 
 interface IdeasGridProps {
@@ -48,7 +42,9 @@ export const IdeasGrid: React.FC<IdeasGridProps> = ({ ideasPlan }) => {
         <ul className="idea-items-list">
           {ideasPlan.function_activities.map((item, idx) => (
             <li key={idx} className="idea-item">
-              <span className="bullet-point" aria-hidden="true">•</span>
+              <span className="bullet-point" aria-hidden="true">
+                •
+              </span>
               <span>
                 <strong>{item.function}:</strong> {item.activity}
               </span>

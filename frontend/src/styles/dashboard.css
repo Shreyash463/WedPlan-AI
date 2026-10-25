@@ -149,7 +149,7 @@
   bottom: var(--space-lg);
   right: var(--space-lg);
   background: var(--color-primary);
-  color: #FFFFFF;
+  color: #ffffff;
   padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
@@ -163,8 +163,14 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 640px) {

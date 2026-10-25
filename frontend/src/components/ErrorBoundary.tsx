@@ -55,9 +55,7 @@ export class ErrorBoundary extends Component<Props, State> {
           }}
         >
           <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>⚠️</div>
-          <h2 style={{ fontSize: "1.5rem", color: "#1f2937", marginBottom: "0.5rem" }}>
-            Something went wrong
-          </h2>
+          <h2 style={{ fontSize: "1.5rem", color: "#1f2937", marginBottom: "0.5rem" }}>Something went wrong</h2>
           <p style={{ color: "#4b5563", fontSize: "0.95rem", lineHeight: "1.5", marginBottom: "1.5rem" }}>
             WedPlan AI encountered an unexpected rendering error. Your data in local storage remains safe.
           </p>

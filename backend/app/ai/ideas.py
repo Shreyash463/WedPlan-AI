@@ -112,7 +112,7 @@ async def generate_wedding_ideas(
     cfg = get_settings()
     api_key = cfg.gemini_api_key
 
-    if not api_key:
+    if not api_key and client is None:
         fallback = build_fallback_ideas(
             clean_city, city_tier, style, functions, priorities, sanitized_special, total_budget, guest_count
         )
@@ -126,7 +126,7 @@ async def generate_wedding_ideas(
     )
 
     try:
-        ai_client = client or RealGeminiClient(api_key=api_key)
+        ai_client = client or RealGeminiClient(api_key=api_key or "")
         start_time = time.time()
         resp = await ai_client.generate_json(
             model=cfg.gemini_model, contents=prompt, response_schema=GeminiIdeasResponse

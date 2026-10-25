@@ -166,7 +166,9 @@ async def test_gemini_ideas_postprocessing_with_mock():
         overview_summary="A grand celebration in Pune. Save INR 50,000 by booking early.",
         themes_and_decor=["Marigold canopy with fairy lights costing Rs. 25000."],
         catering_and_menu=["Regional thali costing Rs 500 per guest."],
-        function_activities=[{"function": "Wedding", "activity": "Traditional varmala ceremony saving 40 percent roughly."}],
+        function_activities=[
+            {"function": "Wedding", "activity": "Traditional varmala ceremony saving 40 percent roughly."}
+        ],
         guest_experience_ideas=["Welcome refreshment counter."],
         money_saving_hacks=["Clubbing ceremonies saves INR 150000 on separate fees."],
     )

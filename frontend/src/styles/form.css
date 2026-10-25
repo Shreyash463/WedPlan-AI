@@ -52,7 +52,7 @@
 
 .section-number {
   background: var(--color-primary);
-  color: #FFFFFF;
+  color: #ffffff;
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -134,7 +134,9 @@
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .form-input:focus,
@@ -147,8 +149,8 @@
 
 .form-input[aria-invalid="true"],
 .form-select[aria-invalid="true"] {
-  border-color: #DC2626;
-  background-color: #FEF2F2;
+  border-color: #dc2626;
+  background-color: #fef2f2;
 }
 
 .field-help {
@@ -159,7 +161,7 @@
 .field-error {
   font-size: 0.825rem;
   font-weight: 600;
-  color: #DC2626;
+  color: #dc2626;
   display: flex;
   align-items: center;
   gap: 4px;

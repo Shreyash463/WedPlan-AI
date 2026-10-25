@@ -3,8 +3,7 @@ name: WedPlan AI CI
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   backend-checks:
@@ -26,8 +25,10 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-asyncio pytest-cov hypothesis ruff mypy httpx
 
-      - name: Run Ruff Linter
-        run: python -m ruff check backend api
+      - name: Run Ruff Linter & Format Check
+        run: |
+          python -m ruff check backend api
+          python -m ruff format --check backend api
 
       - name: Run Mypy Type Checker
         run: python -m mypy backend/app api
@@ -57,7 +58,17 @@ jobs:
       - name: Install Frontend Dependencies
         run: |
           cd frontend
-          npm ci --legacy-peer-deps
+          npm ci
+
+      - name: Run ESLint
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Run Prettier Format Check
+        run: |
+          cd frontend
+          npx prettier --check "src/**/*.{ts,tsx,css}" "tests/**/*.{ts,tsx}"
 
       - name: Run Type Check & Build
         run: |

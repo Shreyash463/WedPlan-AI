@@ -40,8 +40,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialPlan, formData, onE
     return getStoredTasks(planHash);
   });
 
-  useEffect(() => { saveStoredTasks(planHash, completedTasks); }, [planHash, completedTasks]);
-  useEffect(() => { setCompletedTasks(getStoredTasks(planHash)); }, [planHash]);
+  useEffect(() => {
+    saveStoredTasks(planHash, completedTasks);
+  }, [planHash, completedTasks]);
+  useEffect(() => {
+    setCompletedTasks(getStoredTasks(planHash));
+  }, [planHash]);
 
   useEffect(() => {
     const formatted = formatCoupleName(plan.overview.couple_name);
@@ -55,7 +59,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialPlan, formData, onE
   const tabListRef = useRef<HTMLDivElement>(null);
 
   const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
-    let newIdx = index;
+    let newIdx: number;
     if (e.key === "ArrowRight") newIdx = (index + 1) % TABS.length;
     else if (e.key === "ArrowLeft") newIdx = (index - 1 + TABS.length) % TABS.length;
     else if (e.key === "Home") newIdx = 0;
@@ -82,8 +86,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialPlan, formData, onE
     <div className="dashboard-container">
       <div className="screen-only">
         <DashboardHeader
-          plan={plan} style={formData.style} onEditDetails={onEditDetails}
-          onPrint={() => window.print()} onCopyText={handleCopyAsText} toastMessage={toastMessage}
+          plan={plan}
+          style={formData.style}
+          onEditDetails={onEditDetails}
+          onPrint={() => window.print()}
+          onCopyText={handleCopyAsText}
+          toastMessage={toastMessage}
         />
 
         <nav aria-label="Wedding Planning Sections" className="tabs-navigation-wrapper">
@@ -92,10 +100,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialPlan, formData, onE
               const isSelected = activeTab === tab.key;
               return (
                 <button
-                  key={tab.key} role="tab" id={`tab-${tab.key}`} aria-selected={isSelected}
-                  aria-controls={`panel-${tab.key}`} tabIndex={isSelected ? 0 : -1}
+                  key={tab.key}
+                  role="tab"
+                  id={`tab-${tab.key}`}
+                  aria-selected={isSelected}
+                  aria-controls={`panel-${tab.key}`}
+                  tabIndex={isSelected ? 0 : -1}
                   className={`tab-btn ${isSelected ? "active" : ""}`}
-                  onClick={() => setActiveTab(tab.key)} onKeyDown={(e) => handleKeyDown(e, idx)}
+                  onClick={() => setActiveTab(tab.key)}
+                  onKeyDown={(e) => handleKeyDown(e, idx)}
                 >
                   <span className="tab-icon">{tab.icon}</span>
                   <span>{tab.label}</span>
@@ -105,21 +118,104 @@ export const Dashboard: React.FC<DashboardProps> = ({ initialPlan, formData, onE
           </div>
         </nav>
 
-        <Suspense fallback={<div className="tab-loading-state"><span className="spinner" aria-hidden="true" /><p>Loading planning section...</p></div>}>
-          <div role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" tabIndex={0} className={`tab-panel ${activeTab === "overview" ? "active" : ""}`} hidden={activeTab !== "overview"}>
-            {activeTab === "overview" && <OverviewTab overview={plan.overview} budget={plan.budget} timeline={plan.timeline} functions={formData.functions} vendors={plan.vendors} weddingDate={formData.wedding_date} completedTaskIds={completedTasks} onToggleTask={toggleTask} disclaimer={plan.disclaimer} />}
+        <Suspense
+          fallback={
+            <div className="tab-loading-state">
+              <span className="spinner" aria-hidden="true" />
+              <p>Loading planning section...</p>
+            </div>
+          }
+        >
+          <div
+            role="tabpanel"
+            id="panel-overview"
+            aria-labelledby="tab-overview"
+            tabIndex={0}
+            className={`tab-panel ${activeTab === "overview" ? "active" : ""}`}
+            hidden={activeTab !== "overview"}
+          >
+            {activeTab === "overview" && (
+              <OverviewTab
+                overview={plan.overview}
+                budget={plan.budget}
+                timeline={plan.timeline}
+                functions={formData.functions}
+                vendors={plan.vendors}
+                weddingDate={formData.wedding_date}
+                completedTaskIds={completedTasks}
+                onToggleTask={toggleTask}
+                disclaimer={plan.disclaimer}
+              />
+            )}
           </div>
-          <div role="tabpanel" id="panel-budget" aria-labelledby="tab-budget" tabIndex={0} className={`tab-panel ${activeTab === "budget" ? "active" : ""}`} hidden={activeTab !== "budget"}>
-            {activeTab === "budget" && <BudgetTab budgetPlan={plan.budget} originalBudget={initialPlan.budget.total_budget} city={formData.city} cityTier={formData.city_tier} weddingDate={formData.wedding_date} functions={formData.functions} style={formData.style} initialPriorities={formData.priorities} onBudgetUpdated={(b: BudgetPlan) => setPlan((p) => ({ ...p, budget: b }))} />}
+          <div
+            role="tabpanel"
+            id="panel-budget"
+            aria-labelledby="tab-budget"
+            tabIndex={0}
+            className={`tab-panel ${activeTab === "budget" ? "active" : ""}`}
+            hidden={activeTab !== "budget"}
+          >
+            {activeTab === "budget" && (
+              <BudgetTab
+                budgetPlan={plan.budget}
+                originalBudget={initialPlan.budget.total_budget}
+                city={formData.city}
+                cityTier={formData.city_tier}
+                weddingDate={formData.wedding_date}
+                functions={formData.functions}
+                style={formData.style}
+                initialPriorities={formData.priorities}
+                onBudgetUpdated={(b: BudgetPlan) => setPlan((p) => ({ ...p, budget: b }))}
+              />
+            )}
           </div>
-          <div role="tabpanel" id="panel-timeline" aria-labelledby="tab-timeline" tabIndex={0} className={`tab-panel ${activeTab === "timeline" ? "active" : ""}`} hidden={activeTab !== "timeline"}>
-            {activeTab === "timeline" && <TimelineTab timelinePlan={plan.timeline} completedTasks={completedTasks} onToggleTask={toggleTask} />}
+          <div
+            role="tabpanel"
+            id="panel-timeline"
+            aria-labelledby="tab-timeline"
+            tabIndex={0}
+            className={`tab-panel ${activeTab === "timeline" ? "active" : ""}`}
+            hidden={activeTab !== "timeline"}
+          >
+            {activeTab === "timeline" && (
+              <TimelineTab timelinePlan={plan.timeline} completedTasks={completedTasks} onToggleTask={toggleTask} />
+            )}
           </div>
-          <div role="tabpanel" id="panel-vendors" aria-labelledby="tab-vendors" tabIndex={0} className={`tab-panel ${activeTab === "vendors" ? "active" : ""}`} hidden={activeTab !== "vendors"}>
-            {activeTab === "vendors" && <VendorsTab vendorPlan={plan.vendors} weddingDate={formData.wedding_date} planHash={planHash} />}
+          <div
+            role="tabpanel"
+            id="panel-vendors"
+            aria-labelledby="tab-vendors"
+            tabIndex={0}
+            className={`tab-panel ${activeTab === "vendors" ? "active" : ""}`}
+            hidden={activeTab !== "vendors"}
+          >
+            {activeTab === "vendors" && (
+              <VendorsTab vendorPlan={plan.vendors} weddingDate={formData.wedding_date} planHash={planHash} />
+            )}
           </div>
-          <div role="tabpanel" id="panel-ideas" aria-labelledby="tab-ideas" tabIndex={0} className={`tab-panel ${activeTab === "ideas" ? "active" : ""}`} hidden={activeTab !== "ideas"}>
-            {activeTab === "ideas" && <IdeasTab ideasPlan={plan.ideas} city={formData.city} cityTier={formData.city_tier} totalBudget={plan.budget.total_budget} guestCount={plan.budget.guest_count} functions={formData.functions} style={formData.style} priorities={formData.priorities} specialRequests={formData.special_requests} onIdeasUpdated={(ideas: IdeasPlan) => setPlan((p) => ({ ...p, ideas }))} />}
+          <div
+            role="tabpanel"
+            id="panel-ideas"
+            aria-labelledby="tab-ideas"
+            tabIndex={0}
+            className={`tab-panel ${activeTab === "ideas" ? "active" : ""}`}
+            hidden={activeTab !== "ideas"}
+          >
+            {activeTab === "ideas" && (
+              <IdeasTab
+                ideasPlan={plan.ideas}
+                city={formData.city}
+                cityTier={formData.city_tier}
+                totalBudget={plan.budget.total_budget}
+                guestCount={plan.budget.guest_count}
+                functions={formData.functions}
+                style={formData.style}
+                priorities={formData.priorities}
+                specialRequests={formData.special_requests}
+                onIdeasUpdated={(ideas: IdeasPlan) => setPlan((p) => ({ ...p, ideas }))}
+              />
+            )}
           </div>
         </Suspense>
       </div>

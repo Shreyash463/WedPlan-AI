@@ -56,11 +56,7 @@ export const StylePrioritiesSection: React.FC<StylePrioritiesSectionProps> = ({
           <span id="functions-label" className="form-label">
             Celebrated Functions (Select all that apply) <span className="required-indicator">*</span>
           </span>
-          <div
-            role="group"
-            aria-labelledby="functions-label"
-            className="chips-group"
-          >
+          <div role="group" aria-labelledby="functions-label" className="chips-group">
             {ALL_FUNCTIONS.map((fn) => {
               const isSelected = functions.includes(fn);
               return (
@@ -88,11 +84,7 @@ export const StylePrioritiesSection: React.FC<StylePrioritiesSectionProps> = ({
           <span id="priorities-label" className="form-label">
             Top Priorities <span className="field-help">(Choose up to 3 to boost budget allocation)</span>
           </span>
-          <div
-            role="group"
-            aria-labelledby="priorities-label"
-            className="chips-group"
-          >
+          <div role="group" aria-labelledby="priorities-label" className="chips-group">
             {ALL_PRIORITIES.map((p) => {
               const isSelected = priorities.includes(p);
               return (

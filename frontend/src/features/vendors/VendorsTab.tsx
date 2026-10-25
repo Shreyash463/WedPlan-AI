@@ -6,12 +6,7 @@ import { computeVendorUrgency } from "../../hooks/useOverdueCheck";
 import { VendorsTabProps } from "./types";
 import { VendorCard } from "./VendorCard";
 
-export const VendorsTab: React.FC<VendorsTabProps> = ({
-  vendorPlan,
-  weddingDate,
-  today,
-  planHash,
-}) => {
+export const VendorsTab: React.FC<VendorsTabProps> = ({ vendorPlan, weddingDate, today, planHash }) => {
   const [vendorStatuses, setVendorStatuses] = useState<Record<string, VendorStatus>>({});
 
   useEffect(() => {
@@ -40,15 +35,15 @@ export const VendorsTab: React.FC<VendorsTabProps> = ({
             <UsersIcon size={20} color="var(--color-primary)" /> Vendor Procurement & Checklist
           </h2>
           <p className="vendors-section-subtitle">
-            Manage your booking pipeline, track payments, and verify contract requirements tailored for Indian wedding vendors.
+            Manage your booking pipeline, track payments, and verify contract requirements tailored for Indian wedding
+            vendors.
           </p>
         </div>
       </div>
 
       <div className="vendors-grid">
         {vendorPlan.categories.map((vendor) => {
-          const currentStatus: VendorStatus =
-            vendorStatuses[vendor.id] || vendor.default_status || "Not started";
+          const currentStatus: VendorStatus = vendorStatuses[vendor.id] || vendor.default_status || "Not started";
           const urgencyInfo = computeVendorUrgency(vendor.lead_time_weeks, weddingDate, todayStr);
 
           return (

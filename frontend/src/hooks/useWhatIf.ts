@@ -46,9 +46,7 @@ export function useWhatIf({
     formatDigitsIndianGrouping(String(budgetPlan.total_budget))
   );
   const [stepperGuests, setStepperGuests] = useState<number>(budgetPlan.guest_count);
-  const [guestCountString, setGuestCountString] = useState<string>(
-    String(budgetPlan.guest_count)
-  );
+  const [guestCountString, setGuestCountString] = useState<string>(String(budgetPlan.guest_count));
   const [selectedPriorities, setSelectedPriorities] = useState<Priority[]>(initialPriorities);
   const [isRecalculating, setIsRecalculating] = useState<boolean>(false);
 
