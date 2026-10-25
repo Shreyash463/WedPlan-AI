@@ -1,9 +1,10 @@
 # WedPlan AI
 
+[![CI](https://github.com/Shreyash463/WedPlan-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Shreyash463/WedPlan-AI/actions/workflows/ci.yml)
 [![Live Application](https://img.shields.io/badge/Live%20App-Vercel%20Deployed-brightgreen)](https://wed-plan-ai-six.vercel.app)
 [![Python](https://img.shields.io/badge/Python-3.12%20%7C%203.13-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115.8-teal)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-19.0-61dafb)](https://react.dev)
+[![React](https://img.shields.io/badge/React-18.3-61dafb)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 [![Accessibility](https://img.shields.io/badge/WCAG%202.1-AA%20Compliant-success)](docs/ACCESSIBILITY.md)

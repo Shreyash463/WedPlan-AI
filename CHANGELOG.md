@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Feature-Based Frontend Architecture**: Modularized frontend into `intake`, `overview`, `budget`, `timeline`, `vendors`, `ideas`, `print`, and `dashboard`.
 - **Modular CSS Architecture**: Decomposed monolithic `tabs.css` into 8 focused stylesheets (`tabs-overview.css`, `tabs-alerts.css`, `tabs-chart.css`, `tabs-whatif.css`, `tabs-whatif-controls.css`, `tabs-budget-table.css`, `tabs-timeline.css`, `tabs-vendors.css`), all strictly under 250 lines.
 - **Hardened HTTP Headers**: Added HSTS (`max-age=63072000`), COOP (`same-origin`), CORP (`same-origin`), and granular CSP in both `vercel.json` and FastAPI `SecurityHeadersMiddleware`.
-- **Automated Dependabot**: Added `.github/dependabot.yml` monitoring Python and npm dependencies weekly.
+- **Automated CI Validation**: Added `.github/workflows/ci.yml` verifying linting, formatting, type checking, unit tests, and Vercel serverless simulation.
 - **Comprehensive Documentation**: Added `docs/ARCHITECTURE.md`, `docs/API.md`, `docs/ACCESSIBILITY.md`, and updated `SECURITY.md`.
 
 ### Refactored

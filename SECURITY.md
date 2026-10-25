@@ -58,8 +58,7 @@ Every HTTP response issued by FastAPI and Vercel edge CDN carries security heade
 - `RequestSizeLimitMiddleware` intercepts all requests before parsing and immediately rejects payloads exceeding 1 MB with HTTP 413 Payload Too Large.
 
 ### F. Dependency Pinning & Auditing
-- All runtime dependencies in `requirements.txt` are explicitly pinned to exact versions.
-- Automated dependency audits via Dependabot (`.github/dependabot.yml`) check for security advisories weekly across Python and npm ecosystems.
+- All runtime dependencies in `requirements.txt` and `package.json` are explicitly pinned to verified, compatible versions with automated CI vulnerability gates.
 
 ---
 
