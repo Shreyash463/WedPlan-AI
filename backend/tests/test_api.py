@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date, timedelta
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -13,6 +14,23 @@ from backend.app.main import app
 from backend.app.rate_limit import SlidingWindowRateLimiter
 
 client = TestClient(app)
+
+
+def _base_payload(**kwargs: Any) -> dict[str, Any]:
+    base: dict[str, Any] = {
+        "couple_name": "Aarav & Simran",
+        "wedding_date": (date.today() + timedelta(days=90)).isoformat(),
+        "city": "Jaipur",
+        "city_tier": "Tier-2",
+        "total_budget": 2_500_000,
+        "guest_count": 350,
+        "functions": ["Haldi", "Mehendi", "Sangeet", "Wedding"],
+        "style": "Royal/Palace",
+        "priorities": ["Food", "Venue & Decor"],
+        "special_requests": "Pure vegetarian catering, sunset Varmala",
+    }
+    base.update(kwargs)
+    return base
 
 
 @pytest.fixture(autouse=True)
@@ -41,19 +59,7 @@ def test_plan_resilience_on_gemini_exception():
         "backend.app.routes.plan.generate_wedding_ideas",
         side_effect=RuntimeError("Simulated Gemini API network drop"),
     ):
-        wedding_date = (date.today() + timedelta(days=90)).isoformat()
-        payload = {
-            "couple_name": "Aarav & Simran",
-            "wedding_date": wedding_date,
-            "city": "Jaipur",
-            "city_tier": "Tier-2",
-            "total_budget": 2_500_000,
-            "guest_count": 350,
-            "functions": ["Wedding"],
-            "style": "Royal/Palace",
-            "priorities": ["Food"],
-        }
-        response = client.post("/api/plan", json=payload)
+        response = client.post("/api/plan", json=_base_payload(functions=["Wedding"], priorities=["Food"]))
         assert response.status_code == 200
         data = response.json()
         assert data["ideas"]["ideas_source"] == "fallback"
@@ -75,21 +81,7 @@ def test_security_headers_present():
 
 def test_plan_success_deterministic_fallback():
     """Verify /api/plan generates complete 5-section plan using deterministic fallback when Gemini is not configured."""
-    wedding_date = (date.today() + timedelta(days=120)).isoformat()
-    payload = {
-        "couple_name": "Aarav & Simran",
-        "wedding_date": wedding_date,
-        "city": "Jaipur",
-        "city_tier": "Tier-2",
-        "total_budget": 2_500_000,
-        "guest_count": 350,
-        "functions": ["Haldi", "Mehendi", "Sangeet", "Wedding"],
-        "style": "Royal/Palace",
-        "priorities": ["Food", "Venue & Decor"],
-        "special_requests": "Pure vegetarian catering, sunset Varmala",
-    }
-
-    response = client.post("/api/plan", json=payload)
+    response = client.post("/api/plan", json=_base_payload())
     assert response.status_code == 200
     data = response.json()
 
@@ -198,17 +190,7 @@ def test_rate_limiting_429():
 
 def test_ideas_cache_avoids_repeated_calls():
     """Verify identical requests hit the TTL cache and return cached ideas."""
-    wedding_date = (date.today() + timedelta(days=100)).isoformat()
-    payload = {
-        "wedding_date": wedding_date,
-        "city": "Udaipur",
-        "city_tier": "Tier-2",
-        "total_budget": 3_000_000,
-        "guest_count": 200,
-        "functions": ["Wedding", "Sangeet"],
-        "style": "Royal/Palace",
-        "priorities": ["Venue & Decor"],
-    }
+    payload = _base_payload(city="Udaipur", total_budget=3_000_000, guest_count=200)
 
     # Initial call populates cache
     r1 = client.post("/api/plan", json=payload)
@@ -224,19 +206,13 @@ def test_ideas_cache_avoids_repeated_calls():
 
 def test_city_name_casing_normalization():
     """Verify city name inputs like 'pune', 'NAGPUR', 'navi mumbai' are normalized to Title Case."""
-    wedding_date = (date.today() + timedelta(days=90)).isoformat()
     test_cities = [
-        ("pune", "Pune"), ("NAGPUR", "Nagpur"), ("navi mumbai", "Navi Mumbai"), ("hubli-dharwad", "Hubli-Dharwad")
+        ("pune", "Pune"),
+        ("NAGPUR", "Nagpur"),
+        ("navi mumbai", "Navi Mumbai"),
+        ("hubli-dharwad", "Hubli-Dharwad"),
     ]
-    base_payload = {
-        "wedding_date": wedding_date,
-        "city_tier": "Tier-2",
-        "total_budget": 1_500_000,
-        "guest_count": 200,
-        "functions": ["Wedding"],
-        "style": "Traditional",
-        "priorities": [],
-    }
+    base_payload = _base_payload(total_budget=1_500_000, guest_count=200, functions=["Wedding"])
     for input_city, expected_city in test_cities:
         res = client.post("/api/plan", json={**base_payload, "city": input_city})
         assert res.status_code == 200
